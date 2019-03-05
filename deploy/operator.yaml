@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-app-reconciler-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: business-app-reconciler-controller
+  template:
+    metadata:
+      labels:
+        name: business-app-reconciler-controller
+    spec:
+      serviceAccountName: business-app-reconciler-controller
+      containers:
+        - name: business-app-reconciler-controller
+          # Replace this with the built image name
+          image: REPLACE_IMAGE
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              value: REPLACE_VALUE
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "business-app-reconciler-controller"
