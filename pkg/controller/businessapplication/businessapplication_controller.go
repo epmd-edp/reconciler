@@ -1,6 +1,9 @@
 package businessapplication
 
 import (
+	"business-app-reconciler-controller/pkg/db"
+	"business-app-reconciler-controller/pkg/model"
+	"business-app-reconciler-controller/pkg/repository"
 	"context"
 
 	edpv1alpha1 "business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
@@ -31,7 +34,15 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileBusinessApplication{client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	dbConn, _ := db.InitConnection()
+	appRepo := repository.AppRepo{
+		DB: *dbConn,
+	}
+	return &ReconcileBusinessApplication{
+		client:  mgr.GetClient(),
+		scheme:  mgr.GetScheme(),
+		appRepo: appRepo,
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -57,8 +68,9 @@ var _ reconcile.Reconciler = &ReconcileBusinessApplication{}
 type ReconcileBusinessApplication struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client client.Client
-	scheme *runtime.Scheme
+	client  client.Client
+	scheme  *runtime.Scheme
+	appRepo repository.AppRepo
 }
 
 // Reconcile reads that state of the cluster for a BusinessApplication object and makes changes based on the state read
@@ -85,6 +97,10 @@ func (r *ReconcileBusinessApplication) Reconcile(request reconcile.Request) (rec
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
+
+	app, _ := model.Convert(*instance)
+
+	_ = r.appRepo.AddApplication(*app)
 
 	return reconcile.Result{}, nil
 }
