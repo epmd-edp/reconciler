@@ -27,3 +27,15 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "business-app-reconciler-controller"
+            - name: DB_HOST
+              value: "edp-install-wizard-db"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "edp-install-wizard-db"
+            - name: DB_USER
+              value: "admin"
+            - name: DB_PASS
+              value: "admin"
+            - name: DB_SSL_MODE
+              value: "disable"
