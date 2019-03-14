@@ -34,36 +34,53 @@ func (repo AppRepo) AddApplication(app model.AppEntity) error {
 
 	_, err = repo.DB.Exec(
 		sqlStatement,
-		entityID, "Strategy", app.Strategy)
+		entityID, "strategy", app.Strategy)
 
 	_, err = repo.DB.Exec(
 		sqlStatement,
 		entityID, "gitUrl", app.Repository)
 
-	_, err = repo.DB.Exec(
-		sqlStatement,
-		entityID, "routeSite", app.Route.Site)
+	if app.Route != nil {
 
-	_, err = repo.DB.Exec(
-		sqlStatement,
-		entityID, "routePath", app.Route.Path)
+		_, err = repo.DB.Exec(
+			sqlStatement,
+			entityID, "routeSite", app.Route.Site)
 
-	_, err = repo.DB.Exec(
-		sqlStatement,
-		entityID, "databaseKind", app.Database.Kind)
+		_, err = repo.DB.Exec(
+			sqlStatement,
+			entityID, "routePath", app.Route.Path)
+	}
 
-	_, err = repo.DB.Exec(
-		sqlStatement,
-		entityID, "databaseVersion", app.Database.Version)
+	if app.Database != nil {
 
-	_, err = repo.DB.Exec(
-		sqlStatement,
-		entityID, "databaseCapacity", app.Database.Capacity)
+		_, err = repo.DB.Exec(
+			sqlStatement,
+			entityID, "databaseKind", app.Database.Kind)
 
-	_, err = repo.DB.Exec(
-		sqlStatement,
-		entityID, "databaseStorage", app.Database.Storage)
+		_, err = repo.DB.Exec(
+			sqlStatement,
+			entityID, "databaseVersion", app.Database.Version)
+
+		_, err = repo.DB.Exec(
+			sqlStatement,
+			entityID, "databaseCapacity", app.Database.Capacity)
+
+		_, err = repo.DB.Exec(
+			sqlStatement,
+			entityID, "databaseStorage", app.Database.Storage)
+	}
+
+	if app.Status != nil {
+
+		var statusID int
+		repo.DB.QueryRow(
+			"select status_id from statuses_list where status_name = $1", app.Status.Status).Scan(&statusID)
+		log.Println("Getting status ID for created Business Entity", statusID)
+
+		_, err = repo.DB.Exec(
+			"insert into be_status (be_id, status, last_time_update,available) values($1,$2,$3,$4,$5,$6)",
+			entityID, statusID, app.Status.LastTimeUpdated, app.Status.Available)
+	}
 
 	return err
-
 }
