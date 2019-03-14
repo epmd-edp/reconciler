@@ -41,6 +41,6 @@ func TestBEService_CreateBE(t *testing.T) {
 	be.Type = model.App
 	fmt.Println(err)
 
-	err = service.CreateBE(*be)
+	err = service.PutBE(*be)
 
 }

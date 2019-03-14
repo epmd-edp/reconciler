@@ -103,7 +103,7 @@ func (r *ReconcileBusinessApplication) Reconcile(request reconcile.Request) (rec
 	app, _ := model.Convert(*instance)
 	app.Type = model.App
 
-	_ = r.beService.CreateBE(*app)
+	_ = r.beService.PutBE(*app)
 
 	return reconcile.Result{}, nil
 }
