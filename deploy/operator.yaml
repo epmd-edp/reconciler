@@ -12,7 +12,7 @@ spec:
       labels:
         name: business-app-reconciler-controller
     spec:
-      serviceAccountName: business-app-reconciler-controller
+      serviceAccountName: edp
       containers:
         - name: business-app-reconciler-controller
           # Replace this with the built image name
