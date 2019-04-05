@@ -29,23 +29,31 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 	}
 	log.Printf("Id of BE to be updated: %v", *id)
 
-	log.Printf("Start retrieving status id by message %v", be.Status.Message)
-	statusId, err := repository.GetStatusId(*txn, be.Status.Message)
+	isPresent, err := checkActionLogDuplicate(*txn, be)
 	if err != nil {
-		log.Printf("Error has occurred during status retrieving: %v", err)
 		_ = txn.Rollback()
-		return errors.New(fmt.Sprintf("cannot create business entity %v", be))
+		return err
 	}
-	log.Printf("Status id %v has been retrived for message %v", *statusId, be.Status.Message)
-	be.Status.Id = *statusId
-	log.Println("Start update status of business application...")
-	err = repository.CreateStatus(*txn, *id, be.Status)
-	if err != nil {
-		log.Printf("Error has occurred during status creation: %v", err)
-		_ = txn.Rollback()
-		return errors.New(fmt.Sprintf("cannot create business entity %v", be))
+
+	if !isPresent {
+		log.Println("Start update status of business application...")
+		codebaseActionId, err := repository.CreateActionLog(*txn, be.ActionLog)
+		if err != nil {
+			log.Printf("Error has occurred during status creation: %v", err)
+			_ = txn.Rollback()
+			return errors.New(fmt.Sprintf("cannot create business entity %v", be))
+		}
+		log.Println("ActionLog has been saved into the repository")
+
+		log.Println("Start update codebase_action status of business application...")
+		err = repository.CreateCodebaseAction(*txn, *id, *codebaseActionId)
+		if err != nil {
+			log.Printf("Error has occurred during codebase_action creation: %v", err)
+			_ = txn.Rollback()
+			return errors.New(fmt.Sprintf("cannot create codebase_action entity %v", be))
+		}
+		log.Println("codebase_action has been updated")
 	}
-	log.Println("Status has been saved into the repository")
 
 	_ = txn.Commit()
 
@@ -75,14 +83,18 @@ func createBE(txn sql.Tx, be model.BusinessEntity) (*int, error) {
 		return nil, errors.New(fmt.Sprintf("cannot create business entity %v", be))
 	}
 	log.Printf("Id of the newly created business entity is %v", *id)
-
-	log.Println("Start property creation...")
-	err = repository.CreateProps(txn, *id, be.Props)
-	if err != nil {
-		log.Printf("Error has occurred during property creation %v", err)
-		return nil, errors.New(fmt.Sprintf("cannot create business entity %v", be))
-	}
-	log.Println("Properties has been saved successfully")
-
 	return id, nil
+}
+
+func checkActionLogDuplicate(txn sql.Tx, be model.BusinessEntity) (bool, error) {
+	log.Println("Checks duplicate in action log table")
+	lastId, err := repository.GetLastIdActionLog(txn, be)
+	if err != nil {
+		log.Printf("Error has occurred while checking on duplicate: %v", err)
+		return false, errors.New(fmt.Sprintf("cannot check duplication %v", be))
+	}
+	if lastId == nil {
+		return false, nil
+	}
+	return true, nil
 }
