@@ -34,8 +34,14 @@ spec:
             - name: DB_NAME
               value: "edp-install-wizard-db"
             - name: DB_USER
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: admin-console-db
+                  key: username
             - name: DB_PASS
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: admin-console-db
+                  key: password
             - name: DB_SSL_MODE
               value: "disable"
