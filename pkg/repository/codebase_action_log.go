@@ -6,6 +6,22 @@ import (
 	"time"
 )
 
+const (
+	InsertCodebaseStatus = "insert into codebase_action_log(codebase_id, action_log_id) " +
+		"values($1, $2);"
+	InsertActionLog = "insert into action_log(event, detailed_message, username, updated_at) " +
+		"VALUES($1, $2, $3, $4) returning id;"
+	CheckDuplicateActionLog = "select codebase.id" +
+		" from codebase" +
+		"	left join codebase_action_log cal on codebase.id = cal.codebase_id" +
+		" left join action_log al on cal.action_log_id = al.id" +
+		" WHERE name = $1" +
+		"  AND event = $2" +
+		"  AND updated_at = $3" +
+		" order by updated_at desc" +
+		" limit 1;"
+)
+
 func CreateCodebaseAction(txn sql.Tx, codebaseId int, codebaseActionId int) error {
 	stmt, err := txn.Prepare(InsertCodebaseStatus)
 	if err != nil {

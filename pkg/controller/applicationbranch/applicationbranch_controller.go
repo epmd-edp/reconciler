@@ -2,6 +2,7 @@ package applicationbranch
 
 import (
 	"business-app-reconciler-controller/pkg/db"
+	"business-app-reconciler-controller/pkg/model"
 	"business-app-reconciler-controller/pkg/service"
 	"context"
 
@@ -34,13 +35,13 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	dbConn, _ := db.InitConnection()
-	beService := service.BEService{
+	cbService := service.CodebaseBranchService{
 		DB: *dbConn,
 	}
 	return &ReconcileApplicationBranch{
 		client:    mgr.GetClient(),
 		scheme:    mgr.GetScheme(),
-		beService: beService,
+		cbService: cbService,
 	}
 }
 
@@ -69,7 +70,7 @@ type ReconcileApplicationBranch struct {
 	// that reads objects from the cache and writes to the apiserver
 	client    client.Client
 	scheme    *runtime.Scheme
-	beService service.BEService
+	cbService service.CodebaseBranchService
 }
 
 // Reconcile reads that state of the cluster for a ApplicationBranch object and makes changes based on the state read
@@ -94,6 +95,11 @@ func (r *ReconcileApplicationBranch) Reconcile(request reconcile.Request) (recon
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
+
+	reqLogger.Info("ApplicationBranch", instance)
+
+	app, _ := model.ConvertToCodebaseBranch(*instance)
+	_ = r.cbService.PutCodebaseBranch(*app)
 
 	return reconcile.Result{}, nil
 }

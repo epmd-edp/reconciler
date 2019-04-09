@@ -41,7 +41,7 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 		if err != nil {
 			log.Printf("Error has occurred during status creation: %v", err)
 			_ = txn.Rollback()
-			return errors.New(fmt.Sprintf("cannot create business entity %v", be))
+			return errors.New(fmt.Sprintf("cannot insert status %v", be))
 		}
 		log.Println("ActionLog has been saved into the repository")
 
@@ -55,7 +55,11 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 		log.Println("codebase_action has been updated")
 	}
 
-	_ = txn.Commit()
+	err = txn.Commit()
+	if err != nil {
+		log.Printf("An error has occurred while ending transaction: %s", err)
+		return err
+	}
 
 	log.Println("Business entity has been saved successfully")
 
@@ -64,7 +68,7 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 
 func getBeIdOrCreate(txn sql.Tx, be model.BusinessEntity) (*int, error) {
 	log.Printf("Start retrieving BE by name, tenant and type: %v", be)
-	id, err := repository.GetBEId(txn, be)
+	id, err := repository.GetCodebaseId(txn, be.Type, be.Name, be.Tenant)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +81,7 @@ func getBeIdOrCreate(txn sql.Tx, be model.BusinessEntity) (*int, error) {
 
 func createBE(txn sql.Tx, be model.BusinessEntity) (*int, error) {
 	log.Println("Start insertion in the repository business entity...")
-	id, err := repository.CreateBE(txn, be)
+	id, err := repository.CreateCodebase(txn, be)
 	if err != nil {
 		log.Printf("Error has occurred during business entity creation: %v", err)
 		return nil, errors.New(fmt.Sprintf("cannot create business entity %v", be))
