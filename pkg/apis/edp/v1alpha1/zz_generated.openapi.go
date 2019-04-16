@@ -18,6 +18,9 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.ApplicationBranchStatus":   schema_pkg_apis_edp_v1alpha1_ApplicationBranchStatus(ref),
 		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.BusinessApplication":       schema_pkg_apis_edp_v1alpha1_BusinessApplication(ref),
 		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.BusinessApplicationStatus": schema_pkg_apis_edp_v1alpha1_BusinessApplicationStatus(ref),
+		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipeline":                schema_pkg_apis_edp_v1alpha1_CDPipeline(ref),
+		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineSpec":            schema_pkg_apis_edp_v1alpha1_CDPipelineSpec(ref),
+		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineStatus":          schema_pkg_apis_edp_v1alpha1_CDPipelineStatus(ref),
 		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.Repository":                schema_pkg_apis_edp_v1alpha1_Repository(ref),
 	}
 }
@@ -70,7 +73,28 @@ func schema_pkg_apis_edp_v1alpha1_ApplicationBranchSpec(ref common.ReferenceCall
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ApplicationBranchSpec defines the desired state of ApplicationBranch",
-				Properties:  map[string]spec.Schema{},
+				Properties: map[string]spec.Schema{
+					"appName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run \"operator-sdk generate k8s\" to regenerate code after modifying this file Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"branchName": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"fromCommit": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"appName", "branchName", "fromCommit"},
 			},
 		},
 		Dependencies: []string{},
@@ -82,7 +106,22 @@ func schema_pkg_apis_edp_v1alpha1_ApplicationBranchStatus(ref common.ReferenceCa
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ApplicationBranchStatus defines the observed state of ApplicationBranch",
-				Properties:  map[string]spec.Schema{},
+				Properties: map[string]spec.Schema{
+					"lastTimeUpdated": {
+						SchemaProps: spec.SchemaProps{
+							Description: "INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run \"operator-sdk generate k8s\" to regenerate code after modifying this file Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html",
+							Type:        []string{"string"},
+							Format:      "date-time",
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"lastTimeUpdated", "status"},
 			},
 		},
 		Dependencies: []string{},
@@ -159,6 +198,73 @@ func schema_pkg_apis_edp_v1alpha1_BusinessApplicationStatus(ref common.Reference
 					},
 				},
 				Required: []string{"available", "lastTimeUpdated", "status"},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_pkg_apis_edp_v1alpha1_CDPipeline(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CDPipeline is the Schema for the cdpipelines API",
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineSpec", "business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_edp_v1alpha1_CDPipelineSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CDPipelineSpec defines the desired state of CDPipeline",
+				Properties:  map[string]spec.Schema{},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_pkg_apis_edp_v1alpha1_CDPipelineStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CDPipelineStatus defines the observed state of CDPipeline",
+				Properties:  map[string]spec.Schema{},
 			},
 		},
 		Dependencies: []string{},
