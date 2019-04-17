@@ -29,6 +29,13 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 		return errors.New(fmt.Sprintf("cannot get tenant name for %s application", codebaseBranch.AppName))
 	}
 
+	if tenantName == nil {
+		errMsg := fmt.Sprintf("Application with name %v has not been found", codebaseBranch.AppName)
+		log.Printf(errMsg)
+		_ = txn.Rollback()
+		return errors.New(errMsg)
+	}
+
 	id, err := getCodebaseBranchIdOrCreate(*txn, codebaseBranch, *tenantName)
 	if err != nil {
 		log.Printf("Error has occurred during get Codebase Branch id or create: %v", err)

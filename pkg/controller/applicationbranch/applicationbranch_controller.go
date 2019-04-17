@@ -5,6 +5,7 @@ import (
 	"business-app-reconciler-controller/pkg/model"
 	"business-app-reconciler-controller/pkg/service"
 	"context"
+	"time"
 
 	edpv1alpha1 "business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
 
@@ -99,7 +100,10 @@ func (r *ReconcileApplicationBranch) Reconcile(request reconcile.Request) (recon
 	reqLogger.Info("ApplicationBranch", instance)
 
 	app, _ := model.ConvertToCodebaseBranch(*instance)
-	_ = r.cbService.PutCodebaseBranch(*app)
+	err = r.cbService.PutCodebaseBranch(*app)
+	if err != nil {
+		return reconcile.Result{RequeueAfter: 10 * time.Second}, nil
+	}
 
 	return reconcile.Result{}, nil
 }
