@@ -3,10 +3,12 @@ package model
 import (
 	edpv1alpha1 "business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
 	"errors"
+	"strings"
 )
 
 type CodebaseBranch struct {
 	Name       string
+	Tenant     string
 	AppName    string
 	FromCommit string
 	ActionLog  ActionLog
@@ -22,6 +24,7 @@ func ConvertToCodebaseBranch(k8sObject edpv1alpha1.ApplicationBranch) (*Codebase
 
 	branch := CodebaseBranch{
 		Name:       k8sObject.Spec.BranchName,
+		Tenant:     strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
 		AppName:    spec.AppName,
 		FromCommit: spec.FromCommit,
 		ActionLog:  *actionLog,

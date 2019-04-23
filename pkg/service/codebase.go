@@ -21,7 +21,13 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 		log.Printf("Error has occurred during opening transaction: %v", err)
 		return errors.New(fmt.Sprintf("cannot create business entity %v", be))
 	}
-	id, err := getBeIdOrCreate(*txn, be)
+
+	schemaName, err := repository.GetSchema(*txn, be.Tenant)
+	if err != nil {
+		return err
+	}
+
+	id, err := getBeIdOrCreate(*txn, be, *schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during get BE id or create: %v", err)
 		_ = txn.Rollback()
@@ -29,7 +35,7 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 	}
 	log.Printf("Id of BE to be updated: %v", *id)
 
-	isPresent, err := checkActionLogDuplicate(*txn, be)
+	isPresent, err := checkActionLogDuplicate(*txn, be, *schemaName)
 	if err != nil {
 		_ = txn.Rollback()
 		return err
@@ -37,7 +43,7 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 
 	if !isPresent {
 		log.Println("Start update status of business application...")
-		codebaseActionId, err := repository.CreateActionLog(*txn, be.ActionLog)
+		codebaseActionId, err := repository.CreateActionLog(*txn, be.ActionLog, *schemaName)
 		if err != nil {
 			log.Printf("Error has occurred during status creation: %v", err)
 			_ = txn.Rollback()
@@ -46,7 +52,7 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 		log.Println("ActionLog has been saved into the repository")
 
 		log.Println("Start update codebase_action status of business application...")
-		err = repository.CreateCodebaseAction(*txn, *id, *codebaseActionId)
+		err = repository.CreateCodebaseAction(*txn, *id, *codebaseActionId, *schemaName)
 		if err != nil {
 			log.Printf("Error has occurred during codebase_action creation: %v", err)
 			_ = txn.Rollback()
@@ -66,22 +72,22 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 	return nil
 }
 
-func getBeIdOrCreate(txn sql.Tx, be model.BusinessEntity) (*int, error) {
+func getBeIdOrCreate(txn sql.Tx, be model.BusinessEntity, schemaName string) (*int, error) {
 	log.Printf("Start retrieving BE by name, tenant and type: %v", be)
-	id, err := repository.GetCodebaseId(txn, be.Type, be.Name, be.Tenant)
+	id, err := repository.GetCodebaseId(txn, be.Type, be.Name, be.Tenant, schemaName)
 	if err != nil {
 		return nil, err
 	}
 	if id == nil {
 		log.Printf("Record for BE %v has not been found", be)
-		return createBE(txn, be)
+		return createBE(txn, be, schemaName)
 	}
 	return id, nil
 }
 
-func createBE(txn sql.Tx, be model.BusinessEntity) (*int, error) {
+func createBE(txn sql.Tx, be model.BusinessEntity, schemaName string) (*int, error) {
 	log.Println("Start insertion in the repository business entity...")
-	id, err := repository.CreateCodebase(txn, be)
+	id, err := repository.CreateCodebase(txn, be, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during business entity creation: %v", err)
 		return nil, errors.New(fmt.Sprintf("cannot create business entity %v", be))
@@ -90,9 +96,9 @@ func createBE(txn sql.Tx, be model.BusinessEntity) (*int, error) {
 	return id, nil
 }
 
-func checkActionLogDuplicate(txn sql.Tx, be model.BusinessEntity) (bool, error) {
+func checkActionLogDuplicate(txn sql.Tx, be model.BusinessEntity, schemaName string) (bool, error) {
 	log.Println("Checks duplicate in action log table")
-	lastId, err := repository.GetLastIdActionLog(txn, be)
+	lastId, err := repository.GetLastIdActionLog(txn, be, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred while checking on duplicate: %v", err)
 		return false, errors.New(fmt.Sprintf("cannot check duplication %v", be))

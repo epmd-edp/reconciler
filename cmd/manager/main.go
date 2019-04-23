@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"os"
 	"runtime"
 
 	"business-app-reconciler-controller/pkg/apis"
 	"business-app-reconciler-controller/pkg/controller"
 
-	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/operator-framework/operator-sdk/pkg/log/zap"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 	"github.com/spf13/pflag"

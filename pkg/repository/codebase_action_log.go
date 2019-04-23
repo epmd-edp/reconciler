@@ -3,18 +3,19 @@ package repository
 import (
 	"business-app-reconciler-controller/pkg/model"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
 const (
-	InsertCodebaseStatus = "insert into codebase_action_log(codebase_id, action_log_id) " +
+	InsertCodebaseStatus = "insert into \"%v\".codebase_action_log(codebase_id, action_log_id) " +
 		"values($1, $2);"
-	InsertActionLog = "insert into action_log(event, detailed_message, username, updated_at) " +
+	InsertActionLog = "insert into \"%v\".action_log(event, detailed_message, username, updated_at) " +
 		"VALUES($1, $2, $3, $4) returning id;"
 	CheckDuplicateActionLog = "select codebase.id" +
-		" from codebase" +
-		"	left join codebase_action_log cal on codebase.id = cal.codebase_id" +
-		" left join action_log al on cal.action_log_id = al.id" +
+		" from \"%v\".codebase" +
+		"	left join \"%v\".codebase_action_log cal on codebase.id = cal.codebase_id" +
+		" left join \"%v\".action_log al on cal.action_log_id = al.id" +
 		" WHERE name = $1" +
 		"  AND event = $2" +
 		"  AND updated_at = $3" +
@@ -22,8 +23,8 @@ const (
 		" limit 1;"
 )
 
-func CreateCodebaseAction(txn sql.Tx, codebaseId int, codebaseActionId int) error {
-	stmt, err := txn.Prepare(InsertCodebaseStatus)
+func CreateCodebaseAction(txn sql.Tx, codebaseId int, codebaseActionId int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertCodebaseStatus, schemaName))
 	if err != nil {
 		return err
 	}
@@ -36,8 +37,8 @@ func CreateCodebaseAction(txn sql.Tx, codebaseId int, codebaseActionId int) erro
 	return nil
 }
 
-func CreateActionLog(txn sql.Tx, actionLog model.ActionLog) (*int, error) {
-	stmt, err := txn.Prepare(InsertActionLog)
+func CreateActionLog(txn sql.Tx, actionLog model.ActionLog, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertActionLog, schemaName))
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +50,8 @@ func CreateActionLog(txn sql.Tx, actionLog model.ActionLog) (*int, error) {
 	return &id, err
 }
 
-func GetLastIdActionLog(txn sql.Tx, be model.BusinessEntity) (*int, error) {
-	stmt, err := txn.Prepare(CheckDuplicateActionLog)
+func GetLastIdActionLog(txn sql.Tx, be model.BusinessEntity, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(CheckDuplicateActionLog, schemaName, schemaName, schemaName))
 	if err != nil {
 		return nil, err
 	}

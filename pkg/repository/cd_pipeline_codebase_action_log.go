@@ -3,27 +3,28 @@ package repository
 import (
 	"business-app-reconciler-controller/pkg/model"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
 const (
 	CheckDuplicateCDPipelineActionLog = "select cdp.id " +
-		"	from cd_pipeline as cdp " +
-		"left join cd_pipeline_action_log cdpal on cdp.id = cdpal.cd_pipeline_id " +
-		"left join action_log al on cdpal.action_log_id = al.id " +
+		"	from \"%v\".cd_pipeline as cdp " +
+		"left join \"%v\".cd_pipeline_action_log cdpal on cdp.id = cdpal.cd_pipeline_id " +
+		"left join \"%v\".action_log al on cdpal.action_log_id = al.id " +
 		"where cdp.name = $1 " +
 		"  and al.event = $2 " +
 		"  and al.updated_at = $3 " +
 		"order by al.updated_at desc " +
 		"limit 1;"
-	InsertEventActionLog = "insert into action_log(event, detailed_message, username, updated_at) " +
+	InsertEventActionLog = "insert into \"%v\".action_log(event, detailed_message, username, updated_at) " +
 		"VALUES($1, $2, $3, $4) returning id;"
 
-	InsertCDPipelineActionLog = "insert into cd_pipeline_action_log(cd_pipeline_id, action_log_id) values ($1, $2);"
+	InsertCDPipelineActionLog = "insert into \"%v\".cd_pipeline_action_log(cd_pipeline_id, action_log_id) values ($1, $2);"
 )
 
-func CreateCDPipelineActionLog(txn sql.Tx, pipelineId int, actionLogId int) error {
-	stmt, err := txn.Prepare(InsertCDPipelineActionLog)
+func CreateCDPipelineActionLog(txn sql.Tx, pipelineId int, actionLogId int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDPipelineActionLog, schemaName))
 	if err != nil {
 		return err
 	}
@@ -36,8 +37,8 @@ func CreateCDPipelineActionLog(txn sql.Tx, pipelineId int, actionLogId int) erro
 	return nil
 }
 
-func CreateEventActionLog(txn sql.Tx, actionLog model.ActionLog) (*int, error) {
-	stmt, err := txn.Prepare(InsertEventActionLog)
+func CreateEventActionLog(txn sql.Tx, actionLog model.ActionLog, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertEventActionLog, schemaName))
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +50,8 @@ func CreateEventActionLog(txn sql.Tx, actionLog model.ActionLog) (*int, error) {
 	return &id, err
 }
 
-func CheckCDPipelineActionLogDuplicate(txn sql.Tx, cdPipeline model.CDPipeline) (bool, error) {
-	stmt, err := txn.Prepare(CheckDuplicateCDPipelineActionLog)
+func CheckCDPipelineActionLogDuplicate(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string) (bool, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(CheckDuplicateCDPipelineActionLog, schemaName, schemaName, schemaName))
 	if err != nil {
 		return false, err
 	}

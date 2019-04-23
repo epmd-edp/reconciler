@@ -3,19 +3,20 @@ package repository
 import (
 	"business-app-reconciler-controller/pkg/model"
 	"database/sql"
+	"fmt"
 	"strings"
 )
 
 const (
-	InsertCodebase = "insert into codebase(name, tenant_name, type, language, framework, build_tool, strategy, repository_url, route_site," +
+	InsertCodebase = "insert into \"%v\".codebase(name, tenant_name, type, language, framework, build_tool, strategy, repository_url, route_site," +
 		" route_path, database_kind, database_version, database_capacity, database_storage, status)" +
 		" values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) returning id;"
-	SelectCodebase = "select id from codebase where type=$1 AND name=$2 AND tenant_name=$3;"
+	SelectCodebase = "select id from \"%v\".codebase where type=$1 AND name=$2 AND tenant_name=$3;"
 	StatusActive   = "active"
 )
 
-func GetCodebaseId(txn sql.Tx, beType model.BEType, name string, tenant string) (*int, error) {
-	stmt, err := txn.Prepare(SelectCodebase)
+func GetCodebaseId(txn sql.Tx, beType model.BEType, name string, tenant string, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(SelectCodebase, schemaName))
 	if err != nil {
 		return nil, err
 	}
@@ -33,8 +34,8 @@ func GetCodebaseId(txn sql.Tx, beType model.BEType, name string, tenant string) 
 	return &id, nil
 }
 
-func CreateCodebase(txn sql.Tx, cb model.BusinessEntity) (*int, error) {
-	stmt, err := txn.Prepare(InsertCodebase)
+func CreateCodebase(txn sql.Tx, cb model.BusinessEntity, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertCodebase, schemaName))
 	if err != nil {
 		return nil, err
 	}

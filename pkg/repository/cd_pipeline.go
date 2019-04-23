@@ -3,17 +3,18 @@ package repository
 import (
 	"business-app-reconciler-controller/pkg/model"
 	"database/sql"
+	"fmt"
 )
 
 const (
-	InsertCDPipeline               = "insert into cd_pipeline(name, status) VALUES ($1, $2) returning id, name, status;"
-	InsertCDPipelineCodebaseBranch = "insert into cd_pipeline_codebase_branch(cd_pipeline_id, codebase_branch_id) VALUES ($1, $2);"
-	SelectCDPipeline               = "select * from cd_pipeline cdp where cdp.name = $1 ;"
-	UpdateCDPipelineStatusQuery    = "update cd_pipeline set status = $1 where id = $2 ;"
+	InsertCDPipeline               = "insert into \"%v\".cd_pipeline(name, status) VALUES ($1, $2) returning id, name, status;"
+	InsertCDPipelineCodebaseBranch = "insert into \"%v\".cd_pipeline_codebase_branch(cd_pipeline_id, codebase_branch_id) VALUES ($1, $2);"
+	SelectCDPipeline               = "select * from \"%v\".cd_pipeline cdp where cdp.name = $1 ;"
+	UpdateCDPipelineStatusQuery    = "update \"%v\".cd_pipeline set status = $1 where id = $2 ;"
 )
 
-func CreateCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, status string) (*model.CDPipelineDTO, error) {
-	stmt, err := txn.Prepare(InsertCDPipeline)
+func CreateCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, status string, schemaName string) (*model.CDPipelineDTO, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDPipeline, schemaName))
 	if err != nil {
 		return nil, err
 	}
@@ -27,8 +28,8 @@ func CreateCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, status string) (*
 	return &cdPipelineDto, nil
 }
 
-func CreateCDPipelineCodebaseBranch(txn sql.Tx, pipelineId int, codebaseBranchId int) error {
-	stmt, err := txn.Prepare(InsertCDPipelineCodebaseBranch)
+func CreateCDPipelineCodebaseBranch(txn sql.Tx, pipelineId int, codebaseBranchId int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDPipelineCodebaseBranch, schemaName))
 	if err != nil {
 		return err
 	}
@@ -41,8 +42,8 @@ func CreateCDPipelineCodebaseBranch(txn sql.Tx, pipelineId int, codebaseBranchId
 	return nil
 }
 
-func GetCDPipeline(txn sql.Tx, cdPipelineName string) (*model.CDPipelineDTO, error) {
-	stmt, err := txn.Prepare(SelectCDPipeline)
+func GetCDPipeline(txn sql.Tx, cdPipelineName string, schemaName string) (*model.CDPipelineDTO, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(SelectCDPipeline, schemaName))
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +60,8 @@ func GetCDPipeline(txn sql.Tx, cdPipelineName string) (*model.CDPipelineDTO, err
 	return &cdPipeline, nil
 }
 
-func UpdateCDPipelineStatus(txn sql.Tx, pipelineId int, cdPipelineStatus string) error {
-	stmt, err := txn.Prepare(UpdateCDPipelineStatusQuery)
+func UpdateCDPipelineStatus(txn sql.Tx, pipelineId int, cdPipelineStatus string, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(UpdateCDPipelineStatusQuery, schemaName))
 	if err != nil {
 		return err
 	}

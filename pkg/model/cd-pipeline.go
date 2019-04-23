@@ -3,10 +3,12 @@ package model
 import (
 	edpv1alpha1 "business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
 	"errors"
+	"strings"
 )
 
 type CDPipeline struct {
 	Name           string
+	Tenant         string
 	CodebaseBranch []string
 	ActionLog      ActionLog
 	Status         string
@@ -22,6 +24,7 @@ func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline) (*CDPipeline, error) 
 
 	cdPipeline := CDPipeline{
 		Name:           k8sObject.Spec.Name,
+		Tenant:         strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
 		CodebaseBranch: spec.CodebaseBranch,
 		ActionLog:      *actionLog,
 		Status:         getStatus(actionLog.Event),

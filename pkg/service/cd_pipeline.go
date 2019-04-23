@@ -29,7 +29,12 @@ func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) erro
 		return errors.New("error has occurred during opening transaction")
 	}
 
-	cdPipelineDb, err := getCDPipelineOrCreate(*txn, edpRestClient, cdPipeline)
+	schemaName, err := repository.GetSchema(*txn, cdPipeline.Tenant)
+	if err != nil {
+		return err
+	}
+
+	cdPipelineDb, err := getCDPipelineOrCreate(*txn, edpRestClient, cdPipeline, *schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during get CD pipeline or create: %v", err)
 		_ = txn.Rollback()
@@ -37,13 +42,13 @@ func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) erro
 	}
 	log.Printf("Id of CD Pipeline to be updated: %v", cdPipelineDb.Id)
 
-	err = updateCDPipelineStatus(*txn, *cdPipelineDb, cdPipeline.Status)
+	err = updateCDPipelineStatus(*txn, *cdPipelineDb, cdPipeline.Status, *schemaName)
 	if err != nil {
 		log.Printf("An error has occured while updating CD Pipeline Status for %s pipeline: %s", cdPipelineDb.Name, err)
 		return err
 	}
 
-	err = updateActionLog(*txn, cdPipeline, cdPipelineDb.Id)
+	err = updateActionLog(*txn, cdPipeline, cdPipelineDb.Id, *schemaName)
 	if err != nil {
 		log.Printf("An error has occured while updating CD Pipeline Action Event Log for %s pipeline: %s", cdPipeline.Name, err)
 		return err
@@ -60,9 +65,9 @@ func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) erro
 	return nil
 }
 
-func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipeline model.CDPipeline) (*model.CDPipelineDTO, error) {
+func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipeline model.CDPipeline, schemaName string) (*model.CDPipelineDTO, error) {
 	log.Printf("Start retrieving CD Pipeline by name: %v", cdPipeline)
-	cdPipelineDto, err := repository.GetCDPipeline(txn, cdPipeline.Name)
+	cdPipelineDto, err := repository.GetCDPipeline(txn, cdPipeline.Name, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +75,7 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 		return cdPipelineDto, nil
 	}
 	log.Printf("Record for CD Pipeline %v has not been found", cdPipeline.Name)
-	cdPipelineDTO, err := createCDPipeline(txn, cdPipeline)
+	cdPipelineDTO, err := createCDPipeline(txn, cdPipeline, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -82,13 +87,13 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 	}
 	log.Printf("Fetched Application Branches for %s pipeline: %s", cdPipeline.Name, applicationBranches)
 
-	codebaseBranchesId, err := getCodebaseBranchesId(txn, applicationBranches)
+	codebaseBranchesId, err := getCodebaseBranchesId(txn, applicationBranches, schemaName)
 	if err != nil {
 		log.Printf("An error has occured while getting codebase branch id: %s", err)
 		return nil, err
 	}
 
-	err = createCDPipelineCodebaseBranch(txn, cdPipelineDTO.Id, codebaseBranchesId)
+	err = createCDPipelineCodebaseBranch(txn, cdPipelineDTO.Id, codebaseBranchesId, schemaName)
 	if err != nil {
 		log.Printf("An error has occured while inserting CD Pipeline Codebase Branch row: %s", err)
 		return nil, err
@@ -97,9 +102,9 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 	return cdPipelineDTO, nil
 }
 
-func createCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline) (*model.CDPipelineDTO, error) {
+func createCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string) (*model.CDPipelineDTO, error) {
 	log.Println("Start insertion to the cd_pipeline table...")
-	cdPipelineDto, err := repository.CreateCDPipeline(txn, cdPipeline, cdPipeline.Status)
+	cdPipelineDto, err := repository.CreateCDPipeline(txn, cdPipeline, cdPipeline.Status, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -139,9 +144,9 @@ func getApplicationBranchesData(cdPipeline model.CDPipeline, edpRestClient *rest
 	return applicationBranches, nil
 }
 
-func updateActionLog(txn sql.Tx, cdPipeline model.CDPipeline, pipelineId int) error {
+func updateActionLog(txn sql.Tx, cdPipeline model.CDPipeline, pipelineId int, schemaName string) error {
 	log.Println("Start update status of CD Pipeline...")
-	actionLogId, err := repository.CreateEventActionLog(txn, cdPipeline.ActionLog)
+	actionLogId, err := repository.CreateEventActionLog(txn, cdPipeline.ActionLog, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during status creation: %v", err)
 		_ = txn.Rollback()
@@ -150,7 +155,7 @@ func updateActionLog(txn sql.Tx, cdPipeline model.CDPipeline, pipelineId int) er
 	log.Println("ActionLog row has been saved into the repository")
 
 	log.Println("Start update cd_pipeline_codebase_action status of code pipeline entity...")
-	err = repository.CreateCDPipelineActionLog(txn, pipelineId, *actionLogId)
+	err = repository.CreateCDPipelineActionLog(txn, pipelineId, *actionLogId, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during cd_pipeline_action creation: %v", err)
 		_ = txn.Rollback()
@@ -160,10 +165,10 @@ func updateActionLog(txn sql.Tx, cdPipeline model.CDPipeline, pipelineId int) er
 	return nil
 }
 
-func updateCDPipelineStatus(txn sql.Tx, cdPipelineDb model.CDPipelineDTO, status string) error {
+func updateCDPipelineStatus(txn sql.Tx, cdPipelineDb model.CDPipelineDTO, status string, schemaName string) error {
 	if cdPipelineDb.Status != status {
 		log.Printf("Start updating status of %s pipeline to %s", cdPipelineDb.Name, status)
-		err := repository.UpdateCDPipelineStatus(txn, cdPipelineDb.Id, status)
+		err := repository.UpdateCDPipelineStatus(txn, cdPipelineDb.Id, status, schemaName)
 		if err != nil {
 			return err
 		}
@@ -171,10 +176,10 @@ func updateCDPipelineStatus(txn sql.Tx, cdPipelineDb model.CDPipelineDTO, status
 	return nil
 }
 
-func getCodebaseBranchesId(txn sql.Tx, applicationBranches []model.ApplicationBranchDTO) ([]int, error) {
+func getCodebaseBranchesId(txn sql.Tx, applicationBranches []model.ApplicationBranchDTO, schemaName string) ([]int, error) {
 	var codebaseBranchesId []int
 	for _, v := range applicationBranches {
-		codebaseBranchId, err := repository.GetCodebaseBranchesId(txn, v)
+		codebaseBranchId, err := repository.GetCodebaseBranchesId(txn, v, schemaName)
 		if err != nil {
 			return nil, err
 		}
@@ -183,9 +188,9 @@ func getCodebaseBranchesId(txn sql.Tx, applicationBranches []model.ApplicationBr
 	return codebaseBranchesId, nil
 }
 
-func createCDPipelineCodebaseBranch(txn sql.Tx, cdPipelineId int, codebaseBranchesId []int) error {
+func createCDPipelineCodebaseBranch(txn sql.Tx, cdPipelineId int, codebaseBranchesId []int, schemaName string) error {
 	for _, v := range codebaseBranchesId {
-		err := repository.CreateCDPipelineCodebaseBranch(txn, cdPipelineId, v)
+		err := repository.CreateCDPipelineCodebaseBranch(txn, cdPipelineId, v, schemaName)
 		if err != nil {
 			log.Printf("An error has occured while inserting CD Pipeline Codebase Branch row: %s", err)
 			return err
