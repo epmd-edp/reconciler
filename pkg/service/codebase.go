@@ -71,7 +71,7 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 
 func getBeIdOrCreate(txn sql.Tx, be model.BusinessEntity, schemaName string) (*int, error) {
 	log.Printf("Start retrieving BE by name, tenant and type: %v", be)
-	id, err := repository.GetCodebaseId(txn, be.Type, be.Name, be.Tenant, schemaName)
+	id, err := repository.GetCodebaseId(txn, be.Type, be.Name, schemaName)
 	if err != nil {
 		return nil, err
 	}

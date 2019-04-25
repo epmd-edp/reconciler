@@ -24,21 +24,7 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 
 	schemaName := codebaseBranch.Tenant
 
-	tenantName, err := repository.GetCodebaseTenantName(*txn, codebaseBranch.AppName, schemaName)
-	if err != nil {
-		log.Printf("Error has occurred while getting tenant name: %v", err)
-		_ = txn.Rollback()
-		return errors.New(fmt.Sprintf("cannot get tenant name for %s application", codebaseBranch.AppName))
-	}
-
-	if tenantName == nil {
-		errMsg := fmt.Sprintf("Application with name %v has not been found", codebaseBranch.AppName)
-		log.Printf(errMsg)
-		_ = txn.Rollback()
-		return errors.New(errMsg)
-	}
-
-	id, err := getCodebaseBranchIdOrCreate(*txn, codebaseBranch, *tenantName, schemaName)
+	id, err := getCodebaseBranchIdOrCreate(*txn, codebaseBranch, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during get Codebase Branch id or create: %v", err)
 		_ = txn.Rollback()
@@ -83,14 +69,14 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 	return nil
 }
 
-func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, tenantName string, schemaName string) (*int, error) {
+func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schemaName string) (*int, error) {
 	log.Println("Start insertion to the codebase_branch table...")
-	beId, err := repository.GetCodebaseId(txn, "application", codebaseBranch.AppName, tenantName, schemaName)
+	beId, err := repository.GetCodebaseId(txn, "application", codebaseBranch.AppName, schemaName)
 	if err != nil {
 		return nil, err
 	}
 	if beId == nil {
-		return nil, errors.New(fmt.Sprintf("record for codebase has not been found with %s appName and %s tenantName parameters", codebaseBranch.AppName, tenantName))
+		return nil, errors.New(fmt.Sprintf("record for codebase has not been found with %s appName parameters", codebaseBranch.AppName))
 	}
 
 	id, err := repository.CreateCodebaseBranch(txn, codebaseBranch.Name, *beId, codebaseBranch.FromCommit, schemaName)
@@ -102,15 +88,15 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, tenan
 	return id, nil
 }
 
-func getCodebaseBranchIdOrCreate(txn sql.Tx, codebaseBranch model.CodebaseBranch, tenantName string, schemaName string) (*int, error) {
+func getCodebaseBranchIdOrCreate(txn sql.Tx, codebaseBranch model.CodebaseBranch, schemaName string) (*int, error) {
 	log.Printf("Start retrieving Codebase Branch by name, tenant and appName: %v", codebaseBranch)
-	id, err := repository.GetCodebaseBranchId(txn, codebaseBranch.AppName, codebaseBranch.Name, tenantName, schemaName)
+	id, err := repository.GetCodebaseBranchId(txn, codebaseBranch.AppName, codebaseBranch.Name, schemaName)
 	if err != nil {
 		return nil, err
 	}
 	if id == nil {
 		log.Printf("Record for Codebase Branch %v has not been found", codebaseBranch)
-		return createCodebaseBranch(txn, codebaseBranch, tenantName, schemaName)
+		return createCodebaseBranch(txn, codebaseBranch, schemaName)
 	}
 	return id, nil
 }
