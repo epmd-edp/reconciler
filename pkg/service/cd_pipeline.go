@@ -29,12 +29,9 @@ func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) erro
 		return errors.New("error has occurred during opening transaction")
 	}
 
-	schemaName, err := repository.GetSchema(*txn, cdPipeline.Tenant)
-	if err != nil {
-		return err
-	}
+	schemaName := cdPipeline.Tenant
 
-	cdPipelineDb, err := getCDPipelineOrCreate(*txn, edpRestClient, cdPipeline, *schemaName)
+	cdPipelineDb, err := getCDPipelineOrCreate(*txn, edpRestClient, cdPipeline, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during get CD pipeline or create: %v", err)
 		_ = txn.Rollback()
@@ -42,13 +39,13 @@ func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) erro
 	}
 	log.Printf("Id of CD Pipeline to be updated: %v", cdPipelineDb.Id)
 
-	err = updateCDPipelineStatus(*txn, *cdPipelineDb, cdPipeline.Status, *schemaName)
+	err = updateCDPipelineStatus(*txn, *cdPipelineDb, cdPipeline.Status, schemaName)
 	if err != nil {
 		log.Printf("An error has occured while updating CD Pipeline Status for %s pipeline: %s", cdPipelineDb.Name, err)
 		return err
 	}
 
-	err = updateActionLog(*txn, cdPipeline, cdPipelineDb.Id, *schemaName)
+	err = updateActionLog(*txn, cdPipeline, cdPipelineDb.Id, schemaName)
 	if err != nil {
 		log.Printf("An error has occured while updating CD Pipeline Action Event Log for %s pipeline: %s", cdPipeline.Name, err)
 		return err

@@ -22,13 +22,9 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 		return errors.New(fmt.Sprintf("cannot create codebase branch %v", codebaseBranch))
 	}
 
-	schemaName, err := repository.GetSchema(*txn, codebaseBranch.Tenant)
-	if err != nil {
-		return err
-	}
+	schemaName := codebaseBranch.Tenant
 
-
-	tenantName, err := repository.GetCodebaseTenantName(*txn, codebaseBranch.AppName, *schemaName)
+	tenantName, err := repository.GetCodebaseTenantName(*txn, codebaseBranch.AppName, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred while getting tenant name: %v", err)
 		_ = txn.Rollback()
@@ -42,7 +38,7 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 		return errors.New(errMsg)
 	}
 
-	id, err := getCodebaseBranchIdOrCreate(*txn, codebaseBranch, *tenantName, *schemaName)
+	id, err := getCodebaseBranchIdOrCreate(*txn, codebaseBranch, *tenantName, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during get Codebase Branch id or create: %v", err)
 		_ = txn.Rollback()
@@ -50,7 +46,7 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 	}
 	log.Printf("Id of Codebase Branch to be updated: %v", *id)
 
-	isPresent, err := checkCodebaseBranchActionLogDuplicate(*txn, codebaseBranch, *schemaName)
+	isPresent, err := checkCodebaseBranchActionLogDuplicate(*txn, codebaseBranch, schemaName)
 	if err != nil {
 		_ = txn.Rollback()
 		return err
@@ -58,7 +54,7 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 
 	if !isPresent {
 		log.Println("Start update status of codebase branch...")
-		actionLogId, err := repository.CreateCodebaseActionLog(*txn, codebaseBranch.ActionLog, *schemaName)
+		actionLogId, err := repository.CreateCodebaseActionLog(*txn, codebaseBranch.ActionLog, schemaName)
 		if err != nil {
 			log.Printf("Error has occurred during status creation: %v", err)
 			_ = txn.Rollback()
@@ -67,7 +63,7 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 		log.Println("ActionLog has been saved into the repository")
 
 		log.Println("Start update codebase_branch_action status of code branch entity...")
-		err = repository.CreateCodebaseBranchAction(*txn, *id, *actionLogId, *schemaName)
+		err = repository.CreateCodebaseBranchAction(*txn, *id, *actionLogId, schemaName)
 		if err != nil {
 			log.Printf("Error has occurred during codebase_branch_action creation: %v", err)
 			_ = txn.Rollback()
