@@ -18,7 +18,7 @@ const (
 		"order by al.updated_at desc " +
 		"limit 1;"
 	InsertCodebaseActionLog = "insert into \"%v\".action_log(event, detailed_message, username, updated_at) " +
-		"VALUES($1, $2, $3, now()) returning id;"
+		"VALUES($1, $2, $3, $4) returning id;"
 	InsertCodebaseBranchActionLog = "insert into \"%v\".codebase_branch_action_log(codebase_branch_id, action_log_id) " +
 		"values($1, $2);"
 )
@@ -45,7 +45,7 @@ func CreateCodebaseActionLog(txn sql.Tx, actionLog model.ActionLog, schemaName s
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username).Scan(&id)
+	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, time.Unix(actionLog.UpdatedAt, 0).Format("2006-01-02 15:04:05")).Scan(&id)
 
 	return &id, err
 }
