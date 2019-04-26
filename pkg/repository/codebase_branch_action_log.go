@@ -45,7 +45,7 @@ func CreateCodebaseActionLog(txn sql.Tx, actionLog model.ActionLog, schemaName s
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, time.Unix(actionLog.UpdatedAt, 0).Format("2006-01-02 15:04:05")).Scan(&id)
+	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, time.Unix(actionLog.UpdatedAt, 0).Format("2006-01-02 15:04:05.612000")).Scan(&id)
 
 	return &id, err
 }
@@ -58,7 +58,7 @@ func GetLastIdCodebaseBranchActionLog(txn sql.Tx, codebaseBranch model.CodebaseB
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(codebaseBranch.Name, codebaseBranch.ActionLog.Event, time.Unix(codebaseBranch.ActionLog.UpdatedAt, 0).Format("2006-01-02 15:04:05")).Scan(&id)
+	err = stmt.QueryRow(codebaseBranch.Name, codebaseBranch.ActionLog.Event, time.Unix(codebaseBranch.ActionLog.UpdatedAt, 0).Format("2006-01-02 15:04:05.612000")).Scan(&id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
