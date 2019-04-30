@@ -8,7 +8,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"k8s.io/client-go/rest"
 	"log"
 )
@@ -110,14 +109,9 @@ func createCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string
 	return cdPipelineDto, nil
 }
 
-func getApplicationBranchCR(edpRestClient *rest.RESTClient, crName string) (*v1alpha1.ApplicationBranch, error) {
+func getApplicationBranchCR(edpRestClient *rest.RESTClient, crName string, namespace string) (*v1alpha1.ApplicationBranch, error) {
 	applicationBranch := &v1alpha1.ApplicationBranch{}
-	namespace, err := k8sutil.GetWatchNamespace()
-	if err != nil {
-		log.Printf("Failed to get watch namespace: %s", err)
-		panic(err)
-	}
-	err = edpRestClient.Get().Namespace(namespace).Resource("applicationbranches").Name(crName).Do().Into(applicationBranch)
+	err := edpRestClient.Get().Namespace(namespace).Resource("applicationbranches").Name(crName).Do().Into(applicationBranch)
 	if err != nil {
 		log.Printf("An error has occurred while getting Release Branch CR from k8s: %s", err)
 		return nil, err
@@ -128,7 +122,7 @@ func getApplicationBranchCR(edpRestClient *rest.RESTClient, crName string) (*v1a
 func getApplicationBranchesData(cdPipeline model.CDPipeline, edpRestClient *rest.RESTClient) ([]model.ApplicationBranchDTO, error) {
 	var applicationBranches []model.ApplicationBranchDTO
 	for _, v := range cdPipeline.CodebaseBranch {
-		releaseBranchCR, err := getApplicationBranchCR(edpRestClient, v)
+		releaseBranchCR, err := getApplicationBranchCR(edpRestClient, v, cdPipeline.Namespace)
 		if err != nil {
 			return nil, err
 		}

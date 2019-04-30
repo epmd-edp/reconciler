@@ -8,6 +8,7 @@ import (
 
 type CDPipeline struct {
 	Name           string
+	Namespace      string
 	Tenant         string
 	CodebaseBranch []string
 	ActionLog      ActionLog
@@ -24,6 +25,7 @@ func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline) (*CDPipeline, error) 
 
 	cdPipeline := CDPipeline{
 		Name:           k8sObject.Spec.Name,
+		Namespace:      k8sObject.Namespace,
 		Tenant:         strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
 		CodebaseBranch: spec.CodebaseBranch,
 		ActionLog:      *actionLog,
