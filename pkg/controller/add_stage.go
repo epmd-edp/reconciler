@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"business-app-reconciler-controller/pkg/controller/stage"
+	"reconciler/pkg/controller/stage"
 )
 
 func init() {

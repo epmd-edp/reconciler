@@ -1,13 +1,13 @@
 package applicationbranch
 
 import (
-	"business-app-reconciler-controller/pkg/db"
-	"business-app-reconciler-controller/pkg/model"
-	"business-app-reconciler-controller/pkg/service"
 	"context"
+	"reconciler/pkg/db"
+	"reconciler/pkg/model"
+	"reconciler/pkg/service"
 	"time"
 
-	edpv1alpha1 "business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
+	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"

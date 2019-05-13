@@ -1,12 +1,12 @@
 package service
 
 import (
-	"business-app-reconciler-controller/models"
-	edpv1alpha1 "business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
-	"business-app-reconciler-controller/pkg/db"
-	"business-app-reconciler-controller/pkg/model"
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"reconciler/models"
+	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
+	"reconciler/pkg/db"
+	"reconciler/pkg/model"
 	"testing"
 	"time"
 )

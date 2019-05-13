@@ -3,7 +3,7 @@ package v1alpha1
 import (
 	"time"
 
-	"business-app-reconciler-controller/models"
+	"reconciler/models"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

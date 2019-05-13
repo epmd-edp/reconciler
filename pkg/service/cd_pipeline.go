@@ -1,15 +1,15 @@
 package service
 
 import (
-	"business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
-	"business-app-reconciler-controller/pkg/model"
-	"business-app-reconciler-controller/pkg/platform"
-	"business-app-reconciler-controller/pkg/repository"
 	"database/sql"
 	"errors"
 	"fmt"
 	"k8s.io/client-go/rest"
 	"log"
+	"reconciler/pkg/apis/edp/v1alpha1"
+	"reconciler/pkg/model"
+	"reconciler/pkg/platform"
+	"reconciler/pkg/repository"
 )
 
 type CdPipelineService struct {

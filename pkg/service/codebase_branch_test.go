@@ -1,8 +1,8 @@
 package service
 
 import (
-	"business-app-reconciler-controller/pkg/db"
-	"business-app-reconciler-controller/pkg/model"
+	"reconciler/pkg/db"
+	"reconciler/pkg/model"
 	"testing"
 )
 

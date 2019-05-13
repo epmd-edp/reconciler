@@ -7,8 +7,8 @@ import (
 	"os"
 	"runtime"
 
-	"business-app-reconciler-controller/pkg/apis"
-	"business-app-reconciler-controller/pkg/controller"
+	"reconciler/pkg/apis"
+	"reconciler/pkg/controller"
 
 	"github.com/operator-framework/operator-sdk/pkg/log/zap"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"

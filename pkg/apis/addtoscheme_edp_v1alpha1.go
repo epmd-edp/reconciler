@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
+	"reconciler/pkg/apis/edp/v1alpha1"
 )
 
 func init() {

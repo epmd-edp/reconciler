@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: business-app-reconciler-controller
+  name: reconciler
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: business-app-reconciler-controller
+      name: reconciler
   template:
     metadata:
       labels:
-        name: business-app-reconciler-controller
+        name: reconciler
     spec:
       serviceAccountName: edp
       containers:
-        - name: business-app-reconciler-controller
+        - name: reconciler
           # Replace this with the built image name
           image: REPLACE_IMAGE
           imagePullPolicy: Always
@@ -26,7 +26,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "business-app-reconciler-controller"
+              value: "reconciler"
             - name: DB_HOST
               value: "edp-install-wizard-db"
             - name: DB_PORT

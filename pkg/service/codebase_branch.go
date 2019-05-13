@@ -1,12 +1,12 @@
 package service
 
 import (
-	"business-app-reconciler-controller/pkg/model"
-	"business-app-reconciler-controller/pkg/repository"
 	"database/sql"
 	"errors"
 	"fmt"
 	"log"
+	"reconciler/pkg/model"
+	"reconciler/pkg/repository"
 )
 
 type CodebaseBranchService struct {

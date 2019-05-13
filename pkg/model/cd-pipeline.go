@@ -1,8 +1,8 @@
 package model
 
 import (
-	edpv1alpha1 "business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
 	"errors"
+	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
 	"strings"
 )
 

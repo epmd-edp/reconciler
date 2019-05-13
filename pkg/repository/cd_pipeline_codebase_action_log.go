@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"business-app-reconciler-controller/pkg/model"
 	"database/sql"
 	"fmt"
+	"reconciler/pkg/model"
 	"time"
 )
 

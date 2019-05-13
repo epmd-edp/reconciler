@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"business-app-reconciler-controller/pkg/controller/businessapplication"
+	"reconciler/pkg/controller/businessapplication"
 )
 
 func init() {

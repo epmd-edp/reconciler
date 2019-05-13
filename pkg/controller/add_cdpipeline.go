@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"business-app-reconciler-controller/pkg/controller/cdpipeline"
+	"reconciler/pkg/controller/cdpipeline"
 )
 
 func init() {

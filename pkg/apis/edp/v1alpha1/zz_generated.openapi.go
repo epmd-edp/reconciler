@@ -13,18 +13,18 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.ApplicationBranch":         schema_pkg_apis_edp_v1alpha1_ApplicationBranch(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.ApplicationBranchSpec":     schema_pkg_apis_edp_v1alpha1_ApplicationBranchSpec(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.ApplicationBranchStatus":   schema_pkg_apis_edp_v1alpha1_ApplicationBranchStatus(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.BusinessApplication":       schema_pkg_apis_edp_v1alpha1_BusinessApplication(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.BusinessApplicationStatus": schema_pkg_apis_edp_v1alpha1_BusinessApplicationStatus(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipeline":                schema_pkg_apis_edp_v1alpha1_CDPipeline(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineSpec":            schema_pkg_apis_edp_v1alpha1_CDPipelineSpec(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineStatus":          schema_pkg_apis_edp_v1alpha1_CDPipelineStatus(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.Repository":                schema_pkg_apis_edp_v1alpha1_Repository(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.Stage":                     schema_pkg_apis_edp_v1alpha1_Stage(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.StageSpec":                 schema_pkg_apis_edp_v1alpha1_StageSpec(ref),
-		"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.StageStatus":               schema_pkg_apis_edp_v1alpha1_StageStatus(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranch":         schema_pkg_apis_edp_v1alpha1_ApplicationBranch(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchSpec":     schema_pkg_apis_edp_v1alpha1_ApplicationBranchSpec(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchStatus":   schema_pkg_apis_edp_v1alpha1_ApplicationBranchStatus(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.BusinessApplication":       schema_pkg_apis_edp_v1alpha1_BusinessApplication(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationStatus": schema_pkg_apis_edp_v1alpha1_BusinessApplicationStatus(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.CDPipeline":                schema_pkg_apis_edp_v1alpha1_CDPipeline(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.CDPipelineSpec":            schema_pkg_apis_edp_v1alpha1_CDPipelineSpec(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.CDPipelineStatus":          schema_pkg_apis_edp_v1alpha1_CDPipelineStatus(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.Repository":                schema_pkg_apis_edp_v1alpha1_Repository(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.Stage":                     schema_pkg_apis_edp_v1alpha1_Stage(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.StageSpec":                 schema_pkg_apis_edp_v1alpha1_StageSpec(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.StageStatus":               schema_pkg_apis_edp_v1alpha1_StageStatus(ref),
 	}
 }
 
@@ -55,19 +55,19 @@ func schema_pkg_apis_edp_v1alpha1_ApplicationBranch(ref common.ReferenceCallback
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.ApplicationBranchSpec"),
+							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.ApplicationBranchStatus"),
+							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.ApplicationBranchSpec", "business-app-reconciler-controller/pkg/apis/edp/v1alpha1.ApplicationBranchStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchSpec", "reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -158,19 +158,19 @@ func schema_pkg_apis_edp_v1alpha1_BusinessApplication(ref common.ReferenceCallba
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.BusinessApplicationSpec"),
+							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.BusinessApplicationStatus"),
+							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.BusinessApplicationSpec", "business-app-reconciler-controller/pkg/apis/edp/v1alpha1.BusinessApplicationStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationSpec", "reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -234,19 +234,19 @@ func schema_pkg_apis_edp_v1alpha1_CDPipeline(ref common.ReferenceCallback) commo
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineSpec"),
+							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.CDPipelineSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineStatus"),
+							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.CDPipelineStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineSpec", "business-app-reconciler-controller/pkg/apis/edp/v1alpha1.CDPipelineStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"reconciler/pkg/apis/edp/v1alpha1.CDPipelineSpec", "reconciler/pkg/apis/edp/v1alpha1.CDPipelineStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -358,19 +358,19 @@ func schema_pkg_apis_edp_v1alpha1_Stage(ref common.ReferenceCallback) common.Ope
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.StageSpec"),
+							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.StageSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("business-app-reconciler-controller/pkg/apis/edp/v1alpha1.StageStatus"),
+							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.StageStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"business-app-reconciler-controller/pkg/apis/edp/v1alpha1.StageSpec", "business-app-reconciler-controller/pkg/apis/edp/v1alpha1.StageStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"reconciler/pkg/apis/edp/v1alpha1.StageSpec", "reconciler/pkg/apis/edp/v1alpha1.StageStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 

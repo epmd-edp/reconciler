@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	edpv1alpha1 "business-app-reconciler-controller/pkg/apis/edp/v1alpha1"
+	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -77,7 +77,6 @@ func (r *ReconcileStage) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 
 	log.Printf("Stage: %v", instance)
-
 
 	log.Printf("Reconciling Stage %v/%v has been finished", request.Namespace, request.Name)
 	return reconcile.Result{}, nil
