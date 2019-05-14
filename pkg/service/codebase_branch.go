@@ -79,7 +79,14 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schem
 		return nil, errors.New(fmt.Sprintf("record for codebase has not been found with %s appName parameters", codebaseBranch.AppName))
 	}
 
-	id, err := repository.CreateCodebaseBranch(txn, codebaseBranch.Name, *beId, codebaseBranch.FromCommit, schemaName)
+	ocImageStreamName := fmt.Sprintf("%v-%v", codebaseBranch.AppName, codebaseBranch.Name)
+
+	streamId, err := repository.CreateCodebaseDockerStream(txn, schemaName, *beId, ocImageStreamName)
+
+	log.Printf("Id of newly created codebase docker stream: %v", streamId)
+
+	id, err := repository.CreateCodebaseBranch(txn, codebaseBranch.Name, *beId,
+		codebaseBranch.FromCommit, schemaName, *streamId)
 	if err != nil {
 		return nil, err
 	}
