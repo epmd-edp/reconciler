@@ -12,8 +12,11 @@ const (
 	SelectStageId = "select st.id as st_id from \"%v\".cd_stage st " +
 		"left join \"%v\".cd_pipeline pl on st.cd_pipeline_id = pl.id " +
 		"where (st.name = $1 and pl.name = $2);"
-	UpdateStageStatusQuery    = "update \"%v\".cd_stage set status = $1 where id = $2;"
-	CreateStageActionLogQuery = "insert into \"%v\".cd_stage_action_log(cd_stage_id, action_log_id) values ($1, $2);"
+	UpdateStageStatusQuery                = "update \"%v\".cd_stage set status = $1 where id = $2;"
+	CreateStageActionLogQuery             = "insert into \"%v\".cd_stage_action_log(cd_stage_id, action_log_id) values ($1, $2);"
+	GetStageIdByPipelineNameAndOrderQuery = "select stage.id from \"%v\".cd_stage stage " +
+		"left join \"%v\".cd_pipeline pipe on stage.cd_pipeline_id = pipe.id " +
+		"where pipe.name = $1 and stage.\"order\" = $2;"
 )
 
 func CreateStage(txn sql.Tx, schemaName string, stage model.Stage, cdPipelineId int) (id *int, err error) {
@@ -58,11 +61,26 @@ func CreateStageActionLog(txn sql.Tx, schemaName string, stageId int, actionLogI
 	stmt, err := txn.Prepare(fmt.Sprintf(CreateStageActionLogQuery, schemaName))
 
 	if err != nil {
-		return nil
+		return err
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(stageId, actionLogId)
 	return err
+}
+
+func GetStageIdByPipelineNameAndOrder(txn sql.Tx, schemaName string, cdPipelineName string, order int) (id *int, err error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(GetStageIdByPipelineNameAndOrderQuery, schemaName, schemaName))
+
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(cdPipelineName, order).Scan(&id)
+	if err != nil {
+		return checkNoRows(err)
+	}
+	return
 }
 
 func checkNoRows(err error) (*int, error) {

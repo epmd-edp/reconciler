@@ -10,3 +10,9 @@ type CDPipelineDTO struct {
 	Name   string
 	Status string
 }
+
+type CodebaseDockerStreamReadDTO struct {
+	CodebaseDockerStreamId int
+	CodebaseId             int
+	CodebaseName           string
+}

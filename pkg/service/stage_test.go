@@ -14,14 +14,14 @@ func TestPutStage(t *testing.T) {
 	}
 
 	stage := model.Stage{
-		Name:            "qa",
+		Name:            "stage",
 		CdPipelineName:  "team-a",
 		Description:     "Description for stage",
 		TriggerType:     "manual",
 		QualityGate:     "manual",
 		JenkinsStepName: "manual",
-		Tenant:          "tarianyk-test",
-		Order:           1,
+		Tenant:          "py-test",
+		Order:           3,
 		ActionLog: model.ActionLog{
 			Event:           "created",
 			DetailedMessage: "",
