@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"reconciler/pkg/model"
-	"time"
 )
 
 const (
@@ -45,7 +44,7 @@ func CreateActionLog(txn sql.Tx, actionLog model.ActionLog, schemaName string) (
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, time.Unix(actionLog.UpdatedAt, 0).Format("2006-01-02 15:04:05.612000")).Scan(&id)
+	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, actionLog.UpdatedAt).Scan(&id)
 
 	return &id, err
 }
@@ -58,7 +57,7 @@ func GetLastIdActionLog(txn sql.Tx, be model.BusinessEntity, schemaName string) 
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(be.Name, be.ActionLog.Event, time.Unix(be.ActionLog.UpdatedAt, 0).Format("2006-01-02 15:04:05.612000")).Scan(&id)
+	err = stmt.QueryRow(be.Name, be.ActionLog.Event, be.ActionLog.UpdatedAt).Scan(&id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

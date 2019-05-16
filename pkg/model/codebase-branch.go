@@ -42,6 +42,6 @@ func convertCodebaseBranchActionLog(status edpv1alpha1.ApplicationBranchStatus) 
 		Event:           formatStatus(status.Status),
 		DetailedMessage: "",
 		Username:        "",
-		UpdatedAt:       status.LastTimeUpdated.Unix(),
+		UpdatedAt:       status.LastTimeUpdated,
 	}
 }

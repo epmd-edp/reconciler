@@ -44,7 +44,7 @@ func convertCDPipelineActionLog(status edpv1alpha1.CDPipelineStatus) *ActionLog 
 		Event:           formatStatus(status.Status),
 		DetailedMessage: "",
 		Username:        "",
-		UpdatedAt:       status.LastTimeUpdated.Unix(),
+		UpdatedAt:       status.LastTimeUpdated,
 	}
 }
 

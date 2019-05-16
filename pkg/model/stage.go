@@ -52,6 +52,6 @@ func convertStageActionLog(status v1alpha1.StageStatus) *ActionLog {
 		Event:           formatStatus(status.Status),
 		DetailedMessage: "",
 		Username:        "",
-		UpdatedAt:       status.LastTimeUpdated.Unix(),
+		UpdatedAt:       status.LastTimeUpdated,
 	}
 }

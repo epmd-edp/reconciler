@@ -4,6 +4,7 @@ import (
 	"errors"
 	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
 	"strings"
+	"time"
 )
 
 type BusinessEntity struct {
@@ -35,7 +36,7 @@ type ActionLog struct {
 	Event           string
 	DetailedMessage string
 	Username        string
-	UpdatedAt       int64
+	UpdatedAt       time.Time
 }
 
 func Convert(k8sObject edpv1alpha1.BusinessApplication) (*BusinessEntity, error) {
@@ -97,7 +98,7 @@ func convertActionLog(status edpv1alpha1.BusinessApplicationStatus) *ActionLog {
 		Event:           formatStatus(status.Status),
 		DetailedMessage: "",
 		Username:        "",
-		UpdatedAt:       status.LastTimeUpdated.Unix(),
+		UpdatedAt:       status.LastTimeUpdated,
 	}
 }
 

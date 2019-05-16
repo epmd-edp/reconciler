@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"reconciler/pkg/model"
-	"time"
 )
 
 const (
@@ -45,7 +44,7 @@ func CreateEventActionLog(txn sql.Tx, actionLog model.ActionLog, schemaName stri
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, time.Unix(actionLog.UpdatedAt, 0).Format("2006-01-02 15:04:05")).Scan(&id)
+	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, actionLog.UpdatedAt).Scan(&id)
 
 	return &id, err
 }
@@ -58,7 +57,7 @@ func CheckCDPipelineActionLogDuplicate(txn sql.Tx, cdPipeline model.CDPipeline, 
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(cdPipeline.Name, cdPipeline.ActionLog.Event, time.Unix(cdPipeline.ActionLog.UpdatedAt, 0).Format("2006-01-02 15:04:05")).Scan(&id)
+	err = stmt.QueryRow(cdPipeline.Name, cdPipeline.ActionLog.Event, cdPipeline.ActionLog.UpdatedAt).Scan(&id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return false, nil
