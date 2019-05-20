@@ -10,7 +10,7 @@ import (
 )
 
 type BEService struct {
-	DB sql.DB
+	DB *sql.DB
 }
 
 func (service BEService) PutBE(be model.BusinessEntity) error {

@@ -8,9 +8,8 @@ import (
 )
 
 func TestCodebaseBranchService_PutCodebaseBranchIfApplicationDoesNotExist(t *testing.T) {
-	dbConn, _ := db.InitConnection()
 	beService := CodebaseBranchService{
-		DB: *dbConn,
+		DB: db.Instance,
 	}
 
 	branch := model.CodebaseBranch{
@@ -26,13 +25,8 @@ func TestCodebaseBranchService_PutCodebaseBranchIfApplicationDoesNotExist(t *tes
 }
 
 func TestCreateBranch(t *testing.T) {
-	dbConn, err := db.InitConnection()
-
-	if err != nil {
-		t.Fatal(err)
-	}
 	service := CodebaseBranchService{
-		DB: *dbConn,
+		DB: db.Instance,
 	}
 
 	branch := model.CodebaseBranch{
@@ -44,10 +38,10 @@ func TestCreateBranch(t *testing.T) {
 			Event:           "created",
 			DetailedMessage: "",
 			Username:        "",
-			UpdatedAt:       time.Now().Unix(),
+			UpdatedAt:       time.Now(),
 		},
 	}
-	err = service.PutCodebaseBranch(branch)
+	err := service.PutCodebaseBranch(branch)
 
 	if err != nil {
 		t.Fatal(err)

@@ -10,7 +10,7 @@ import (
 )
 
 type CodebaseBranchService struct {
-	DB sql.DB
+	DB *sql.DB
 }
 
 func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.CodebaseBranch) error {

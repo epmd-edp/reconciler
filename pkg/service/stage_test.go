@@ -8,9 +8,8 @@ import (
 )
 
 func TestPutStage(t *testing.T) {
-	db, _ := db.InitConnection()
 	service := StageService{
-		DB: *db,
+		DB: db.Instance,
 	}
 
 	stage := model.Stage{
@@ -26,7 +25,7 @@ func TestPutStage(t *testing.T) {
 			Event:           "created",
 			DetailedMessage: "",
 			Username:        "",
-			UpdatedAt:       time.Now().Unix(),
+			UpdatedAt:       time.Now(),
 		},
 		Status: "inactive",
 	}

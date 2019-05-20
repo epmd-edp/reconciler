@@ -34,14 +34,12 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	dbConn, _ := db.InitConnection()
-	beService := service.BEService{
-		DB: *dbConn,
-	}
 	return &ReconcileBusinessApplication{
-		client:    mgr.GetClient(),
-		scheme:    mgr.GetScheme(),
-		beService: beService,
+		client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
+		beService: service.BEService{
+			DB: db.Instance,
+		},
 	}
 }
 

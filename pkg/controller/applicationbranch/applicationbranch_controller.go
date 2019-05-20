@@ -35,14 +35,12 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	dbConn, _ := db.InitConnection()
-	cbService := service.CodebaseBranchService{
-		DB: *dbConn,
-	}
 	return &ReconcileApplicationBranch{
-		client:    mgr.GetClient(),
-		scheme:    mgr.GetScheme(),
-		cbService: cbService,
+		client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
+		cbService: service.CodebaseBranchService{
+			DB: db.Instance,
+		},
 	}
 }
 

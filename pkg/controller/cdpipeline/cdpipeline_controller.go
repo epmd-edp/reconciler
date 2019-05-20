@@ -35,13 +35,12 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	dbConn, _ := db.InitConnection()
 	clientSet, err := platform.CreateOpenshiftClients()
 	if err != nil {
 		panic(err)
 	}
 	cdpService := service.CdPipelineService{
-		DB:        *dbConn,
+		DB:        db.Instance,
 		ClientSet: *clientSet,
 	}
 	return &ReconcileCDPipeline{client: mgr.GetClient(), scheme: mgr.GetScheme(), cdpService: cdpService}

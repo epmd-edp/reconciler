@@ -12,13 +12,8 @@ import (
 )
 
 func TestBEService_CreateBE(t *testing.T) {
-	database, err := db.InitConnection()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	service := BEService{
-		DB: *database,
+		DB: db.Instance,
 	}
 	k8sObject := edpv1alpha1.BusinessApplication{
 		ObjectMeta: metav1.ObjectMeta{

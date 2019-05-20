@@ -10,7 +10,7 @@ import (
 )
 
 type StageService struct {
-	DB sql.DB
+	DB *sql.DB
 }
 
 func (service StageService) PutStage(stage model.Stage) error {

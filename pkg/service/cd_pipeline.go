@@ -13,7 +13,7 @@ import (
 )
 
 type CdPipelineService struct {
-	DB        sql.DB
+	DB        *sql.DB
 	ClientSet platform.ClientSet
 }
 
