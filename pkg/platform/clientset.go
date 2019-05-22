@@ -123,8 +123,8 @@ func createCrdClient(cfg *rest.Config) (*rest.RESTClient, error) {
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&v1alpha1.ApplicationBranch{},
-		&v1alpha1.ApplicationBranchList{},
+		&v1alpha1.CodebaseBranch{},
+		&v1alpha1.CodebaseBranchList{},
 	)
 
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)

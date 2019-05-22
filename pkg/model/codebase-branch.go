@@ -14,7 +14,7 @@ type CodebaseBranch struct {
 	ActionLog  ActionLog
 }
 
-func ConvertToCodebaseBranch(k8sObject edpv1alpha1.ApplicationBranch) (*CodebaseBranch, error) {
+func ConvertToCodebaseBranch(k8sObject edpv1alpha1.CodebaseBranch) (*CodebaseBranch, error) {
 	if &k8sObject == nil {
 		return nil, errors.New("k8s object application branch object should not be nil")
 	}
@@ -25,7 +25,7 @@ func ConvertToCodebaseBranch(k8sObject edpv1alpha1.ApplicationBranch) (*Codebase
 	branch := CodebaseBranch{
 		Name:       k8sObject.Spec.BranchName,
 		Tenant:     strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
-		AppName:    spec.AppName,
+		AppName:    spec.CodebaseName,
 		FromCommit: spec.FromCommit,
 		ActionLog:  *actionLog,
 	}
@@ -33,7 +33,7 @@ func ConvertToCodebaseBranch(k8sObject edpv1alpha1.ApplicationBranch) (*Codebase
 	return &branch, nil
 }
 
-func convertCodebaseBranchActionLog(status edpv1alpha1.ApplicationBranchStatus) *ActionLog {
+func convertCodebaseBranchActionLog(status edpv1alpha1.CodebaseBranchStatus) *ActionLog {
 	if &status == nil {
 		return nil
 	}

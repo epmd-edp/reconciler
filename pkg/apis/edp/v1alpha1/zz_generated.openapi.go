@@ -13,9 +13,9 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranch":         schema_pkg_apis_edp_v1alpha1_ApplicationBranch(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchSpec":     schema_pkg_apis_edp_v1alpha1_ApplicationBranchSpec(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchStatus":   schema_pkg_apis_edp_v1alpha1_ApplicationBranchStatus(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.CodebaseBranch":            schema_pkg_apis_edp_v1alpha1_CodebaseBranch(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.CodebaseBranchSpec":        schema_pkg_apis_edp_v1alpha1_CodebaseBranchSpec(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.CodebaseBranchStatus":      schema_pkg_apis_edp_v1alpha1_CodebaseBranchStatus(ref),
 		"reconciler/pkg/apis/edp/v1alpha1.Codebase":                  schema_pkg_apis_edp_v1alpha1_Codebase(ref),
 		"reconciler/pkg/apis/edp/v1alpha1.CodebaseStatus":            schema_pkg_apis_edp_v1alpha1_CodebaseStatus(ref),
 		"reconciler/pkg/apis/edp/v1alpha1.CDPipeline":                schema_pkg_apis_edp_v1alpha1_CDPipeline(ref),
@@ -28,11 +28,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 	}
 }
 
-func schema_pkg_apis_edp_v1alpha1_ApplicationBranch(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_edp_v1alpha1_CodebaseBranch(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ApplicationBranch is the Schema for the applicationbranches API",
+				Description: "CodebaseBranch is the Schema for the codebasebranches API",
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -55,29 +55,29 @@ func schema_pkg_apis_edp_v1alpha1_ApplicationBranch(ref common.ReferenceCallback
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchSpec"),
+							Ref: ref("codebase-operator/pkg/apis/edp/v1alpha1.CodebaseBranchSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchStatus"),
+							Ref: ref("codebase-operator/pkg/apis/edp/v1alpha1.CodebaseBranchStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchSpec", "reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"codebase-operator/pkg/apis/edp/v1alpha1.CodebaseBranchSpec", "codebase-operator/pkg/apis/edp/v1alpha1.CodebaseBranchStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
-func schema_pkg_apis_edp_v1alpha1_ApplicationBranchSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_edp_v1alpha1_CodebaseBranchSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ApplicationBranchSpec defines the desired state of ApplicationBranch",
+				Description: "CodebaseBranchSpec defines the desired state of CodebaseBranch",
 				Properties: map[string]spec.Schema{
-					"appName": {
+					"codebaseName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run \"operator-sdk generate k8s\" to regenerate code after modifying this file Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html",
 							Type:        []string{"string"},
@@ -97,18 +97,18 @@ func schema_pkg_apis_edp_v1alpha1_ApplicationBranchSpec(ref common.ReferenceCall
 						},
 					},
 				},
-				Required: []string{"appName", "branchName", "fromCommit"},
+				Required: []string{"codebaseName", "branchName", "fromCommit"},
 			},
 		},
 		Dependencies: []string{},
 	}
 }
 
-func schema_pkg_apis_edp_v1alpha1_ApplicationBranchStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_edp_v1alpha1_CodebaseBranchStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ApplicationBranchStatus defines the observed state of ApplicationBranch",
+				Description: "CodebaseBranchStatus defines the observed state of CodebaseBranch",
 				Properties: map[string]spec.Schema{
 					"lastTimeUpdated": {
 						SchemaProps: spec.SchemaProps{

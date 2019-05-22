@@ -1,4 +1,4 @@
-package applicationbranch
+package codebasebranch
 
 import (
 	"context"
@@ -20,14 +20,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_applicationbranch")
+var log = logf.Log.WithName("controller_codebasebranch")
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
 * business logic.  Delete these comments after modifying this file.*
  */
 
-// Add creates a new ApplicationBranch Controller and adds it to the Manager. The Manager will set fields on the Controller
+// Add creates a new CodebaseBranch Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
@@ -35,7 +35,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileApplicationBranch{
+	return &ReconcileCodebaseBranch{
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 		cbService: service.CodebaseBranchService{
@@ -47,13 +47,13 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("applicationbranch-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("codebasebranch-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to primary resource ApplicationBranch
-	err = c.Watch(&source.Kind{Type: &edpv1alpha1.ApplicationBranch{}}, &handler.EnqueueRequestForObject{})
+	// Watch for changes to primary resource CodebaseBranch
+	err = c.Watch(&source.Kind{Type: &edpv1alpha1.CodebaseBranch{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -61,10 +61,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileApplicationBranch{}
+var _ reconcile.Reconciler = &ReconcileCodebaseBranch{}
 
-// ReconcileApplicationBranch reconciles a ApplicationBranch object
-type ReconcileApplicationBranch struct {
+// ReconcileCodebaseBranch reconciles a CodebaseBranch object
+type ReconcileCodebaseBranch struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client    client.Client
@@ -72,17 +72,17 @@ type ReconcileApplicationBranch struct {
 	cbService service.CodebaseBranchService
 }
 
-// Reconcile reads that state of the cluster for a ApplicationBranch object and makes changes based on the state read
-// and what is in the ApplicationBranch.Spec
+// Reconcile reads that state of the cluster for a CodebaseBranch object and makes changes based on the state read
+// and what is in the CodebaseBranch.Spec
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileApplicationBranch) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileCodebaseBranch) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling ApplicationBranch")
+	reqLogger.Info("Reconciling CodebaseBranch")
 
-	// Fetch the ApplicationBranch instance
-	instance := &edpv1alpha1.ApplicationBranch{}
+	// Fetch the CodebaseBranch instance
+	instance := &edpv1alpha1.CodebaseBranch{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -95,7 +95,7 @@ func (r *ReconcileApplicationBranch) Reconcile(request reconcile.Request) (recon
 		return reconcile.Result{}, err
 	}
 
-	reqLogger.Info("ApplicationBranch", instance)
+	reqLogger.Info("CodebaseBranch", instance)
 
 	app, _ := model.ConvertToCodebaseBranch(*instance)
 	err = r.cbService.PutCodebaseBranch(*app)

@@ -52,7 +52,7 @@ func CreateCodebaseBranch(txn sql.Tx, name string, beId int, fromCommit string, 
 	return &id, nil
 }
 
-func GetCodebaseBranchesId(txn sql.Tx, appBranch model.ApplicationBranchDTO, schemaName string) (*int, error) {
+func GetCodebaseBranchesId(txn sql.Tx, appBranch model.CodebaseBranchDTO, schemaName string) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(SelectCodebaseBranchesId, schemaName, schemaName))
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func GetCodebaseBranchesId(txn sql.Tx, appBranch model.ApplicationBranchDTO, sch
 	defer stmt.Close()
 
 	var branchId int
-	err = stmt.QueryRow(appBranch.BranchName, appBranch.AppName).Scan(&branchId)
+	err = stmt.QueryRow(appBranch.BranchName, appBranch.CodebaseName).Scan(&branchId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

@@ -97,7 +97,7 @@ func (r *ReconcileCDPipeline) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 
-	reqLogger.Info("ApplicationBranch", instance)
+	reqLogger.Info("CDPipeline", instance)
 
 	cdp, _ := model.ConvertToCDPipeline(*instance)
 	_ = r.cdpService.PutCDPipeline(*cdp)

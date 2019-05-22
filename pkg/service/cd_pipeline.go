@@ -76,14 +76,14 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 		return nil, err
 	}
 
-	applicationBranches, err := getApplicationBranchesData(cdPipeline, edpRestClient)
+	codebaseBranches, err := getCodebaseBranchesData(cdPipeline, edpRestClient)
 	if err != nil {
-		log.Printf("An error has occured while getting Application Branch from k8s: %s", err)
+		log.Printf("An error has occured while getting Codebase Branch from k8s: %s", err)
 		return nil, err
 	}
-	log.Printf("Fetched Application Branches for %s pipeline: %s", cdPipeline.Name, applicationBranches)
+	log.Printf("Fetched Codebase Branches for %s pipeline: %s", cdPipeline.Name, codebaseBranches)
 
-	codebaseBranchesId, err := getCodebaseBranchesId(txn, applicationBranches, schemaName)
+	codebaseBranchesId, err := getCodebaseBranchesId(txn, codebaseBranches, schemaName)
 	if err != nil {
 		log.Printf("An error has occured while getting codebase branch id: %s", err)
 		return nil, err
@@ -109,30 +109,30 @@ func createCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string
 	return cdPipelineDto, nil
 }
 
-func getApplicationBranchCR(edpRestClient *rest.RESTClient, crName string, namespace string) (*v1alpha1.ApplicationBranch, error) {
-	applicationBranch := &v1alpha1.ApplicationBranch{}
-	err := edpRestClient.Get().Namespace(namespace).Resource("applicationbranches").Name(crName).Do().Into(applicationBranch)
+func getCodebaseBranchCR(edpRestClient *rest.RESTClient, crName string, namespace string) (*v1alpha1.CodebaseBranch, error) {
+	codebaseBranch := &v1alpha1.CodebaseBranch{}
+	err := edpRestClient.Get().Namespace(namespace).Resource("codebasebranches").Name(crName).Do().Into(codebaseBranch)
 	if err != nil {
 		log.Printf("An error has occurred while getting Release Branch CR from k8s: %s", err)
 		return nil, err
 	}
-	return applicationBranch, nil
+	return codebaseBranch, nil
 }
 
-func getApplicationBranchesData(cdPipeline model.CDPipeline, edpRestClient *rest.RESTClient) ([]model.ApplicationBranchDTO, error) {
-	var applicationBranches []model.ApplicationBranchDTO
+func getCodebaseBranchesData(cdPipeline model.CDPipeline, edpRestClient *rest.RESTClient) ([]model.CodebaseBranchDTO, error) {
+	var codebaseBranches []model.CodebaseBranchDTO
 	for _, v := range cdPipeline.CodebaseBranch {
-		releaseBranchCR, err := getApplicationBranchCR(edpRestClient, v, cdPipeline.Namespace)
+		releaseBranchCR, err := getCodebaseBranchCR(edpRestClient, v, cdPipeline.Namespace)
 		if err != nil {
 			return nil, err
 		}
 
-		applicationBranches = append(applicationBranches, model.ApplicationBranchDTO{
-			AppName:    releaseBranchCR.Spec.AppName,
+		codebaseBranches = append(codebaseBranches, model.CodebaseBranchDTO{
+			CodebaseName:    releaseBranchCR.Spec.CodebaseName,
 			BranchName: releaseBranchCR.Spec.BranchName,
 		})
 	}
-	return applicationBranches, nil
+	return codebaseBranches, nil
 }
 
 func updateActionLog(txn sql.Tx, cdPipeline model.CDPipeline, pipelineId int, schemaName string) error {
@@ -167,9 +167,9 @@ func updateCDPipelineStatus(txn sql.Tx, cdPipelineDb model.CDPipelineDTO, status
 	return nil
 }
 
-func getCodebaseBranchesId(txn sql.Tx, applicationBranches []model.ApplicationBranchDTO, schemaName string) ([]int, error) {
+func getCodebaseBranchesId(txn sql.Tx, codebaseBranches []model.CodebaseBranchDTO, schemaName string) ([]int, error) {
 	var codebaseBranchesId []int
-	for _, v := range applicationBranches {
+	for _, v := range codebaseBranches {
 		codebaseBranchId, err := repository.GetCodebaseBranchesId(txn, v, schemaName)
 		if err != nil {
 			return nil, err

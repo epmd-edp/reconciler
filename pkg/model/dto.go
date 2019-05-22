@@ -1,7 +1,7 @@
 package model
 
-type ApplicationBranchDTO struct {
-	AppName    string
+type CodebaseBranchDTO struct {
+	CodebaseName    string
 	BranchName string
 }
 
