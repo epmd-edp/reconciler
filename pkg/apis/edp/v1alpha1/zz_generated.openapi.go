@@ -16,8 +16,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranch":         schema_pkg_apis_edp_v1alpha1_ApplicationBranch(ref),
 		"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchSpec":     schema_pkg_apis_edp_v1alpha1_ApplicationBranchSpec(ref),
 		"reconciler/pkg/apis/edp/v1alpha1.ApplicationBranchStatus":   schema_pkg_apis_edp_v1alpha1_ApplicationBranchStatus(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.BusinessApplication":       schema_pkg_apis_edp_v1alpha1_BusinessApplication(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationStatus": schema_pkg_apis_edp_v1alpha1_BusinessApplicationStatus(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.Codebase":                  schema_pkg_apis_edp_v1alpha1_Codebase(ref),
+		"reconciler/pkg/apis/edp/v1alpha1.CodebaseStatus":            schema_pkg_apis_edp_v1alpha1_CodebaseStatus(ref),
 		"reconciler/pkg/apis/edp/v1alpha1.CDPipeline":                schema_pkg_apis_edp_v1alpha1_CDPipeline(ref),
 		"reconciler/pkg/apis/edp/v1alpha1.CDPipelineSpec":            schema_pkg_apis_edp_v1alpha1_CDPipelineSpec(ref),
 		"reconciler/pkg/apis/edp/v1alpha1.CDPipelineStatus":          schema_pkg_apis_edp_v1alpha1_CDPipelineStatus(ref),
@@ -131,11 +131,11 @@ func schema_pkg_apis_edp_v1alpha1_ApplicationBranchStatus(ref common.ReferenceCa
 	}
 }
 
-func schema_pkg_apis_edp_v1alpha1_BusinessApplication(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_edp_v1alpha1_Codebase(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "BusinessApplication is the Schema for the businessapplications API",
+				Description: "Codebase is the Schema for the codebases API",
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -158,27 +158,27 @@ func schema_pkg_apis_edp_v1alpha1_BusinessApplication(ref common.ReferenceCallba
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationSpec"),
+							Ref: ref("codebase-operator/pkg/apis/edp/v1alpha1.CodebaseSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationStatus"),
+							Ref: ref("codebase-operator/pkg/apis/edp/v1alpha1.CodebaseStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationSpec", "reconciler/pkg/apis/edp/v1alpha1.BusinessApplicationStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"codebase-operator/pkg/apis/edp/v1alpha1.CodebaseSpec", "codebase-operator/pkg/apis/edp/v1alpha1.CodebaseStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
-func schema_pkg_apis_edp_v1alpha1_BusinessApplicationStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_edp_v1alpha1_CodebaseStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "BusinessApplicationStatus defines the observed state of BusinessApplication",
+				Description: "CodebaseStatus defines the observed state of Codebase",
 				Properties: map[string]spec.Schema{
 					"available": {
 						SchemaProps: spec.SchemaProps{
@@ -315,7 +315,7 @@ func schema_pkg_apis_edp_v1alpha1_Repository(ref common.ReferenceCallback) commo
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "BusinessApplicationSpec defines the desired state of BusinessApplication",
+				Description: "CodebaseSpec defines the desired state of Codebase",
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{

@@ -1,6 +1,6 @@
 package models
 
-type AppSettings struct {
+type CodebaseSettings struct {
 	WorkDir               string         `json:"work_dir"`
 	RepositoryUrl         string         `json:"repository_url"`
 	GerritKeyPath         string         `json:"gerrit_key_path"`

@@ -39,7 +39,7 @@ type ActionLog struct {
 	UpdatedAt       time.Time
 }
 
-func Convert(k8sObject edpv1alpha1.BusinessApplication) (*BusinessEntity, error) {
+func Convert(k8sObject edpv1alpha1.Codebase) (*BusinessEntity, error) {
 	if &k8sObject == nil {
 		return nil, errors.New("k8s object cannot be nil")
 	}
@@ -89,7 +89,7 @@ func Convert(k8sObject edpv1alpha1.BusinessApplication) (*BusinessEntity, error)
 	return &app, nil
 }
 
-func convertActionLog(status edpv1alpha1.BusinessApplicationStatus) *ActionLog {
+func convertActionLog(status edpv1alpha1.CodebaseStatus) *ActionLog {
 	if &status == nil {
 		return nil
 	}

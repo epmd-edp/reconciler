@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"reconciler/pkg/controller/businessapplication"
+	"reconciler/pkg/controller/codebase"
 )
 
 func init() {
 	// AddToManagerFuncs is a list of functions to create controllers and add them to a manager.
-	AddToManagerFuncs = append(AddToManagerFuncs, businessapplication.Add)
+	AddToManagerFuncs = append(AddToManagerFuncs, codebase.Add)
 }

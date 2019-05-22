@@ -39,7 +39,7 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 	}
 
 	if !isPresent {
-		log.Println("Start update status of business application...")
+		log.Println("Start update status of codebase...")
 		codebaseActionId, err := repository.CreateActionLog(*txn, be.ActionLog, schemaName)
 		if err != nil {
 			log.Printf("Error has occurred during status creation: %v", err)
@@ -48,7 +48,7 @@ func (service BEService) PutBE(be model.BusinessEntity) error {
 		}
 		log.Println("ActionLog has been saved into the repository")
 
-		log.Println("Start update codebase_action status of business application...")
+		log.Println("Start update codebase_action status of codebase...")
 		err = repository.CreateCodebaseAction(*txn, *id, *codebaseActionId, schemaName)
 		if err != nil {
 			log.Printf("Error has occurred during codebase_action creation: %v", err)

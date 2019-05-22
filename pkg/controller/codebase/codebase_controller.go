@@ -1,4 +1,4 @@
-package businessapplication
+package codebase
 
 import (
 	"context"
@@ -19,14 +19,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_businessapplication")
+var log = logf.Log.WithName("controller_codebase")
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
 * business logic.  Delete these comments after modifying this file.*
  */
 
-// Add creates a new BusinessApplication Controller and adds it to the Manager. The Manager will set fields on the Controller
+// Add creates a new Codebase Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
@@ -34,7 +34,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileBusinessApplication{
+	return &ReconcileCodebase{
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 		beService: service.BEService{
@@ -46,13 +46,13 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("businessapplication-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("codebase-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to primary resource BusinessApplication
-	err = c.Watch(&source.Kind{Type: &edpv1alpha1.BusinessApplication{}}, &handler.EnqueueRequestForObject{})
+	// Watch for changes to primary resource Codebase
+	err = c.Watch(&source.Kind{Type: &edpv1alpha1.Codebase{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -60,10 +60,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileBusinessApplication{}
+var _ reconcile.Reconciler = &ReconcileCodebase{}
 
-// ReconcileBusinessApplication reconciles a BusinessApplication object
-type ReconcileBusinessApplication struct {
+// ReconcileCodebase reconciles a Codebase object
+type ReconcileCodebase struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client    client.Client
@@ -71,19 +71,19 @@ type ReconcileBusinessApplication struct {
 	beService service.BEService
 }
 
-// Reconcile reads that state of the cluster for a BusinessApplication object and makes changes based on the state read
-// and what is in the BusinessApplication.Spec
+// Reconcile reads that state of the cluster for a Codebase object and makes changes based on the state read
+// and what is in the Codebase.Spec
 // TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
 // a Pod as an example
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileBusinessApplication) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling BusinessApplication")
+	reqLogger.Info("Reconciling Codebase")
 
-	// Fetch the BusinessApplication instance
-	instance := &edpv1alpha1.BusinessApplication{}
+	// Fetch the Codebase instance
+	instance := &edpv1alpha1.Codebase{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -96,7 +96,7 @@ func (r *ReconcileBusinessApplication) Reconcile(request reconcile.Request) (rec
 		return reconcile.Result{}, err
 	}
 
-	log.WithValues("BusinessApplication", instance)
+	log.WithValues("Codebase", instance)
 
 	app, _ := model.Convert(*instance)
 	app.Type = model.App
