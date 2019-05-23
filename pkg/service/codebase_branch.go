@@ -71,7 +71,7 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 
 func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schemaName string) (*int, error) {
 	log.Println("Start insertion to the codebase_branch table...")
-	beId, err := repository.GetCodebaseId(txn, "application", codebaseBranch.AppName, schemaName)
+	beId, err := repository.GetCodebaseId(txn, codebaseBranch.AppName, schemaName)
 	if err != nil {
 		return nil, err
 	}

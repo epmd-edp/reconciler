@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"reconciler/models"
 	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
 	"reconciler/pkg/db"
 	"reconciler/pkg/model"
@@ -24,7 +23,7 @@ func TestBEService_CreateBE(t *testing.T) {
 			Lang:      "java",
 			Framework: "spring-boot",
 			BuildTool: "maven",
-			Strategy:  models.Create,
+			Strategy:  edpv1alpha1.Create,
 		},
 		Status: edpv1alpha1.CodebaseStatus{
 			Available:       true,
@@ -33,7 +32,7 @@ func TestBEService_CreateBE(t *testing.T) {
 		},
 	}
 	be, err := model.Convert(k8sObject)
-	be.Type = model.App
+	be.Type = "application"
 	fmt.Println(err)
 
 	err = service.PutBE(*be)

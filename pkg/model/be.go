@@ -8,28 +8,24 @@ import (
 )
 
 type BusinessEntity struct {
-	Name             string
-	Tenant           string
-	Type             BEType
-	Language         string
-	Framework        string
-	BuildTool        string
-	Strategy         string
-	RepositoryUrl    string
-	RouteSite        string
-	RoutePath        string
-	DatabaseKind     string
-	DatabaseVersion  string
-	DatabaseCapacity string
-	DatabaseStorage  string
-	ActionLog        ActionLog
+	Name                string
+	Tenant              string
+	Type                string
+	Language            string
+	Framework           string
+	BuildTool           string
+	Strategy            string
+	RepositoryUrl       string
+	RouteSite           string
+	RoutePath           string
+	DatabaseKind        string
+	DatabaseVersion     string
+	DatabaseCapacity    string
+	DatabaseStorage     string
+	ActionLog           ActionLog
+	Description         string
+	TestReportFramework string
 }
-
-type BEType string
-
-const (
-	App BEType = "application"
-)
 
 type ActionLog struct {
 	Id              int
@@ -58,6 +54,7 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*BusinessEntity, error) {
 		BuildTool: spec.BuildTool,
 		Strategy:  string(spec.Strategy),
 		ActionLog: *status,
+		Type:      spec.Type,
 	}
 
 	if spec.Repository != nil {
@@ -86,6 +83,13 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*BusinessEntity, error) {
 		app.DatabaseCapacity = ""
 	}
 
+	if spec.Description != nil {
+		app.Description = *spec.Description
+	}
+
+	if spec.TestReportFramework != nil {
+		app.TestReportFramework = *spec.TestReportFramework
+	}
 	return &app, nil
 }
 

@@ -99,7 +99,6 @@ func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Resu
 	log.WithValues("Codebase", instance)
 
 	app, _ := model.Convert(*instance)
-	app.Type = model.App
 
 	_ = r.beService.PutBE(*app)
 
