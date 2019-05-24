@@ -12,7 +12,7 @@ type BusinessEntity struct {
 	Tenant              string
 	Type                string
 	Language            string
-	Framework           string
+	Framework           *string
 	BuildTool           string
 	Strategy            string
 	RepositoryUrl       string
@@ -50,11 +50,18 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*BusinessEntity, error) {
 		Tenant:    strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
 		Name:      k8sObject.Name,
 		Language:  spec.Lang,
-		Framework: spec.Framework,
 		BuildTool: spec.BuildTool,
 		Strategy:  string(spec.Strategy),
 		ActionLog: *status,
 		Type:      spec.Type,
+	}
+
+	framework := spec.Framework
+	if framework == "" {
+		app.Framework = nil
+	} else {
+		lowerFramework := strings.ToLower(framework)
+		app.Framework = &lowerFramework
 	}
 
 	if spec.Repository != nil {

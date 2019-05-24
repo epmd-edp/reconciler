@@ -42,7 +42,7 @@ func CreateCodebase(txn sql.Tx, cb model.BusinessEntity, schemaName string) (*in
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(cb.Name, cb.Type, strings.ToLower(cb.Language), strings.ToLower(cb.Framework),
+	err = stmt.QueryRow(cb.Name, cb.Type, strings.ToLower(cb.Language), cb.Framework,
 		strings.ToLower(cb.BuildTool), strings.ToLower(cb.Strategy), cb.RepositoryUrl, cb.RouteSite, cb.RoutePath,
 		cb.DatabaseKind, cb.DatabaseVersion, cb.DatabaseCapacity, cb.DatabaseStorage, StatusActive, cb.TestReportFramework, cb.Description).Scan(&id)
 	if err != nil {
