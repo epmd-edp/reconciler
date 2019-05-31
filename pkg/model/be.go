@@ -108,7 +108,7 @@ func convertActionLog(status edpv1alpha1.CodebaseStatus) *ActionLog {
 	return &ActionLog{
 		Event:           formatStatus(status.Status),
 		DetailedMessage: "",
-		Username:        "",
+		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
 	}
 }
