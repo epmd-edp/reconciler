@@ -34,7 +34,7 @@ func GetCodebaseId(txn sql.Tx, name string, schemaName string) (*int, error) {
 	return &id, nil
 }
 
-func CreateCodebase(txn sql.Tx, cb model.BusinessEntity, schemaName string) (*int, error) {
+func CreateCodebase(txn sql.Tx, cb model.Codebase, schemaName string) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(InsertCodebase, schemaName))
 	if err != nil {
 		return nil, err

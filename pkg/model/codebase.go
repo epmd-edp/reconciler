@@ -2,12 +2,13 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
 	"strings"
 	"time"
 )
 
-type BusinessEntity struct {
+type Codebase struct {
 	Name                string
 	Tenant              string
 	Type                string
@@ -33,9 +34,21 @@ type ActionLog struct {
 	DetailedMessage string
 	Username        string
 	UpdatedAt       time.Time
+	Action          string
+	ActionMessage   string
+	Result          string
 }
 
-func Convert(k8sObject edpv1alpha1.Codebase) (*BusinessEntity, error) {
+var actionMessageMap = map[string]string{
+	"codebase_registration":          "Codebase %v registration",
+	"gerrit_repository_provisioning": "Gerrit repository for codebase %v provisioning",
+	"jenkins_configuration":          "CI Jenkins pipelines codebase %v provisioning",
+	"perf_registration":              "Registration codebase %v in Perf",
+	"setup_deployment_templates":     "Setup deployment templates for codebase %v",
+	"codebase_branch_registration":   "Branch %v for codebase %v registration",
+}
+
+func Convert(k8sObject edpv1alpha1.Codebase) (*Codebase, error) {
 	if &k8sObject == nil {
 		return nil, errors.New("k8s object cannot be nil")
 	}
@@ -44,9 +57,9 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*BusinessEntity, error) {
 		return nil, errors.New("k8s spec cannot be nil")
 	}
 
-	status := convertActionLog(k8sObject.Status)
+	status := convertActionLog(k8sObject.Name, k8sObject.Status)
 
-	app := BusinessEntity{
+	app := Codebase{
 		Tenant:    strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
 		Name:      k8sObject.Name,
 		Language:  spec.Lang,
@@ -100,16 +113,19 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*BusinessEntity, error) {
 	return &app, nil
 }
 
-func convertActionLog(status edpv1alpha1.CodebaseStatus) *ActionLog {
+func convertActionLog(name string, status edpv1alpha1.CodebaseStatus) *ActionLog {
 	if &status == nil {
 		return nil
 	}
 
 	return &ActionLog{
 		Event:           formatStatus(status.Status),
-		DetailedMessage: "",
+		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
+		Action:          status.Action,
+		Result:          status.Result,
+		ActionMessage:   fmt.Sprintf(actionMessageMap[status.Action], name),
 	}
 }
 

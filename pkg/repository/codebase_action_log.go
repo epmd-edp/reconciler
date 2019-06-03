@@ -9,8 +9,8 @@ import (
 const (
 	InsertCodebaseStatus = "insert into \"%v\".codebase_action_log(codebase_id, action_log_id) " +
 		"values($1, $2);"
-	InsertActionLog = "insert into \"%v\".action_log(event, detailed_message, username, updated_at) " +
-		"VALUES($1, $2, $3, $4) returning id;"
+	InsertActionLog = "insert into \"%v\".action_log(event, detailed_message, username, updated_at, action, action_message, result) " +
+		"VALUES($1, $2, $3, $4, $5, $6, $7) returning id;"
 	CheckDuplicateActionLog = "select codebase.id" +
 		" from \"%v\".codebase" +
 		"	left join \"%v\".codebase_action_log cal on codebase.id = cal.codebase_id" +
@@ -44,12 +44,13 @@ func CreateActionLog(txn sql.Tx, actionLog model.ActionLog, schemaName string) (
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, actionLog.UpdatedAt).Scan(&id)
+	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, actionLog.UpdatedAt,
+		actionLog.Action, actionLog.ActionMessage, actionLog.Result).Scan(&id)
 
 	return &id, err
 }
 
-func GetLastIdActionLog(txn sql.Tx, be model.BusinessEntity, schemaName string) (*int, error) {
+func GetLastIdActionLog(txn sql.Tx, codebase model.Codebase, schemaName string) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(CheckDuplicateActionLog, schemaName, schemaName, schemaName))
 	if err != nil {
 		return nil, err
@@ -57,7 +58,7 @@ func GetLastIdActionLog(txn sql.Tx, be model.BusinessEntity, schemaName string) 
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(be.Name, be.ActionLog.Event, be.ActionLog.UpdatedAt).Scan(&id)
+	err = stmt.QueryRow(codebase.Name, codebase.ActionLog.Event, codebase.ActionLog.UpdatedAt).Scan(&id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

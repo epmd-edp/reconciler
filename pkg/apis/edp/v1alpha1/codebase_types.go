@@ -59,6 +59,9 @@ type CodebaseStatus struct {
 	LastTimeUpdated time.Time `json:"last_time_updated"`
 	Status          string    `json:"status"`
 	Username        string    `json:"username"`
+	Action          string    `json:"action"`
+	Result          string    `json:"result"`
+	DetailedMessage string    `json:"detailed_message"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
