@@ -36,7 +36,7 @@ func GetCodebaseBranchId(txn sql.Tx, codebaseName string, codebaseBranchName str
 	return &id, nil
 }
 
-func CreateCodebaseBranch(txn sql.Tx, name string, beId int, fromCommit string, schemaName string, streamId int) (*int, error) {
+func CreateCodebaseBranch(txn sql.Tx, name string, beId int, fromCommit string, schemaName string, streamId *int) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(InsertCodebaseBranch, schemaName))
 	if err != nil {
 		return nil, err

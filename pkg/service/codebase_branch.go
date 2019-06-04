@@ -71,6 +71,8 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 
 func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schemaName string) (*int, error) {
 	log.Println("Start insertion to the codebase_branch table...")
+	var streamId *int = nil
+
 	beId, err := repository.GetCodebaseId(txn, codebaseBranch.AppName, schemaName)
 	if err != nil {
 		return nil, err
@@ -79,14 +81,24 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schem
 		return nil, errors.New(fmt.Sprintf("record for codebase has not been found with %s appName parameters", codebaseBranch.AppName))
 	}
 
-	ocImageStreamName := fmt.Sprintf("%v-%v", codebaseBranch.AppName, codebaseBranch.Name)
+	cbType, err := repository.GetCodebaseTypeById(txn, *beId, schemaName)
+	if err != nil {
+		return nil, err
+	}
 
-	streamId, err := repository.CreateCodebaseDockerStream(txn, schemaName, *beId, ocImageStreamName)
+	if *cbType == string(model.Application) {
+		ocImageStreamName := fmt.Sprintf("%v-%v", codebaseBranch.AppName, codebaseBranch.Name)
 
-	log.Printf("Id of newly created codebase docker stream: %v", streamId)
+		streamId, err = repository.CreateCodebaseDockerStream(txn, schemaName, *beId, ocImageStreamName)
+		if err != nil {
+			return nil, err
+		}
 
+		log.Printf("Id of newly created codebase docker stream: %v", streamId)
+
+	}
 	id, err := repository.CreateCodebaseBranch(txn, codebaseBranch.Name, *beId,
-		codebaseBranch.FromCommit, schemaName, *streamId)
+		codebaseBranch.FromCommit, schemaName, streamId)
 	if err != nil {
 		return nil, err
 	}

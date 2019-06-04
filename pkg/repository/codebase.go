@@ -11,8 +11,9 @@ const (
 	InsertCodebase = "insert into \"%v\".codebase(name, type, language, framework, build_tool, strategy, repository_url, route_site," +
 		" route_path, database_kind, database_version, database_capacity, database_storage, status, test_report_framework, description)" +
 		" values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) returning id;"
-	SelectCodebase = "select id from \"%v\".codebase where name=$1;"
-	StatusActive   = "active"
+	SelectCodebase     = "select id from \"%v\".codebase where name=$1;"
+	SelectCodebaseType = "select type from \"%v\".codebase where id=$1;"
+	StatusActive       = "active"
 )
 
 func GetCodebaseId(txn sql.Tx, name string, schemaName string) (*int, error) {
@@ -50,4 +51,20 @@ func CreateCodebase(txn sql.Tx, cb model.Codebase, schemaName string) (*int, err
 	}
 
 	return &id, nil
+}
+
+func GetCodebaseTypeById(txn sql.Tx, cbId int, schemaName string) (*string, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(SelectCodebaseType, schemaName))
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var cbType string
+	err = stmt.QueryRow(cbId).Scan(&cbType)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cbType, nil
 }

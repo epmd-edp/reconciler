@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+const (
+	Application CodebaseType = "application"
+	Autotests   CodebaseType = "autotests"
+	Library     CodebaseType = "library"
+)
+
+type CodebaseType string
+
 type Codebase struct {
 	Name                string
 	Tenant              string
