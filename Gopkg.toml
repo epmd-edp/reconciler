@@ -25,6 +25,10 @@ required = [
   branch = "master"
 
 [[override]]
+  name = "github.com/openshift/client-go"
+  version = "=v3.9.0"
+
+[[override]]
   name = "sigs.k8s.io/controller-tools"
   version = "=v0.1.8"
 
