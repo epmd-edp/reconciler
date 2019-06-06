@@ -62,6 +62,7 @@ type CodebaseStatus struct {
 	Action          string    `json:"action"`
 	Result          string    `json:"result"`
 	DetailedMessage string    `json:"detailed_message"`
+	Value           string    `json:"value"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

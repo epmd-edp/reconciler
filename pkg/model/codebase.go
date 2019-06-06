@@ -34,6 +34,7 @@ type Codebase struct {
 	ActionLog           ActionLog
 	Description         string
 	TestReportFramework string
+	Status              string
 }
 
 type ActionLog struct {
@@ -75,6 +76,7 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*Codebase, error) {
 		Strategy:  string(spec.Strategy),
 		ActionLog: *status,
 		Type:      spec.Type,
+		Status:    k8sObject.Status.Value,
 	}
 
 	framework := spec.Framework

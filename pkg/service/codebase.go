@@ -58,6 +58,13 @@ func (service BEService) PutBE(be model.Codebase) error {
 		log.Println("codebase_action has been updated")
 	}
 
+	err = repository.UpdateStatusByCodebaseId(*txn, *id, be.Status, be.Tenant)
+	if err != nil {
+		log.Printf("Error has occurred during the update of codebase: %v", err)
+		_ = txn.Rollback()
+		return errors.New(fmt.Sprintf("cannot create codebase with name %v", be.Name))
+	}
+
 	err = txn.Commit()
 	if err != nil {
 		log.Printf("An error has occurred while ending transaction: %s", err)

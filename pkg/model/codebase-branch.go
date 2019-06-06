@@ -11,6 +11,7 @@ type CodebaseBranch struct {
 	Tenant     string
 	AppName    string
 	FromCommit string
+	Status     string
 	ActionLog  ActionLog
 }
 
@@ -27,6 +28,7 @@ func ConvertToCodebaseBranch(k8sObject edpv1alpha1.CodebaseBranch) (*CodebaseBra
 		Tenant:     strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
 		AppName:    spec.CodebaseName,
 		FromCommit: spec.FromCommit,
+		Status:     k8sObject.Status.Value,
 		ActionLog:  *actionLog,
 	}
 

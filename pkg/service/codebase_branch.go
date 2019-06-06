@@ -58,6 +58,13 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 		log.Println("codebase_action has been updated")
 	}
 
+	err = repository.UpdateStatusByCodebaseBranchId(*txn, *id, codebaseBranch.Status, codebaseBranch.Tenant)
+	if err != nil {
+		log.Printf("Error has occurred during the update of codebase branch: %v", err)
+		_ = txn.Rollback()
+		return errors.New(fmt.Sprintf("cannot create codebase branch with name %v", codebaseBranch.Name))
+	}
+
 	err = txn.Commit()
 	if err != nil {
 		log.Printf("An error has occurred while ending transaction: %s", err)
@@ -98,7 +105,7 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schem
 
 	}
 	id, err := repository.CreateCodebaseBranch(txn, codebaseBranch.Name, *beId,
-		codebaseBranch.FromCommit, schemaName, streamId)
+		codebaseBranch.FromCommit, schemaName, streamId, codebaseBranch.Status)
 	if err != nil {
 		return nil, err
 	}
