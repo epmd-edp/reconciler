@@ -32,31 +32,29 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 	}
 	log.Printf("Id of Codebase Branch to be updated: %v", *id)
 
-	isPresent, err := checkCodebaseBranchActionLogDuplicate(*txn, codebaseBranch, schemaName)
+	log.Println("Start update status of codebase branch...")
+	actionLogId, err := repository.CreateActionLog(*txn, codebaseBranch.ActionLog, schemaName)
 	if err != nil {
+		log.Printf("Error has occurred during status creation: %v", err)
 		_ = txn.Rollback()
-		return err
+		return errors.New(fmt.Sprintf("cannot insert status %v", codebaseBranch))
 	}
+	log.Println("ActionLog has been saved into the repository")
 
-	if !isPresent {
-		log.Println("Start update status of codebase branch...")
-		actionLogId, err := repository.CreateCodebaseActionLog(*txn, codebaseBranch.ActionLog, schemaName)
-		if err != nil {
-			log.Printf("Error has occurred during status creation: %v", err)
-			_ = txn.Rollback()
-			return errors.New(fmt.Sprintf("cannot insert status %v", codebaseBranch))
-		}
-		log.Println("ActionLog has been saved into the repository")
-
-		log.Println("Start update codebase_branch_action status of code branch entity...")
-		err = repository.CreateCodebaseBranchAction(*txn, *id, *actionLogId, schemaName)
-		if err != nil {
-			log.Printf("Error has occurred during codebase_branch_action creation: %v", err)
-			_ = txn.Rollback()
-			return errors.New(fmt.Sprintf("cannot create codebase_branch_action entity %v", codebaseBranch))
-		}
-		log.Println("codebase_action has been updated")
+	log.Println("Start update codebase_branch_action status of code branch entity...")
+	cbId, err := repository.GetCodebaseId(*txn, codebaseBranch.AppName, schemaName)
+	if err != nil {
+		log.Printf("Error has occurred during retrieving codebase id: %v", err)
+		_ = txn.Rollback()
+		return errors.New(fmt.Sprintf("cannot update codebase branch %v", codebaseBranch))
 	}
+	err = repository.CreateCodebaseAction(*txn, *cbId, *actionLogId, schemaName)
+	if err != nil {
+		log.Printf("Error has occurred during codebase_branch_action creation: %v", err)
+		_ = txn.Rollback()
+		return errors.New(fmt.Sprintf("cannot create codebase_branch_action entity %v", codebaseBranch))
+	}
+	log.Println("codebase_action has been updated")
 
 	err = repository.UpdateStatusByCodebaseBranchId(*txn, *id, codebaseBranch.Status, codebaseBranch.Tenant)
 	if err != nil {
@@ -125,17 +123,4 @@ func getCodebaseBranchIdOrCreate(txn sql.Tx, codebaseBranch model.CodebaseBranch
 		return createCodebaseBranch(txn, codebaseBranch, schemaName)
 	}
 	return id, nil
-}
-
-func checkCodebaseBranchActionLogDuplicate(txn sql.Tx, codebaseBranch model.CodebaseBranch, schemaName string) (bool, error) {
-	log.Println("Checks duplicate in action log table")
-	lastId, err := repository.GetLastIdCodebaseBranchActionLog(txn, codebaseBranch, schemaName)
-	if err != nil {
-		log.Printf("Error has occurred while checking on duplicate: %v", err)
-		return false, errors.New(fmt.Sprintf("cannot check duplication %v", codebaseBranch))
-	}
-	if lastId == nil {
-		return false, nil
-	}
-	return true, nil
 }

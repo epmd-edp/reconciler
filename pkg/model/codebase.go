@@ -48,13 +48,12 @@ type ActionLog struct {
 	Result          string
 }
 
-var actionMessageMap = map[string]string{
+var codebaseActionMessageMap = map[string]string{
 	"codebase_registration":          "Codebase %v registration",
 	"gerrit_repository_provisioning": "Gerrit repository for codebase %v provisioning",
 	"jenkins_configuration":          "CI Jenkins pipelines codebase %v provisioning",
 	"perf_registration":              "Registration codebase %v in Perf",
 	"setup_deployment_templates":     "Setup deployment templates for codebase %v",
-	"codebase_branch_registration":   "Branch %v for codebase %v registration",
 }
 
 func Convert(k8sObject edpv1alpha1.Codebase) (*Codebase, error) {
@@ -135,7 +134,7 @@ func convertActionLog(name string, status edpv1alpha1.CodebaseStatus) *ActionLog
 		UpdatedAt:       status.LastTimeUpdated,
 		Action:          status.Action,
 		Result:          status.Result,
-		ActionMessage:   fmt.Sprintf(actionMessageMap[status.Action], name),
+		ActionMessage:   fmt.Sprintf(codebaseActionMessageMap[status.Action], name),
 	}
 }
 
