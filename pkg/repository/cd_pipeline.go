@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	InsertCDPipeline               = "insert into \"%v\".cd_pipeline(name, status) VALUES ($1, $2) returning id, name, status;"
-	InsertCDPipelineCodebaseBranch = "insert into \"%v\".cd_pipeline_codebase_branch(cd_pipeline_id, codebase_branch_id) VALUES ($1, $2);"
-	SelectCDPipeline               = "select * from \"%v\".cd_pipeline cdp where cdp.name = $1 ;"
-	UpdateCDPipelineStatusQuery    = "update \"%v\".cd_pipeline set status = $1 where id = $2 ;"
+	InsertCDPipeline                  = "insert into \"%v\".cd_pipeline(name, status) VALUES ($1, $2) returning id, name, status;"
+	InsertCDPipelineCodebaseBranch    = "insert into \"%v\".cd_pipeline_codebase_branch(cd_pipeline_id, codebase_branch_id) VALUES ($1, $2);"
+	SelectCDPipeline                  = "select * from \"%v\".cd_pipeline cdp where cdp.name = $1 ;"
+	UpdateCDPipelineStatusQuery       = "update \"%v\".cd_pipeline set status = $1 where id = $2 ;"
+	InsertCDPipelineThirdPartyService = "insert into \"%v\".cd_pipeline_third_party_service(cd_pipeline_id, service_id) values ($1, $2) ;"
 )
 
 func CreateCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, status string, schemaName string) (*model.CDPipelineDTO, error) {
@@ -68,6 +69,20 @@ func UpdateCDPipelineStatus(txn sql.Tx, pipelineId int, cdPipelineStatus string,
 	defer stmt.Close()
 
 	_, err = stmt.Exec(cdPipelineStatus, pipelineId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateCDPipelineThirdPartyService(txn sql.Tx, pipelineId int, serviceId int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDPipelineThirdPartyService, schemaName))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(pipelineId, serviceId)
 	if err != nil {
 		return err
 	}

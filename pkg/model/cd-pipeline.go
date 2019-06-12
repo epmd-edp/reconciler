@@ -7,12 +7,13 @@ import (
 )
 
 type CDPipeline struct {
-	Name           string
-	Namespace      string
-	Tenant         string
-	CodebaseBranch []string
-	ActionLog      ActionLog
-	Status         string
+	Name               string
+	Namespace          string
+	Tenant             string
+	CodebaseBranch     []string
+	ThirdPartyServices []string
+	ActionLog          ActionLog
+	Status             string
 }
 
 func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline) (*CDPipeline, error) {
@@ -24,12 +25,13 @@ func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline) (*CDPipeline, error) 
 	actionLog := convertCDPipelineActionLog(k8sObject.Status)
 
 	cdPipeline := CDPipeline{
-		Name:           k8sObject.Spec.Name,
-		Namespace:      k8sObject.Namespace,
-		Tenant:         strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
-		CodebaseBranch: spec.CodebaseBranch,
-		ActionLog:      *actionLog,
-		Status:         getStatus(actionLog.Event),
+		Name:               k8sObject.Spec.Name,
+		Namespace:          k8sObject.Namespace,
+		Tenant:             strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
+		CodebaseBranch:     spec.CodebaseBranch,
+		ThirdPartyServices: spec.ThirdPartyServices,
+		ActionLog:          *actionLog,
+		Status:             getStatus(actionLog.Event),
 	}
 
 	return &cdPipeline, nil

@@ -45,7 +45,7 @@ func (c ThirdPartyService) PutService(service model.ThirdPartyService) error {
 
 func skipCatalogOrCreate(txn sql.Tx, service model.ThirdPartyService, schemaName string) (*int, error) {
 	log.Printf("Start retrieving ThirdPartyService by name and tenant: %v", service)
-	id, err := repository.GetThirdPartyService(txn, service, schemaName)
+	id, err := repository.GetThirdPartyService(txn, service.Name, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -64,4 +64,16 @@ func createService(txn sql.Tx, service model.ThirdPartyService, schemaName strin
 		return nil, errors.New(fmt.Sprintf("cannot create ThirdPartyService entity %v", service))
 	}
 	return id, nil
+}
+
+func getServicesId(txn sql.Tx, serviceNames []string, schemaName string) ([]int, error) {
+	var servicesId []int
+	for _, name := range serviceNames {
+		id, err := repository.GetThirdPartyService(txn, name, schemaName)
+		if err != nil {
+			return nil, err
+		}
+		servicesId = append(servicesId, *id)
+	}
+	return servicesId, nil
 }

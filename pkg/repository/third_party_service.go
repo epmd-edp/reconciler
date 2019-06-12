@@ -27,7 +27,7 @@ func CreateThirdPartyService(txn sql.Tx, service model.ThirdPartyService, schema
 	return &id, nil
 }
 
-func GetThirdPartyService(txn sql.Tx, service model.ThirdPartyService, schemaName string) (*int, error) {
+func GetThirdPartyService(txn sql.Tx, serviceName string, schemaName string) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(SelectService, schemaName))
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func GetThirdPartyService(txn sql.Tx, service model.ThirdPartyService, schemaNam
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(service.Name).Scan(&id)
+	err = stmt.QueryRow(serviceName).Scan(&id)
 	if err != nil {
 		_, err = checkNoRows(err)
 		return nil, err

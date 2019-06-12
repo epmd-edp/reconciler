@@ -95,6 +95,18 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 		return nil, err
 	}
 
+	servicesId, err := getServicesId(txn, cdPipeline.ThirdPartyServices, schemaName)
+	if err != nil {
+		log.Printf("An error has occured while getting services id: %s", err)
+		return nil, err
+	}
+
+	err = createCDPipelineThirdPartyService(txn, cdPipelineDTO.Id, servicesId, schemaName)
+	if err != nil {
+		log.Printf("An error has occured while inserting record into cd_pipeline_third_party_service: %v", err)
+		return nil, err
+	}
+
 	return cdPipelineDTO, nil
 }
 
@@ -128,8 +140,8 @@ func getCodebaseBranchesData(cdPipeline model.CDPipeline, edpRestClient *rest.RE
 		}
 
 		codebaseBranches = append(codebaseBranches, model.CodebaseBranchDTO{
-			CodebaseName:    releaseBranchCR.Spec.CodebaseName,
-			BranchName: releaseBranchCR.Spec.BranchName,
+			CodebaseName: releaseBranchCR.Spec.CodebaseName,
+			BranchName:   releaseBranchCR.Spec.BranchName,
 		})
 	}
 	return codebaseBranches, nil
@@ -184,6 +196,16 @@ func createCDPipelineCodebaseBranch(txn sql.Tx, cdPipelineId int, codebaseBranch
 		err := repository.CreateCDPipelineCodebaseBranch(txn, cdPipelineId, v, schemaName)
 		if err != nil {
 			log.Printf("An error has occured while inserting CD Pipeline Codebase Branch row: %s", err)
+			return err
+		}
+	}
+	return nil
+}
+
+func createCDPipelineThirdPartyService(txn sql.Tx, cdPipelineId int, servicesId []int, schemaName string) error {
+	for _, serviceId := range servicesId {
+		err := repository.CreateCDPipelineThirdPartyService(txn, cdPipelineId, serviceId, schemaName)
+		if err != nil {
 			return err
 		}
 	}
