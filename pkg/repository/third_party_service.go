@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	InsertService = "insert into \"%v\".service(name, description, version) values ($1, $2, $3) returning id;"
-	SelectService = "select id from \"%v\".service where name=$1;"
+	InsertService = "insert into \"%v\".third_party_service(name, description, version) values ($1, $2, $3) returning id;"
+	SelectService = "select id from \"%v\".third_party_service where name=$1;"
 )
 
 func CreateThirdPartyService(txn sql.Tx, service model.ThirdPartyService, schemaName string) (*int, error) {
