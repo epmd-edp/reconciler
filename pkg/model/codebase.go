@@ -50,6 +50,7 @@ type ActionLog struct {
 
 var codebaseActionMessageMap = map[string]string{
 	"codebase_registration":          "Codebase %v registration",
+	"accept_codebase_registration":   "Accept codebase %v registration",
 	"gerrit_repository_provisioning": "Gerrit repository for codebase %v provisioning",
 	"jenkins_configuration":          "CI Jenkins pipelines codebase %v provisioning",
 	"perf_registration":              "Registration codebase %v in Perf",

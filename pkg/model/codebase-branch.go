@@ -17,8 +17,9 @@ type CodebaseBranch struct {
 }
 
 var codebaseBranchActionMessageMap = map[string]string{
-	"jenkins_configuration":        "CI Jenkins pipelines for codebase branch %v provisioning for codebase %v",
-	"codebase_branch_registration": "Branch %v for codebase %v registration",
+	"jenkins_configuration":               "CI Jenkins pipelines for codebase branch %v provisioning for codebase %v",
+	"codebase_branch_registration":        "Branch %v for codebase %v registration",
+	"accept_codebase_branch_registration": "Accept branch %v for codebase %v registration",
 }
 
 func ConvertToCodebaseBranch(k8sObject edpv1alpha1.CodebaseBranch) (*CodebaseBranch, error) {
