@@ -11,7 +11,7 @@ const (
 	InsertCDPipelineCodebaseBranch    = "insert into \"%v\".cd_pipeline_codebase_branch(cd_pipeline_id, codebase_branch_id) VALUES ($1, $2);"
 	SelectCDPipeline                  = "select * from \"%v\".cd_pipeline cdp where cdp.name = $1 ;"
 	UpdateCDPipelineStatusQuery       = "update \"%v\".cd_pipeline set status = $1 where id = $2 ;"
-	InsertCDPipelineThirdPartyService = "insert into \"%v\".cd_pipeline_third_party_service(cd_pipeline_id, service_id) values ($1, $2) ;"
+	InsertCDPipelineThirdPartyService = "insert into \"%v\".cd_pipeline_third_party_service(cd_pipeline_id, third_party_service_id) values ($1, $2) ;"
 )
 
 func CreateCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, status string, schemaName string) (*model.CDPipelineDTO, error) {
