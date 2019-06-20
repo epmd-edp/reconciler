@@ -38,13 +38,6 @@ func (service StageService) PutStage(stage model.Stage) error {
 	}
 	log.Printf("Id of stage to be updated: %v", *id)
 
-	err = createCodebaseDockerStreams(*txn, *id, stage)
-	if err != nil {
-		log.Printf("error has occured during the creation docker streams: %v", err)
-		_ = txn.Rollback()
-		return fmt.Errorf("cannot create stage: %v", stage)
-	}
-
 	err = updateStageStatus(*txn, id, stage)
 
 	if err != nil {
@@ -230,5 +223,11 @@ func createStage(tx sql.Tx, stage model.Stage) (*int, error) {
 		return nil, err
 	}
 	log.Printf("Id of newly created stage is %v", *id)
+
+	err = createCodebaseDockerStreams(tx, *id, stage)
+	if err != nil {
+		return nil, fmt.Errorf("error has occured during the creation docker streams for stage %v in CD Pipeline %v", stage.Name, stage.CdPipelineName)
+	}
+
 	return id, nil
 }
