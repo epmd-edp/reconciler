@@ -17,6 +17,7 @@ type Stage struct {
 	Order           int
 	ActionLog       ActionLog
 	Status          string
+	Autotests       []string
 }
 
 func ConvertToStage(k8sObject v1alpha1.Stage) (*Stage, error) {
@@ -39,6 +40,7 @@ func ConvertToStage(k8sObject v1alpha1.Stage) (*Stage, error) {
 		Order:           spec.Order,
 		ActionLog:       *actionLog,
 		Status:          status,
+		Autotests:       spec.Autotests,
 	}, nil
 
 }
