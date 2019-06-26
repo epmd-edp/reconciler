@@ -38,21 +38,6 @@ func (service StageService) PutStage(stage model.Stage) error {
 	}
 	log.Printf("Id of stage to be updated: %v", *id)
 
-	if stage.QualityGate == "autotests" {
-		autotestsId, err := getAutotestsId(*txn, stage.Autotests, stage.Tenant)
-		if err != nil {
-			log.Printf("error has occured during retrieving Autotests Id: %v", err)
-			_ = txn.Rollback()
-			return fmt.Errorf("cannot create stage: %v", stage)
-		}
-		err = insertCDStageCodebaseRecord(*txn, *id, autotestsId, stage.Tenant)
-		if err != nil {
-			log.Printf("error has occurred during creation record to bind relation betwуen CD Stages and Autotests: %v", err)
-			_ = txn.Rollback()
-			return fmt.Errorf("cannot create stage: %v", stage)
-		}
-	}
-
 	err = updateStageStatus(*txn, id, stage)
 
 	if err != nil {
@@ -242,6 +227,17 @@ func createStage(tx sql.Tx, stage model.Stage) (*int, error) {
 	err = createCodebaseDockerStreams(tx, *id, stage)
 	if err != nil {
 		return nil, fmt.Errorf("error has occured during the creation docker streams for stage %v in CD Pipeline %v", stage.Name, stage.CdPipelineName)
+	}
+
+	if stage.QualityGate == "autotests" {
+		autotestsId, err := getAutotestsId(tx, stage.Autotests, stage.Tenant)
+		if err != nil {
+			return nil, fmt.Errorf("error has occured during retrieving Autotests Id: %v", err)
+		}
+		err = insertCDStageCodebaseRecord(tx, *id, autotestsId, stage.Tenant)
+		if err != nil {
+			return nil, fmt.Errorf("error has occurred during creation record to bind relation betwуen CD Stages and Autotests: %v", err)
+		}
 	}
 
 	return id, nil
