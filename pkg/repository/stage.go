@@ -17,7 +17,7 @@ const (
 	GetStageIdByPipelineNameAndOrderQuery = "select stage.id from \"%v\".cd_stage stage " +
 		"left join \"%v\".cd_pipeline pipe on stage.cd_pipeline_id = pipe.id " +
 		"where pipe.name = $1 and stage.\"order\" = $2;"
-	InsertCDStageCodebase = "insert into \"%v\".cd_stage_codebase(cd_stage_id, codebase_id) VALUES ($1, $2);"
+	InsertCDStageCodebaseBranch = "insert into \"%v\".cd_stage_codebase_branch(cd_stage_id, codebase_branch_id) VALUES ($1, $2);"
 )
 
 func CreateStage(txn sql.Tx, schemaName string, stage model.Stage, cdPipelineId int) (id *int, err error) {
@@ -91,8 +91,8 @@ func checkNoRows(err error) (*int, error) {
 	return nil, err
 }
 
-func CreateCDStageCodebase(txn sql.Tx, cdStageId int, autotestId int, schemaName string) error {
-	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDStageCodebase, schemaName))
+func CreateCDStageCodebaseBranch(txn sql.Tx, cdStageId int, autotestId int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDStageCodebaseBranch, schemaName))
 	if err != nil {
 		return err
 	}
