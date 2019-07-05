@@ -41,6 +41,7 @@ func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) erro
 	err = updateCDPipelineStatus(*txn, *cdPipelineDb, cdPipeline.Status, schemaName)
 	if err != nil {
 		log.Printf("An error has occured while updating CD Pipeline Status for %s pipeline: %s", cdPipelineDb.Name, err)
+		_ = txn.Rollback()
 		return err
 	}
 
@@ -63,12 +64,24 @@ func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) erro
 
 func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipeline model.CDPipeline, schemaName string) (*model.CDPipelineDTO, error) {
 	log.Printf("Start retrieving CD Pipeline by name: %v", cdPipeline)
-	cdPipelineDto, err := repository.GetCDPipeline(txn, cdPipeline.Name, schemaName)
+	cdPipelineReadModel, err := repository.GetCDPipeline(txn, cdPipeline.Name, schemaName)
 	if err != nil {
 		return nil, err
 	}
-	if cdPipelineDto != nil {
-		return cdPipelineDto, nil
+	if cdPipelineReadModel != nil {
+
+		err := repository.DeleteBranches(txn, cdPipelineReadModel.Id, schemaName)
+		if err != nil {
+			log.Printf("An error has occured while deleting pipeline's branches: %s", err)
+			return nil, err
+		}
+
+		err = createCDPipelineCodebaseBranch(txn, edpRestClient, cdPipelineReadModel, cdPipeline, schemaName)
+		if err != nil {
+			return nil, err
+		}
+
+		return cdPipelineReadModel, nil
 	}
 	log.Printf("Record for CD Pipeline %v has not been found", cdPipeline.Name)
 	cdPipelineDTO, err := createCDPipeline(txn, cdPipeline, schemaName)
@@ -76,22 +89,8 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 		return nil, err
 	}
 
-	codebaseBranches, err := getCodebaseBranchesData(cdPipeline, edpRestClient)
+	err = createCDPipelineCodebaseBranch(txn, edpRestClient, cdPipelineDTO, cdPipeline, schemaName)
 	if err != nil {
-		log.Printf("An error has occured while getting Codebase Branch from k8s: %s", err)
-		return nil, err
-	}
-	log.Printf("Fetched Codebase Branches for %s pipeline: %s", cdPipeline.Name, codebaseBranches)
-
-	codebaseBranchesId, err := getCodebaseBranchesId(txn, codebaseBranches, schemaName)
-	if err != nil {
-		log.Printf("An error has occured while getting codebase branch id: %s", err)
-		return nil, err
-	}
-
-	err = createCDPipelineCodebaseBranch(txn, cdPipelineDTO.Id, codebaseBranchesId, schemaName)
-	if err != nil {
-		log.Printf("An error has occured while inserting CD Pipeline Codebase Branch row: %s", err)
 		return nil, err
 	}
 
@@ -191,7 +190,7 @@ func getCodebaseBranchesId(txn sql.Tx, codebaseBranches []model.CodebaseBranchDT
 	return codebaseBranchesId, nil
 }
 
-func createCDPipelineCodebaseBranch(txn sql.Tx, cdPipelineId int, codebaseBranchesId []int, schemaName string) error {
+func insertCDPipelineCodebaseBranch(txn sql.Tx, cdPipelineId int, codebaseBranchesId []int, schemaName string) error {
 	for _, v := range codebaseBranchesId {
 		err := repository.CreateCDPipelineCodebaseBranch(txn, cdPipelineId, v, schemaName)
 		if err != nil {
@@ -209,5 +208,28 @@ func createCDPipelineThirdPartyService(txn sql.Tx, cdPipelineId int, servicesId 
 			return err
 		}
 	}
+	return nil
+}
+
+func createCDPipelineCodebaseBranch(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelineReadModel *model.CDPipelineDTO, cdPipeline model.CDPipeline, schemaName string) error {
+	codebaseBranches, err := getCodebaseBranchesData(cdPipeline, edpRestClient)
+	if err != nil {
+		log.Printf("An error has occured while getting Codebase Branch from k8s: %s", err)
+		return err
+	}
+	log.Printf("Fetched Codebase Branches for %s pipeline: %s", cdPipeline.Name, codebaseBranches)
+
+	codebaseBranchesId, err := getCodebaseBranchesId(txn, codebaseBranches, schemaName)
+	if err != nil {
+		log.Printf("An error has occured while getting codebase branch id: %s", err)
+		return err
+	}
+
+	err = insertCDPipelineCodebaseBranch(txn, cdPipelineReadModel.Id, codebaseBranchesId, schemaName)
+	if err != nil {
+		log.Printf("An error has occured while inserting CD Pipeline Codebase Branch row: %s", err)
+		return err
+	}
+
 	return nil
 }

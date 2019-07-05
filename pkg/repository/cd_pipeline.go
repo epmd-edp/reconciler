@@ -12,6 +12,7 @@ const (
 	SelectCDPipeline                  = "select * from \"%v\".cd_pipeline cdp where cdp.name = $1 ;"
 	UpdateCDPipelineStatusQuery       = "update \"%v\".cd_pipeline set status = $1 where id = $2 ;"
 	InsertCDPipelineThirdPartyService = "insert into \"%v\".cd_pipeline_third_party_service(cd_pipeline_id, third_party_service_id) values ($1, $2) ;"
+	DeleteAllPipelinesBranches        = "delete from \"%v\".cd_pipeline_codebase_branch cpcb  where cpcb.cd_pipeline_id = $1 ;"
 )
 
 func CreateCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, status string, schemaName string) (*model.CDPipelineDTO, error) {
@@ -83,6 +84,20 @@ func CreateCDPipelineThirdPartyService(txn sql.Tx, pipelineId int, serviceId int
 	defer stmt.Close()
 
 	_, err = stmt.Exec(pipelineId, serviceId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteBranches(txn sql.Tx, pipelineId int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(DeleteAllPipelinesBranches, schemaName))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(pipelineId)
 	if err != nil {
 		return err
 	}
