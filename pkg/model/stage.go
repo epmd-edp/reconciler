@@ -7,6 +7,7 @@ import (
 )
 
 type Stage struct {
+	Id              int
 	Name            string
 	Tenant          string
 	CdPipelineName  string

@@ -25,6 +25,10 @@ const (
 		"where pipe.name = $1 and cs.\"order\" = $2;"
 	CreateStageCodebaseDockerStreamQuery = "insert into \"%v\".stage_codebase_docker_stream " +
 		"values($1, $2, $3);"
+	RemoveStageCodebaseDockerStream = "delete " +
+		"	from \"%v\".stage_codebase_docker_stream scds " +
+		"where scds.cd_stage_id = $1 returning scds.output_codebase_docker_stream_id id;"
+	RemoveCodebaseDockerStream = "delete from \"%v\".codebase_docker_stream cds where cds.id = $1 ;"
 )
 
 func CreateCodebaseDockerStream(txn sql.Tx, schemaName string, codebaseId int, ocImageStreamName string) (id *int, err error) {
@@ -99,4 +103,33 @@ func getDockerStreamsFromRows(rows *sql.Rows) ([]model.CodebaseDockerStreamReadD
 		return nil, err
 	}
 	return result, err
+}
+
+func DeleteStageCodebaseDockerStream(txn sql.Tx, stageId int, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(RemoveStageCodebaseDockerStream, schemaName))
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var id int
+	err = stmt.QueryRow(stageId).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
+}
+
+func DeleteCodebaseDockerStream(txn sql.Tx, id int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(RemoveCodebaseDockerStream, schemaName))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

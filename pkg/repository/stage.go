@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"reconciler/pkg/model"
 )
 
@@ -18,6 +19,10 @@ const (
 		"left join \"%v\".cd_pipeline pipe on stage.cd_pipeline_id = pipe.id " +
 		"where pipe.name = $1 and stage.\"order\" = $2;"
 	InsertCDStageCodebaseBranch = "insert into \"%v\".cd_stage_codebase_branch(cd_stage_id, codebase_branch_id) VALUES ($1, $2);"
+	GetStagesIdByCDPipelineName = "select cs.id, cs.name, cs.status, cs.quality_gate, cs.trigger_type, cs.description, cs.jenkins_step_name, cs.\"order\" " +
+		"	from \"%v\".cd_pipeline cp " +
+		"right join \"%v\".cd_stage cs on cp.id = cs.cd_pipeline_id " +
+		"where cp.name = $1 ;"
 )
 
 func CreateStage(txn sql.Tx, schemaName string, stage model.Stage, cdPipelineId int) (id *int, err error) {
@@ -103,4 +108,41 @@ func CreateCDStageCodebaseBranch(txn sql.Tx, cdStageId int, autotestId int, sche
 		return err
 	}
 	return nil
+}
+
+func GetStages(txn sql.Tx, pipelineName string, schemaName string) ([]model.Stage, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(GetStagesIdByCDPipelineName, schemaName, schemaName))
+
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(pipelineName)
+	defer rows.Close()
+	if err != nil {
+		_, err = checkNoRows(err)
+		return nil, err
+	}
+
+	return getStage(rows)
+}
+
+func getStage(rows *sql.Rows) ([]model.Stage, error) {
+	var result []model.Stage
+
+	for rows.Next() {
+		dto := model.Stage{}
+		err := rows.Scan(&dto.Id, &dto.Name, &dto.Status, &dto.QualityGate, &dto.TriggerType, &dto.Description, &dto.JenkinsStepName, &dto.Order)
+		if err != nil {
+			log.Printf("Error during parsing: %v", err)
+			return nil, err
+		}
+		result = append(result, dto)
+	}
+	err := rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return result, err
 }
