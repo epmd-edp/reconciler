@@ -105,19 +105,39 @@ func getDockerStreamsFromRows(rows *sql.Rows) ([]model.CodebaseDockerStreamReadD
 	return result, err
 }
 
-func DeleteStageCodebaseDockerStream(txn sql.Tx, stageId int, schemaName string) (*int, error) {
+func DeleteStageCodebaseDockerStream(txn sql.Tx, stageId int, schemaName string) ([]int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(RemoveStageCodebaseDockerStream, schemaName))
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
-	var id int
-	err = stmt.QueryRow(stageId).Scan(&id)
+	rows, err := stmt.Query(stageId)
+	defer rows.Close()
+	if err != nil {
+		_, err = checkNoRows(err)
+		return nil, err
+	}
+
+	return getOutputStreamIds(rows)
+}
+
+func getOutputStreamIds(rows *sql.Rows) ([]int, error) {
+	var result []int
+
+	for rows.Next() {
+		var id int
+		err := rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, id)
+	}
+	err := rows.Err()
 	if err != nil {
 		return nil, err
 	}
-	return &id, nil
+	return result, err
 }
 
 func DeleteCodebaseDockerStream(txn sql.Tx, id int, schemaName string) error {
