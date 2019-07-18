@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	InsertStage = "insert into \"%v\".cd_stage(name, cd_pipeline_id, description, trigger_type, quality_gate," +
-		" jenkins_step_name, \"order\", status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) returning id;"
+	InsertStage = "insert into \"%v\".cd_stage(name, cd_pipeline_id, description, trigger_type," +
+		" \"order\", status) VALUES ($1, $2, $3, $4, $5, $6) returning id;"
 	SelectStageId = "select st.id as st_id from \"%v\".cd_stage st " +
 		"left join \"%v\".cd_pipeline pl on st.cd_pipeline_id = pl.id " +
 		"where (st.name = $1 and pl.name = $2);"
@@ -18,11 +18,18 @@ const (
 	GetStageIdByPipelineNameAndOrderQuery = "select stage.id from \"%v\".cd_stage stage " +
 		"left join \"%v\".cd_pipeline pipe on stage.cd_pipeline_id = pipe.id " +
 		"where pipe.name = $1 and stage.\"order\" = $2;"
-	InsertCDStageCodebaseBranch = "insert into \"%v\".cd_stage_codebase_branch(cd_stage_id, codebase_branch_id) VALUES ($1, $2);"
-	GetStagesIdByCDPipelineName = "select cs.id, cs.name, cs.status, cs.quality_gate, cs.trigger_type, cs.description, cs.jenkins_step_name, cs.\"order\" " +
+	GetStagesIdByCDPipelineName = "select cs.id, cs.name, cs.status, cs.trigger_type, cs.description, cs.\"order\" " +
 		"	from \"%v\".cd_pipeline cp " +
 		"right join \"%v\".cd_stage cs on cp.id = cs.cd_pipeline_id " +
 		"where cp.name = $1 ;"
+	InsertQualityGate = "insert into \"%v\".quality_gate_stage(quality_gate, step_name, cd_stage_id, codebase_id, codebase_branch_id) " +
+		" values ($1, $2, $3, $4, $5) returning id; "
+	SelectCodebaseAndBranchIds = "select c.id codebase_id, cb.id codebase_branch_id " +
+		"	from \"%v\".codebase c " +
+		"left join \"%v\".codebase_branch cb on c.id = cb.codebase_id " +
+		"where c.type = 'autotests' " +
+		"  and c.name = $1 " +
+		"  and cb.name = $2 ; "
 )
 
 func CreateStage(txn sql.Tx, schemaName string, stage model.Stage, cdPipelineId int) (id *int, err error) {
@@ -32,8 +39,7 @@ func CreateStage(txn sql.Tx, schemaName string, stage model.Stage, cdPipelineId 
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(stage.Name, cdPipelineId, stage.Description, stage.TriggerType, stage.QualityGate,
-		stage.JenkinsStepName, stage.Order, stage.Status).Scan(&id)
+	err = stmt.QueryRow(stage.Name, cdPipelineId, stage.Description, stage.TriggerType, stage.Order, stage.Status).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
@@ -96,20 +102,6 @@ func checkNoRows(err error) (*int, error) {
 	return nil, err
 }
 
-func CreateCDStageCodebaseBranch(txn sql.Tx, cdStageId int, autotestId int, schemaName string) error {
-	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDStageCodebaseBranch, schemaName))
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(cdStageId, autotestId)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func GetStages(txn sql.Tx, pipelineName string, schemaName string) ([]model.Stage, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(GetStagesIdByCDPipelineName, schemaName, schemaName))
 
@@ -133,7 +125,7 @@ func getStage(rows *sql.Rows) ([]model.Stage, error) {
 
 	for rows.Next() {
 		dto := model.Stage{}
-		err := rows.Scan(&dto.Id, &dto.Name, &dto.Status, &dto.QualityGate, &dto.TriggerType, &dto.Description, &dto.JenkinsStepName, &dto.Order)
+		err := rows.Scan(&dto.Id, &dto.Name, &dto.Status, &dto.TriggerType, &dto.Description, &dto.Order)
 		if err != nil {
 			log.Printf("Error during parsing: %v", err)
 			return nil, err
@@ -145,4 +137,38 @@ func getStage(rows *sql.Rows) ([]model.Stage, error) {
 		return nil, err
 	}
 	return result, err
+}
+
+func CreateQualityGate(txn sql.Tx, qualityGateType string, jenkinsStepName string, cdStageId int, codebaseId *int, codebaseBranchId *int, schemaName string) (id *int, err error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertQualityGate, schemaName))
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(qualityGateType, jenkinsStepName, cdStageId, codebaseId, codebaseBranchId).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	return id, nil
+}
+
+func GetCodebaseAndBranchIds(txn sql.Tx, autotestName, branchName, schemaName string) (*model.CodebaseBranchIdDTO, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(SelectCodebaseAndBranchIds, schemaName, schemaName))
+
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	dto := model.CodebaseBranchIdDTO{}
+	err = stmt.QueryRow(autotestName, branchName).Scan(&dto.CodebaseId, &dto.BranchId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &dto, nil
 }

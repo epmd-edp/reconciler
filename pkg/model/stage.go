@@ -7,23 +7,23 @@ import (
 )
 
 type Stage struct {
-	Id              int
-	Name            string
-	Tenant          string
-	CdPipelineName  string
-	Description     string
-	TriggerType     string
-	QualityGate     string
-	JenkinsStepName string
-	Order           int
-	ActionLog       ActionLog
-	Status          string
-	Autotests       []AutotestCreateCommand
+	Id             int
+	Name           string
+	Tenant         string
+	CdPipelineName string
+	Description    string
+	TriggerType    string
+	Order          int
+	ActionLog      ActionLog
+	Status         string
+	QualityGates   []QualityGate
 }
 
-type AutotestCreateCommand struct {
-	AutotestName string
-	BranchName   string
+type QualityGate struct {
+	QualityGate     string
+	JenkinsStepName string
+	AutotestName    *string
+	BranchName      *string
 }
 
 func ConvertToStage(k8sObject v1alpha1.Stage) (*Stage, error) {
@@ -36,39 +36,39 @@ func ConvertToStage(k8sObject v1alpha1.Stage) (*Stage, error) {
 	status := getStatus(actionLog.Event)
 
 	stage := Stage{
-		Name:            spec.Name,
-		Tenant:          strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
-		CdPipelineName:  spec.CdPipeline,
-		Description:     spec.Description,
-		TriggerType:     strings.ToLower(spec.TriggerType),
-		QualityGate:     strings.ToLower(spec.QualityGate),
-		JenkinsStepName: spec.JenkinsStep,
-		Order:           spec.Order,
-		ActionLog:       *actionLog,
-		Status:          status,
-	}
-
-	if stage.QualityGate == "autotests" {
-		for _, autotestDto := range spec.Autotests {
-			stage.Autotests = appendOrCreateAutotest(stage.Autotests, autotestDto)
-		}
+		Name:           spec.Name,
+		Tenant:         strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
+		CdPipelineName: spec.CdPipeline,
+		Description:    spec.Description,
+		TriggerType:    strings.ToLower(spec.TriggerType),
+		Order:          spec.Order,
+		ActionLog:      *actionLog,
+		Status:         status,
+		QualityGates:   convertQualityGatesFromRequest(spec.QualityGates),
 	}
 
 	return &stage, nil
 
 }
 
-func appendOrCreateAutotest(target []AutotestCreateCommand, autotestDto v1alpha1.AutotestCreateCommand) []AutotestCreateCommand {
-	autotest := AutotestCreateCommand{
-		AutotestName: autotestDto.AutotestName,
-		BranchName:   autotestDto.BranchName,
+func convertQualityGatesFromRequest(gates []v1alpha1.QualityGate) []QualityGate {
+	var result []QualityGate
+
+	for _, val := range gates {
+		gate := QualityGate{
+			QualityGate:     strings.ToLower(val.QualityGateType),
+			JenkinsStepName: strings.ToLower(val.StepName),
+		}
+
+		if gate.QualityGate == "autotests" {
+			gate.AutotestName = val.AutotestName
+			gate.BranchName = val.BranchName
+		}
+
+		result = append(result, gate)
 	}
 
-	if target == nil {
-		return []AutotestCreateCommand{autotest}
-	}
-
-	return append(target, autotest)
+	return result
 }
 
 func convertStageActionLog(status v1alpha1.StageStatus) *ActionLog {

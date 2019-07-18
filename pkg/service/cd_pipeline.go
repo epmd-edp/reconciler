@@ -148,20 +148,27 @@ func getStages(txn sql.Tx, cdPipelineName string, schemaName string) ([]model.St
 }
 
 func deleteStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, schemaName string) error {
+	var outputStreamIdsToRemove []int
+	var stagesToLog []string
+
 	for _, stage := range stages {
 		outputStreamIds, err := repository.DeleteStageCodebaseDockerStream(txn, stage.Id, schemaName)
+		outputStreamIdsToRemove = append(outputStreamIdsToRemove, outputStreamIds...)
 		if err != nil {
 			log.Printf("An error has occured while deleting stage codebase docker stream row: %v", err)
 			return err
 		}
-
-		err = deleteCodebaseDockerStreams(txn, outputStreamIds, schemaName)
-		if err != nil {
-			return err
-		}
-
-		log.Printf("All records in StageCodebaseDockerStream and CodebaseDockerStream tables for {%v:%v} stage were removed.", stage.Id, stage.Name)
+		stagesToLog = append(stagesToLog, stage.Name)
 	}
+	log.Printf("Collected Output Stream Ids to delete: %v", outputStreamIdsToRemove)
+
+	err := deleteCodebaseDockerStreams(txn, outputStreamIdsToRemove, schemaName)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("All records in StageCodebaseDockerStream and CodebaseDockerStream for %v Stages are removed.", stagesToLog)
+
 	return nil
 }
 

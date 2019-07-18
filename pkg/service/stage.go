@@ -229,39 +229,47 @@ func createStage(tx sql.Tx, stage model.Stage) (*int, error) {
 		return nil, fmt.Errorf("error has occured during the creation docker streams for stage %v in CD Pipeline %v", stage.Name, stage.CdPipelineName)
 	}
 
-	if stage.QualityGate == "autotests" {
-		branchesId, err := getBranchesId(tx, stage.Autotests, stage.Tenant)
-		if err != nil {
-			return nil, fmt.Errorf("error has occured during retrieving Autotest's Branches Id: %v", err)
-		}
-
-		err = insertCDStageCodebaseBranchRecord(tx, *id, branchesId, stage.Tenant)
-		if err != nil {
-			return nil, fmt.Errorf("error has occurred during creation record to bind relation between CD Stages and Autotest's Branches: %v", err)
-		}
+	err = insertQualityGateRow(tx, *id, stage.QualityGates, stage.Tenant)
+	if err != nil {
+		return nil, fmt.Errorf("an error has occurred while creating Quality Gate for %v Stage: %v", *id, err)
 	}
 
 	return id, nil
 }
 
-func getBranchesId(txn sql.Tx, autotests []model.AutotestCreateCommand, schemaName string) ([]int, error) {
-	var branchesId []int
-	for _, autotest := range autotests {
-		id, err := repository.GetCodebaseBranchId(txn, autotest.AutotestName, autotest.BranchName, schemaName)
-		if err != nil {
-			return nil, err
-		}
-		branchesId = append(branchesId, *id)
-	}
-	return branchesId, nil
-}
+func insertQualityGateRow(tx sql.Tx, cdStageId int, gates []model.QualityGate, schemaName string) error {
+	for _, gate := range gates {
+		if gate.QualityGate == "autotests" {
+			err := insertAutotestQualityGate(tx, cdStageId, gate, schemaName)
+			if err != nil {
+				return err
+			}
 
-func insertCDStageCodebaseBranchRecord(txn sql.Tx, stageId int, branchesId []int, schemaName string) error {
-	for _, id := range branchesId {
-		err := repository.CreateCDStageCodebaseBranch(txn, stageId, id, schemaName)
+			continue
+		}
+
+		err := insertManualQualityGate(tx, cdStageId, gate, schemaName)
 		if err != nil {
 			return err
 		}
 	}
+
 	return nil
+}
+
+func insertAutotestQualityGate(tx sql.Tx, cdStageId int, gate model.QualityGate, schemaName string) error {
+	entityIdsDTO, err := repository.GetCodebaseAndBranchIds(tx, *gate.AutotestName, *gate.BranchName, schemaName)
+	if err != nil {
+		return err
+	}
+
+	_, err = repository.CreateQualityGate(tx, gate.QualityGate, gate.JenkinsStepName, cdStageId, &entityIdsDTO.CodebaseId, &entityIdsDTO.BranchId, schemaName)
+
+	return err
+}
+
+func insertManualQualityGate(tx sql.Tx, cdStageId int, gate model.QualityGate, schemaName string) error {
+	_, err := repository.CreateQualityGate(tx, gate.QualityGate, gate.JenkinsStepName, cdStageId, nil, nil, schemaName)
+
+	return err
 }

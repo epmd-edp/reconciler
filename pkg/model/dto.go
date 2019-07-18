@@ -1,8 +1,8 @@
 package model
 
 type CodebaseBranchDTO struct {
-	CodebaseName    string
-	BranchName string
+	CodebaseName string
+	BranchName   string
 }
 
 type CDPipelineDTO struct {
@@ -15,4 +15,9 @@ type CodebaseDockerStreamReadDTO struct {
 	CodebaseDockerStreamId int
 	CodebaseId             int
 	CodebaseName           string
+}
+
+type CodebaseBranchIdDTO struct {
+	CodebaseId int
+	BranchId   int
 }
