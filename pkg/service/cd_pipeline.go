@@ -10,6 +10,7 @@ import (
 	"reconciler/pkg/model"
 	"reconciler/pkg/platform"
 	"reconciler/pkg/repository"
+	"sort"
 )
 
 type CdPipelineService struct {
@@ -86,6 +87,10 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 			return nil, err
 		}
 
+		sort.SliceStable(stages, func(i, j int) bool {
+			return stages[i].Order < stages[j].Order
+		})
+
 		err = tryToCreateCodebaseDockerStream(txn, stages, cdPipelineReadModel.Name, schemaName)
 		if err != nil {
 			return nil, err
@@ -120,6 +125,8 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 }
 
 func createCodebaseDockerStreamsRow(txn sql.Tx, stages []model.Stage, pipelineName string, schemaName string) error {
+	log.Printf("Try to create Codebase Docker Streams for stages: %v", stages)
+
 	for i := range stages {
 		stages[i].Tenant = schemaName
 		stages[i].CdPipelineName = pipelineName
