@@ -29,6 +29,13 @@ const (
 		"	from \"%v\".stage_codebase_docker_stream scds " +
 		"where scds.cd_stage_id = $1 returning scds.output_codebase_docker_stream_id id;"
 	RemoveCodebaseDockerStream = "delete from \"%v\".codebase_docker_stream cds where cds.id = $1 ;"
+	SelectSourceInputStream    = "select cds.id id " +
+		"	from \"%[1]v\".codebase_docker_stream as cds " +
+		"left join \"%[1]v\".codebase cb on cds.codebase_id = cb.id " +
+		"left join \"%[1]v\".codebase_branch cbb on cds.id = cbb.output_codebase_docker_stream_id " +
+		"left join \"%[1]v\".cd_pipeline_codebase_branch cpcb on cbb.id = cpcb.codebase_branch_id " +
+		"left join \"%[1]v\".cd_pipeline pipe on cpcb.cd_pipeline_id = pipe.id " +
+		"where pipe.name = $1 and cb.name=$2 ;"
 )
 
 func CreateCodebaseDockerStream(txn sql.Tx, schemaName string, codebaseId int, ocImageStreamName string) (id *int, err error) {
@@ -152,4 +159,21 @@ func DeleteCodebaseDockerStream(txn sql.Tx, id int, schemaName string) error {
 		return err
 	}
 	return nil
+}
+
+func GetSourceInputStream(txn sql.Tx, cdPipelineName, codebaseName, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(SelectSourceInputStream, schemaName))
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var id int
+	err = stmt.QueryRow(cdPipelineName, codebaseName).Scan(&id)
+	if err != nil {
+		_, err = checkNoRows(err)
+		return nil, err
+	}
+
+	return &id, nil
 }

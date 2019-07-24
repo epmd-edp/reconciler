@@ -4,13 +4,17 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"k8s.io/client-go/rest"
 	"log"
+	"reconciler/pkg/apis/edp/v1alpha1"
 	"reconciler/pkg/model"
+	"reconciler/pkg/platform"
 	"reconciler/pkg/repository"
 )
 
 type StageService struct {
-	DB *sql.DB
+	DB        *sql.DB
+	ClientSet platform.ClientSet
 }
 
 func (service StageService) PutStage(stage model.Stage) error {
@@ -30,7 +34,9 @@ func (service StageService) PutStage(stage model.Stage) error {
 		return fmt.Errorf("cannot create stage: %v", stage)
 	}
 
-	id, err := getStageIdOrCreate(*txn, stage)
+	edpRestClient := service.ClientSet.EDPRestClient
+
+	id, err := getStageIdOrCreate(*txn, edpRestClient, stage)
 	if err != nil {
 		log.Printf("error has occured during retrieving or creation stage: %v", err)
 		_ = txn.Rollback()
@@ -60,7 +66,7 @@ func (service StageService) PutStage(stage model.Stage) error {
 	return nil
 }
 
-func createCodebaseDockerStreams(tx sql.Tx, id int, stage model.Stage) error {
+func createCodebaseDockerStreams(tx sql.Tx, id int, stage model.Stage, applicationsToApprove []string) error {
 	log.Printf("Start creation of the docker streams for stage with id: %v", id)
 
 	inputDockerStreams, err := getInputDockerStreams(tx, id, stage)
@@ -69,7 +75,7 @@ func createCodebaseDockerStreams(tx sql.Tx, id int, stage model.Stage) error {
 		return err
 	}
 
-	err = createOutputStreamsAndLink(tx, id, stage, inputDockerStreams)
+	err = createOutputStreamsAndLink(tx, id, stage, inputDockerStreams, applicationsToApprove)
 
 	if err != nil {
 		log.Printf("Cannot create output streams for stage with id: %v", id)
@@ -80,10 +86,10 @@ func createCodebaseDockerStreams(tx sql.Tx, id int, stage model.Stage) error {
 	return nil
 }
 
-func createOutputStreamsAndLink(tx sql.Tx, id int, stage model.Stage, dtos []model.CodebaseDockerStreamReadDTO) error {
+func createOutputStreamsAndLink(tx sql.Tx, id int, stage model.Stage, dtos []model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
 	log.Printf("Start creation of outputstreams and links for stage with id: %v", id)
 	for _, stream := range dtos {
-		err := createSingleOutputStreamAndLink(tx, id, stage, stream)
+		err := createSingleOutputStreamAndLink(tx, id, stage, stream, applicationsToApprove)
 		if err != nil {
 			return err
 		}
@@ -91,7 +97,7 @@ func createOutputStreamsAndLink(tx sql.Tx, id int, stage model.Stage, dtos []mod
 	return nil
 }
 
-func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, dto model.CodebaseDockerStreamReadDTO) error {
+func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, dto model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
 	log.Printf("Start creation single outputstream and link for stage with id %v and stream: %v", stageId, dto)
 
 	ocImageStreamName := fmt.Sprintf("%v-%v-%v-verified", stage.CdPipelineName, stage.Name, dto.CodebaseName)
@@ -103,7 +109,12 @@ func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, 
 	}
 	log.Printf("Id of newly created docker stream is: %v", *outputId)
 
-	err = repository.CreateStageCodebaseDockerStream(tx, stage.Tenant, stageId, dto.CodebaseDockerStreamId, *outputId)
+	stage.Id = stageId
+	if include(applicationsToApprove, dto.CodebaseName) {
+		err = setPreviousStageInputImageStream(tx, stage, dto.CodebaseDockerStreamId, *outputId)
+	} else {
+		err = setOriginalInputImageStream(tx, stage, dto.CodebaseName, *outputId)
+	}
 
 	if err != nil {
 		log.Printf("Cannot link codebase docker stream for dto: %v", dto)
@@ -112,6 +123,54 @@ func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, 
 
 	log.Printf("End creation single outputstream and link for stage with id %v and stream: %v", stageId, dto)
 	return nil
+}
+
+func setPreviousStageInputImageStream(tx sql.Tx, stage model.Stage, inputId int, outputId int) error {
+	log.Printf("Previous Stage Input Stream. CD Stage {%v:%v} has InputDockerStream - %v and OutputDockerStream - %v", stage.Id, stage.Name, inputId, outputId)
+	return repository.CreateStageCodebaseDockerStream(tx, stage.Tenant, stage.Id, inputId, outputId)
+}
+
+func setOriginalInputImageStream(tx sql.Tx, stage model.Stage, codebaseName string, outputId int) error {
+	sourceInputStream, err := getOriginalInputImageStream(tx, stage.CdPipelineName, codebaseName, stage.Tenant)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Source Input Stream. CD Stage {%v:%v} has InputDockerStream - %v and OutputDockerStream - %v", stage.Id, stage.Name, sourceInputStream, outputId)
+	return repository.CreateStageCodebaseDockerStream(tx, stage.Tenant, stage.Id, *sourceInputStream, outputId)
+}
+
+func getOriginalInputImageStream(tx sql.Tx, cdPipelineName, codebaseName, schemaName string) (*int, error) {
+	originalInputStream, err := repository.GetSourceInputStream(tx, cdPipelineName, codebaseName, schemaName)
+	if err != nil {
+		log.Printf("Couldn't fetch Original Input Stream for %v pipeline and %v codebase: %v", cdPipelineName, codebaseName, err)
+		return nil, err
+	}
+	return originalInputStream, nil
+}
+
+func getCDPipelineCR(edpRestClient *rest.RESTClient, crName string, namespace string) (*v1alpha1.CDPipeline, error) {
+	log.Printf("Trying to fetch CD Pipeline %v to get Applications To Promote", crName)
+
+	cdPipeline := &v1alpha1.CDPipeline{}
+	err := edpRestClient.Get().Namespace(namespace).Resource("cdpipelines").Name(crName).Do().Into(cdPipeline)
+	if err != nil {
+		log.Printf("An error has occurred while getting CD Pipeline CR from k8s: %s", err)
+		return nil, err
+	}
+
+	log.Printf("Fetched CD Pipeline: %v", cdPipeline.Spec)
+
+	return cdPipeline, nil
+}
+
+func include(applicationsToPromote []string, application string) bool {
+	for _, app := range applicationsToPromote {
+		if app == application {
+			return true
+		}
+	}
+	return false
 }
 
 func getInputDockerStreams(tx sql.Tx, id int, stage model.Stage) ([]model.CodebaseDockerStreamReadDTO, error) {
@@ -195,7 +254,7 @@ func updateStageStatus(tx sql.Tx, id *int, stage model.Stage) error {
 	return nil
 }
 
-func getStageIdOrCreate(tx sql.Tx, stage model.Stage) (*int, error) {
+func getStageIdOrCreate(tx sql.Tx, edpRestClient *rest.RESTClient, stage model.Stage) (*int, error) {
 	log.Printf("Start get stage id or create for stage: %v", stage)
 	id, err := repository.GetStageId(tx, stage.Tenant, stage.Name, stage.CdPipelineName)
 	if err != nil {
@@ -205,10 +264,10 @@ func getStageIdOrCreate(tx sql.Tx, stage model.Stage) (*int, error) {
 		log.Printf("Stage %v is already presented. Returning id; %v", stage, *id)
 		return id, err
 	}
-	return createStage(tx, stage)
+	return createStage(tx, edpRestClient, stage)
 }
 
-func createStage(tx sql.Tx, stage model.Stage) (*int, error) {
+func createStage(tx sql.Tx, edpRestClient *rest.RESTClient, stage model.Stage) (*int, error) {
 	log.Printf("Start create stage %v", stage)
 	cdPipeline, err := repository.GetCDPipeline(tx, stage.CdPipelineName, stage.Tenant)
 	if err != nil {
@@ -224,7 +283,12 @@ func createStage(tx sql.Tx, stage model.Stage) (*int, error) {
 	}
 	log.Printf("Id of newly created stage is %v", *id)
 
-	err = createCodebaseDockerStreams(tx, *id, stage)
+	pipelineCR, err := getCDPipelineCR(edpRestClient, stage.CdPipelineName, stage.Tenant+"-edp-cicd")
+	if err != nil {
+		return nil, err
+	}
+
+	err = createCodebaseDockerStreams(tx, *id, stage, pipelineCR.Spec.ApplicationsToPromote)
 	if err != nil {
 		return nil, fmt.Errorf("error has occured during the creation docker streams for stage %v in CD Pipeline %v", stage.Name, stage.CdPipelineName)
 	}

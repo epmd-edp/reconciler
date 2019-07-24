@@ -14,6 +14,7 @@ const (
 	SelectCodebase       = "select id from \"%v\".codebase where name=$1;"
 	SelectCodebaseType   = "select type from \"%v\".codebase where id=$1;"
 	UpdateCodebaseStatus = "update \"%v\".codebase set status = $1 where id = $2;"
+	SelectApplication    = "select id from \"%v\".codebase where name=$1 and type='application';"
 )
 
 func GetCodebaseId(txn sql.Tx, name string, schemaName string) (*int, error) {
@@ -79,4 +80,23 @@ func UpdateStatusByCodebaseId(txn sql.Tx, cbId int, status string, schemaName st
 
 	_, err = stmt.Exec(status, cbId)
 	return err
+}
+
+func GetApplicationId(txn sql.Tx, name string, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(SelectApplication, schemaName))
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var id int
+
+	err = stmt.QueryRow(name).Scan(&id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &id, nil
 }

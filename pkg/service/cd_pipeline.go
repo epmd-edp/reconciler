@@ -91,7 +91,12 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 			return stages[i].Order < stages[j].Order
 		})
 
-		err = tryToCreateCodebaseDockerStream(txn, stages, cdPipelineReadModel.Name, schemaName)
+		err = tryToCreateCodebaseDockerStream(txn, edpRestClient, stages, cdPipelineReadModel.Name, schemaName)
+		if err != nil {
+			return nil, err
+		}
+
+		err = updateApplicationsToPromote(txn, cdPipelineReadModel.Id, cdPipeline.ApplicationsToPromote, schemaName)
 		if err != nil {
 			return nil, err
 		}
@@ -109,29 +114,80 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 		return nil, err
 	}
 
-	servicesId, err := getServicesId(txn, cdPipeline.ThirdPartyServices, schemaName)
-	if err != nil {
-		log.Printf("An error has occured while getting services id: %s", err)
-		return nil, err
+	if cdPipeline.ThirdPartyServices != nil && len(cdPipeline.ThirdPartyServices) != 0 {
+		log.Printf("Try to create records in ThirdPartyServices: %v", cdPipeline.ThirdPartyServices)
+
+		servicesId, err := getServicesId(txn, cdPipeline.ThirdPartyServices, schemaName)
+		if err != nil {
+			log.Printf("An error has occured while getting services id: %s", err)
+			return nil, err
+		}
+
+		log.Printf("Try to create record for %v service", servicesId)
+
+		err = createCDPipelineThirdPartyService(txn, cdPipelineDTO.Id, servicesId, schemaName)
+		if err != nil {
+			log.Printf("An error has occured while inserting record into cd_pipeline_third_party_service: %v", err)
+			return nil, err
+		}
 	}
 
-	err = createCDPipelineThirdPartyService(txn, cdPipelineDTO.Id, servicesId, schemaName)
+	err = createApplicationToPromoteRow(txn, cdPipelineDTO.Id, cdPipeline.ApplicationsToPromote, schemaName)
 	if err != nil {
-		log.Printf("An error has occured while inserting record into cd_pipeline_third_party_service: %v", err)
+		log.Printf("An error has occured while inserting record into applications_to_promote: %v", err)
 		return nil, err
 	}
 
 	return cdPipelineDTO, nil
 }
 
-func createCodebaseDockerStreamsRow(txn sql.Tx, stages []model.Stage, pipelineName string, schemaName string) error {
+func updateApplicationsToPromote(tx sql.Tx, cdPipelineId int, applicationsToPromote []string, schemaName string) error {
+	err := repository.RemoveApplicationsToPromote(tx, cdPipelineId, schemaName)
+	if err != nil {
+		return fmt.Errorf("an error has occurred while removing Application To Promote records for %v Stage: %v", cdPipelineId, err)
+	}
+
+	err = createApplicationToPromoteRow(tx, cdPipelineId, applicationsToPromote, schemaName)
+	if err != nil {
+		return fmt.Errorf("an error has occurred while creating Application To Promote record for %v Stage: %v", cdPipelineId, err)
+	}
+
+	return nil
+}
+
+func createApplicationToPromoteRow(txn sql.Tx, cdPipelineId int, applicationsToPromote []string, schemaName string) error {
+	log.Printf("Try to create record in ApplicationToPromote table %v ...", applicationsToPromote)
+
+	for _, appToPromote := range applicationsToPromote {
+		id, err := repository.GetApplicationId(txn, appToPromote, schemaName)
+		if err != nil {
+			return err
+		}
+
+		log.Printf("Application Id %v by %v app name", id, appToPromote)
+
+		err = repository.CreateApplicationsToPromote(txn, cdPipelineId, *id, schemaName)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func createCodebaseDockerStreamsRow(txn sql.Tx, edpRestClient *rest.RESTClient, stages []model.Stage, pipelineName string, schemaName string) error {
 	log.Printf("Try to create Codebase Docker Streams for stages: %v", stages)
 
 	for i := range stages {
 		stages[i].Tenant = schemaName
 		stages[i].CdPipelineName = pipelineName
 
-		err := createCodebaseDockerStreams(txn, stages[i].Id, stages[i])
+		pipelineCR, err := getCDPipelineCR(edpRestClient, stages[i].CdPipelineName, stages[i].Tenant+"-edp-cicd")
+		if err != nil {
+			return err
+		}
+
+		err = createCodebaseDockerStreams(txn, stages[i].Id, stages[i], pipelineCR.Spec.ApplicationsToPromote)
 		if err != nil {
 			log.Printf("Error has occurred while creating Codebase Docker Stream row: %v", err)
 			return err
@@ -190,7 +246,7 @@ func deleteCodebaseDockerStreams(txn sql.Tx, outputStreamIds []int, schemaName s
 	return nil
 }
 
-func tryToCreateCodebaseDockerStream(txn sql.Tx, stages []model.Stage, pipelineName string, schemaName string) error {
+func tryToCreateCodebaseDockerStream(txn sql.Tx, edpRestClient *rest.RESTClient, stages []model.Stage, pipelineName string, schemaName string) error {
 	if stages == nil {
 		log.Printf("There're no stages for %v CD Pipeline. Updating of Codebase Docker stream will not be executed.", pipelineName)
 		return nil
@@ -201,7 +257,7 @@ func tryToCreateCodebaseDockerStream(txn sql.Tx, stages []model.Stage, pipelineN
 		return err
 	}
 
-	err = createCodebaseDockerStreamsRow(txn, stages, pipelineName, schemaName)
+	err = createCodebaseDockerStreamsRow(txn, edpRestClient, stages, pipelineName, schemaName)
 	if err != nil {
 		return err
 	}

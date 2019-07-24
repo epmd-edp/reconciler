@@ -5,6 +5,7 @@ import (
 	"log"
 	"reconciler/pkg/db"
 	"reconciler/pkg/model"
+	"reconciler/pkg/platform"
 	"reconciler/pkg/service"
 
 	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
@@ -27,11 +28,17 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
+	clientSet, err := platform.CreateOpenshiftClients()
+	if err != nil {
+		panic(err)
+	}
+
 	return &ReconcileStage{
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 		service: service.StageService{
-			DB: db.Instance,
+			DB:        db.Instance,
+			ClientSet: *clientSet,
 		},
 	}
 }
