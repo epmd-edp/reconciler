@@ -94,7 +94,7 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schem
 	if *cbType == string(model.Application) {
 		ocImageStreamName := fmt.Sprintf("%v-%v", codebaseBranch.AppName, codebaseBranch.Name)
 
-		streamId, err = repository.CreateCodebaseDockerStream(txn, schemaName, *beId, ocImageStreamName)
+		streamId, err = repository.CreateCodebaseDockerStream(txn, schemaName, *beId, nil, ocImageStreamName)
 		if err != nil {
 			return nil, err
 		}

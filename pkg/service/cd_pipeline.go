@@ -82,7 +82,7 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 			return nil, err
 		}
 
-		err = repository.DeleteDockerStreams(txn, cdPipelineReadModel.Id, schemaName)
+		err = repository.DeleteCDPipelineDockerStreams(txn, cdPipelineReadModel.Id, schemaName)
 		if err != nil {
 			log.Printf("An error has occurred while deleting pipeline's docker streams: %s", err)
 			return nil, err
@@ -102,7 +102,7 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 			return stages[i].Order < stages[j].Order
 		})
 
-		err = tryToCreateCodebaseDockerStream(txn, edpRestClient, stages, cdPipelineReadModel.Name, schemaName)
+		err = updateStageCodebaseDockerStream(txn, edpRestClient, stages, cdPipelineReadModel.Name, schemaName)
 		if err != nil {
 			return nil, err
 		}
@@ -191,8 +191,8 @@ func createApplicationToPromoteRow(txn sql.Tx, cdPipelineId int, applicationsToP
 	return nil
 }
 
-func createCodebaseDockerStreamsRow(txn sql.Tx, edpRestClient *rest.RESTClient, stages []model.Stage, pipelineName string, schemaName string) error {
-	log.Printf("Try to create Codebase Docker Streams for stages: %v", stages)
+func updateStageCodebaseDockerStreamRelations(txn sql.Tx, edpRestClient *rest.RESTClient, stages []model.Stage, pipelineName string, schemaName string) error {
+	log.Printf("Try to update Stage Codebase Docker Streams relations for stages: %v", stages)
 
 	for i := range stages {
 		stages[i].Tenant = schemaName
@@ -203,14 +203,14 @@ func createCodebaseDockerStreamsRow(txn sql.Tx, edpRestClient *rest.RESTClient, 
 			return err
 		}
 
-		err = createCodebaseDockerStreams(txn, stages[i].Id, stages[i], pipelineCR.Spec.ApplicationsToPromote)
+		err = updateSingleStageCodebaseDockerStreamRelations(txn, stages[i].Id, stages[i], pipelineCR.Spec.ApplicationsToPromote)
 		if err != nil {
 			log.Printf("Error has occurred while creating Codebase Docker Stream row: %v", err)
 			return err
 		}
 	}
 
-	log.Printf("Codebase Docker Stream Row has been created for %v pipeline", pipelineName)
+	log.Printf("Relations have been updated for %v pipeline", pipelineName)
 
 	return nil
 }
@@ -226,7 +226,7 @@ func getStages(txn sql.Tx, cdPipelineName string, schemaName string) ([]model.St
 	return stages, nil
 }
 
-func deleteStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, schemaName string) error {
+func deleteStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, schemaName string) ([]int, error) {
 	var outputStreamIdsToRemove []int
 	var stagesToLog []string
 
@@ -235,20 +235,14 @@ func deleteStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, schemaNam
 		outputStreamIdsToRemove = append(outputStreamIdsToRemove, outputStreamIds...)
 		if err != nil {
 			log.Printf("An error has occured while deleting stage codebase docker stream row: %v", err)
-			return err
+			return nil, err
 		}
 		stagesToLog = append(stagesToLog, stage.Name)
 	}
+
 	log.Printf("Collected Output Stream Ids to delete: %v", outputStreamIdsToRemove)
 
-	err := deleteCodebaseDockerStreams(txn, outputStreamIdsToRemove, schemaName)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("All records in StageCodebaseDockerStream and CodebaseDockerStream for %v Stages are removed.", stagesToLog)
-
-	return nil
+	return outputStreamIdsToRemove, nil
 }
 
 func deleteCodebaseDockerStreams(txn sql.Tx, outputStreamIds []int, schemaName string) error {
@@ -262,18 +256,18 @@ func deleteCodebaseDockerStreams(txn sql.Tx, outputStreamIds []int, schemaName s
 	return nil
 }
 
-func tryToCreateCodebaseDockerStream(txn sql.Tx, edpRestClient *rest.RESTClient, stages []model.Stage, pipelineName string, schemaName string) error {
+func updateStageCodebaseDockerStream(txn sql.Tx, edpRestClient *rest.RESTClient, stages []model.Stage, pipelineName string, schemaName string) error {
 	if stages == nil {
 		log.Printf("There're no stages for %v CD Pipeline. Updating of Codebase Docker stream will not be executed.", pipelineName)
 		return nil
 	}
 
-	err := deleteStageCodebaseDockerStream(txn, stages, schemaName)
+	_, err := deleteStageCodebaseDockerStream(txn, stages, schemaName)
 	if err != nil {
 		return err
 	}
 
-	err = createCodebaseDockerStreamsRow(txn, edpRestClient, stages, pipelineName, schemaName)
+	err = updateStageCodebaseDockerStreamRelations(txn, edpRestClient, stages, pipelineName, schemaName)
 	if err != nil {
 		return err
 	}

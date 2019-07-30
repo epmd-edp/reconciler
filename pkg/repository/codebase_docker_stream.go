@@ -7,18 +7,19 @@ import (
 )
 
 const (
-	CreateCodebaseDockerStreamQuery = "insert into \"%v\".codebase_docker_stream(codebase_id, oc_image_stream_name)" +
-		" values($1, $2) returning id;"
-	GetDockerStreamsByPipelineNameQuery = "select cds.id, cds.codebase_id, cb.name " +
-		"from \"%[1]v\".codebase_docker_stream as cds " +
-		"left join \"%[1]v\".codebase cb on cds.codebase_id = cb.id " +
-		"left join \"%[1]v\".codebase_branch cbb on cds.id = cbb.output_codebase_docker_stream_id " +
-		"left join \"%[1]v\".cd_pipeline_codebase_branch cpcb on cbb.id = cpcb.codebase_branch_id " +
-		"left join \"%[1]v\".cd_pipeline pipe on cpcb.cd_pipeline_id = pipe.id " +
-		"where pipe.name = $1;"
-	GetDockerStreamsByPipelineNameAndStageOrderQuery = "select cds.id, cds.codebase_id, cb.name " +
-		"from \"%[1]v\".codebase_docker_stream as cds " +
-		"left join \"%[1]v\".codebase cb on cds.codebase_id = cb.id " +
+	CreateCodebaseDockerStreamQuery = "insert into \"%v\".codebase_docker_stream(codebase_id, codebase_branch_id, oc_image_stream_name)" +
+		" values($1, $2, $3) returning id;"
+	GetDockerStreamsByPipelineNameQuery = "select cds.id, c.id codebase_id, c.name " +
+		"from \"%[1]v\".codebase_docker_stream cds " +
+		"left join \"%[1]v\".codebase_branch cb on cds.codebase_branch_id = cb.id " +
+		"left join \"%[1]v\".codebase c on cb.codebase_id = c.id " +
+		"left join \"%[1]v\".cd_pipeline_docker_stream cpds on cds.id = cpds.codebase_docker_stream_id " +
+		"left join \"%[1]v\".cd_pipeline cp on cpds.cd_pipeline_id = cp.id " +
+		"where cp.name = $1;"
+	GetDockerStreamsByPipelineNameAndStageOrderQuery = "select cds.id, c.id codebase_id, c.name " +
+		"	from \"%[1]v\".codebase_docker_stream cds " +
+		"left join \"%[1]v\".codebase_branch cb on cds.codebase_branch_id = cb.id " +
+		"left join \"%[1]v\".codebase c on cb.codebase_id = c.id " +
 		"left join \"%[1]v\".stage_codebase_docker_stream scds on cds.id = scds.output_codebase_docker_stream_id " +
 		"left join \"%[1]v\".cd_stage cs on scds.cd_stage_id = cs.id " +
 		"left join \"%[1]v\".cd_pipeline pipe on cs.cd_pipeline_id = pipe.id " +
@@ -29,25 +30,26 @@ const (
 		"	from \"%v\".stage_codebase_docker_stream scds " +
 		"where scds.cd_stage_id = $1 returning scds.output_codebase_docker_stream_id id;"
 	RemoveCodebaseDockerStream = "delete from \"%v\".codebase_docker_stream cds where cds.id = $1 ;"
-	SelectSourceInputStream    = "select cds.id id " +
-		"	from \"%[1]v\".codebase_docker_stream as cds " +
-		"left join \"%[1]v\".codebase cb on cds.codebase_id = cb.id " +
-		"left join \"%[1]v\".codebase_branch cbb on cds.id = cbb.output_codebase_docker_stream_id " +
-		"left join \"%[1]v\".cd_pipeline_codebase_branch cpcb on cbb.id = cpcb.codebase_branch_id " +
-		"left join \"%[1]v\".cd_pipeline pipe on cpcb.cd_pipeline_id = pipe.id " +
-		"where pipe.name = $1 and cb.name=$2 ;"
+	SelectSourceInputStream    = "select cds.id " +
+		"	from \"%[1]v\".codebase_docker_stream cds " +
+		"left join \"%[1]v\".codebase_branch cb on cds.codebase_branch_id = cb.id " +
+		"left join \"%[1]v\".codebase c on cb.codebase_id = c.id " +
+		"left join \"%[1]v\".cd_pipeline_docker_stream cpds on cds.id = cpds.codebase_docker_stream_id " +
+		"left join \"%[1]v\".cd_pipeline cp on cpds.cd_pipeline_id = cp.id " +
+		"where cp.name = $1 and c.name = $2 ;"
 	SelectCodebaseDockerStreamId       = "select id from \"%[1]v\".codebase_docker_stream cds where cds.oc_image_stream_name=$1 ;"
 	UpdateCodebaseDockerStreamBranchId = "update \"%v\".codebase_docker_stream set codebase_branch_id = $1 where id = $2 ;"
+	SelectCodebaseDockerStreamBranchId = "select cds.codebase_branch_id from \"%v\".codebase_docker_stream cds where cds.id = $1;"
 )
 
-func CreateCodebaseDockerStream(txn sql.Tx, schemaName string, codebaseId int, ocImageStreamName string) (id *int, err error) {
+func CreateCodebaseDockerStream(txn sql.Tx, schemaName string, codebaseId int, branchId *int, ocImageStreamName string) (id *int, err error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(CreateCodebaseDockerStreamQuery, schemaName))
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(codebaseId, ocImageStreamName).Scan(&id)
+	err = stmt.QueryRow(codebaseId, branchId, ocImageStreamName).Scan(&id)
 	return
 }
 
@@ -206,4 +208,21 @@ func UpdateBranchIdCodebaseDockerStream(txn sql.Tx, dockerStreamId int, branchId
 
 	_, err = stmt.Exec(branchId, dockerStreamId)
 	return err
+}
+
+func GetCodebaseDockerStreamBranchId(txn sql.Tx, dockerStreamId int, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(SelectCodebaseDockerStreamBranchId, schemaName))
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var id int
+	err = stmt.QueryRow(dockerStreamId).Scan(&id)
+	if err != nil {
+		_, err = checkNoRows(err)
+		return nil, err
+	}
+
+	return &id, nil
 }

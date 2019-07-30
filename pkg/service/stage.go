@@ -86,10 +86,41 @@ func createCodebaseDockerStreams(tx sql.Tx, id int, stage model.Stage, applicati
 	return nil
 }
 
+func updateSingleStageCodebaseDockerStreamRelations(tx sql.Tx, id int, stage model.Stage, applicationsToApprove []string) error {
+	log.Printf("Start update of the docker streams relation for stage with id: %v", id)
+
+	inputDockerStreams, err := getInputDockerStreams(tx, id, stage)
+	if err != nil {
+		log.Printf("Cannot get list of input docker streams for stage with id : %v", id)
+		return err
+	}
+
+	err = updateOutputStreamsRelation(tx, id, stage, inputDockerStreams, applicationsToApprove)
+
+	if err != nil {
+		log.Printf("Cannot create output streams for stage with id: %v", id)
+		return err
+	}
+
+	log.Printf("Docker streams relation have been successfully updated for stage with id: %v", id)
+	return nil
+}
+
 func createOutputStreamsAndLink(tx sql.Tx, id int, stage model.Stage, dtos []model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
 	log.Printf("Start creation of outputstreams and links for stage with id: %v", id)
 	for _, stream := range dtos {
 		err := createSingleOutputStreamAndLink(tx, id, stage, stream, applicationsToApprove)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func updateOutputStreamsRelation(tx sql.Tx, id int, stage model.Stage, dtos []model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
+	log.Printf("Start update of links for stage with id: %v", id)
+	for _, stream := range dtos {
+		err := updateSingleOutputStreamRelation(tx, id, stage, stream, applicationsToApprove)
 		if err != nil {
 			return err
 		}
@@ -102,7 +133,13 @@ func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, 
 
 	ocImageStreamName := fmt.Sprintf("%v-%v-%v-verified", stage.CdPipelineName, stage.Name, dto.CodebaseName)
 
-	outputId, err := repository.CreateCodebaseDockerStream(tx, stage.Tenant, dto.CodebaseId, ocImageStreamName)
+	branchId, err := repository.GetCodebaseDockerStreamBranchId(tx, dto.CodebaseDockerStreamId, stage.Tenant)
+	if err != nil {
+		log.Printf("Cannot get branch id by codebase docker stream id %v: %v", dto.CodebaseDockerStreamId, err)
+		return err
+	}
+
+	outputId, err := repository.CreateCodebaseDockerStream(tx, stage.Tenant, dto.CodebaseId, branchId, ocImageStreamName)
 	if err != nil {
 		log.Printf("Cannot create codebase docker stream for dto: %v", dto)
 		return err
@@ -122,6 +159,33 @@ func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, 
 	}
 
 	log.Printf("End creation single outputstream and link for stage with id %v and stream: %v", stageId, dto)
+	return nil
+}
+
+func updateSingleOutputStreamRelation(tx sql.Tx, stageId int, stage model.Stage, dto model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
+	log.Printf("Start update single relation outputstream for stage with id %v and stream: %v", stageId, dto)
+
+	ocImageStreamName := fmt.Sprintf("%v-%v-%v-verified", stage.CdPipelineName, stage.Name, dto.CodebaseName)
+
+	outputId, err := repository.GetCodebaseDockerStreamId(tx, ocImageStreamName, stage.Tenant)
+	if err != nil {
+		log.Printf("Cannot get Codebase Docker Stream Id %v: %v", ocImageStreamName, err)
+		return err
+	}
+
+	stage.Id = stageId
+	if include(applicationsToApprove, dto.CodebaseName) {
+		err = setPreviousStageInputImageStream(tx, stage, dto.CodebaseDockerStreamId, *outputId)
+	} else {
+		err = setOriginalInputImageStream(tx, stage, dto.CodebaseName, *outputId)
+	}
+
+	if err != nil {
+		log.Printf("Cannot link codebase docker stream for dto: %v", dto)
+		return err
+	}
+
+	log.Printf("Start update single relation outputstream for stage with id %v and stream: %v", stageId, dto)
 	return nil
 }
 

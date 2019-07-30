@@ -72,10 +72,7 @@ func UpdateCDPipelineStatus(txn sql.Tx, pipelineId int, cdPipelineStatus string,
 	defer stmt.Close()
 
 	_, err = stmt.Exec(cdPipelineStatus, pipelineId)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func CreateCDPipelineThirdPartyService(txn sql.Tx, pipelineId int, serviceId int, schemaName string) error {
@@ -86,10 +83,7 @@ func CreateCDPipelineThirdPartyService(txn sql.Tx, pipelineId int, serviceId int
 	defer stmt.Close()
 
 	_, err = stmt.Exec(pipelineId, serviceId)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func DeleteBranches(txn sql.Tx, pipelineId int, schemaName string) error {
@@ -100,10 +94,7 @@ func DeleteBranches(txn sql.Tx, pipelineId int, schemaName string) error {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(pipelineId)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func CreateCDPipelineDockerStream(txn sql.Tx, pipelineId int, dockerStreamId int, schemaName string) error {
@@ -117,7 +108,7 @@ func CreateCDPipelineDockerStream(txn sql.Tx, pipelineId int, dockerStreamId int
 	return err
 }
 
-func DeleteDockerStreams(txn sql.Tx, pipelineId int, schemaName string) error {
+func DeleteCDPipelineDockerStreams(txn sql.Tx, pipelineId int, schemaName string) error {
 	stmt, err := txn.Prepare(fmt.Sprintf(DeleteAllDockerStreams, schemaName))
 	if err != nil {
 		return err
