@@ -11,6 +11,7 @@ type CDPipeline struct {
 	Namespace             string
 	Tenant                string
 	CodebaseBranch        []string
+	InputDockerStreams    []string
 	ThirdPartyServices    []string
 	ActionLog             ActionLog
 	Status                string
@@ -30,6 +31,7 @@ func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline) (*CDPipeline, error) 
 		Namespace:             k8sObject.Namespace,
 		Tenant:                strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
 		CodebaseBranch:        spec.CodebaseBranch,
+		InputDockerStreams:    spec.InputDockerStreams,
 		ThirdPartyServices:    spec.ThirdPartyServices,
 		ActionLog:             *actionLog,
 		Status:                getStatus(actionLog.Event),
