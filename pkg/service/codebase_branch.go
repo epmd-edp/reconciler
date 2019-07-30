@@ -108,6 +108,13 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schem
 		return nil, err
 	}
 
+	if *cbType == string(model.Application) {
+		err := repository.UpdateBranchIdCodebaseDockerStream(txn, *streamId, *id, schemaName)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	log.Printf("Id of the newly created codebase branch is %v", *id)
 	return id, nil
 }

@@ -36,6 +36,8 @@ const (
 		"left join \"%[1]v\".cd_pipeline_codebase_branch cpcb on cbb.id = cpcb.codebase_branch_id " +
 		"left join \"%[1]v\".cd_pipeline pipe on cpcb.cd_pipeline_id = pipe.id " +
 		"where pipe.name = $1 and cb.name=$2 ;"
+	SelectCodebaseDockerStreamId       = "select id from \"%[1]v\".codebase_docker_stream cds where cds.oc_image_stream_name=$1 ;"
+	UpdateCodebaseDockerStreamBranchId = "update \"%v\".codebase_docker_stream set codebase_branch_id = $1 where id = $2 ;"
 )
 
 func CreateCodebaseDockerStream(txn sql.Tx, schemaName string, codebaseId int, ocImageStreamName string) (id *int, err error) {
@@ -176,4 +178,32 @@ func GetSourceInputStream(txn sql.Tx, cdPipelineName, codebaseName, schemaName s
 	}
 
 	return &id, nil
+}
+
+func GetCodebaseDockerStreamId(txn sql.Tx, dockerStream, schemaName string) (*int, error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(SelectCodebaseDockerStreamId, schemaName))
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var id int
+	err = stmt.QueryRow(dockerStream).Scan(&id)
+	if err != nil {
+		_, err = checkNoRows(err)
+		return nil, err
+	}
+
+	return &id, nil
+}
+
+func UpdateBranchIdCodebaseDockerStream(txn sql.Tx, dockerStreamId int, branchId int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(UpdateCodebaseDockerStreamBranchId, schemaName))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(branchId, dockerStreamId)
+	return err
 }

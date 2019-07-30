@@ -82,6 +82,17 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 			return nil, err
 		}
 
+		err = repository.DeleteDockerStreams(txn, cdPipelineReadModel.Id, schemaName)
+		if err != nil {
+			log.Printf("An error has occurred while deleting pipeline's docker streams: %s", err)
+			return nil, err
+		}
+
+		err = createCDPipelineDockerStream(txn, cdPipelineReadModel.Id, cdPipeline.InputDockerStreams, schemaName)
+		if err != nil {
+			return nil, err
+		}
+
 		stages, err := getStages(txn, cdPipelineReadModel.Name, schemaName)
 		if err != nil {
 			return nil, err
@@ -110,6 +121,11 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 	}
 
 	err = createCDPipelineCodebaseBranch(txn, edpRestClient, cdPipelineDTO, cdPipeline, schemaName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = createCDPipelineDockerStream(txn, cdPipelineDTO.Id, cdPipeline.InputDockerStreams, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -337,7 +353,7 @@ func updateCDPipelineStatus(txn sql.Tx, cdPipelineDb model.CDPipelineDTO, status
 func getCodebaseBranchesId(txn sql.Tx, codebaseBranches []model.CodebaseBranchDTO, schemaName string) ([]int, error) {
 	var codebaseBranchesId []int
 	for _, v := range codebaseBranches {
-		codebaseBranchId, err := repository.GetCodebaseBranchesId(txn, v, schemaName)
+		codebaseBranchId, err := repository.GetCodebaseBranchesId(txn, v.CodebaseName, v.BranchName, schemaName)
 		if err != nil {
 			return nil, err
 		}
@@ -387,5 +403,36 @@ func createCDPipelineCodebaseBranch(txn sql.Tx, edpRestClient *rest.RESTClient, 
 		return err
 	}
 
+	return nil
+}
+
+func createCDPipelineDockerStream(txn sql.Tx, cdPipelineId int, dockerStreams []string, schemaName string) error {
+	var dockerStreamIds []int
+	for _, dockerStream := range dockerStreams {
+		id, err := repository.GetCodebaseDockerStreamId(txn, dockerStream, schemaName)
+		if err != nil {
+			log.Printf("An error has occured while getting id of docker stream %v: %v", dockerStream, err)
+			return err
+		}
+		dockerStreamIds = append(dockerStreamIds, *id)
+	}
+
+	err := insertCDPipelineDockerStream(txn, cdPipelineId, dockerStreamIds, schemaName)
+	if err != nil {
+		log.Printf("An error has occured while inserting CD Pipeline Docker Stream row: %s", err)
+		return err
+	}
+
+	return nil
+}
+
+func insertCDPipelineDockerStream(txn sql.Tx, cdPipelineId int, dockerStreams []int, schemaName string) error {
+	for _, id := range dockerStreams {
+		err := repository.CreateCDPipelineDockerStream(txn, cdPipelineId, id, schemaName)
+		if err != nil {
+			log.Printf("An error has occured while inserting CD Pipeline Docker Stream row: %s", err)
+			return err
+		}
+	}
 	return nil
 }

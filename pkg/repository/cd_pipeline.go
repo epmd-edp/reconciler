@@ -13,6 +13,8 @@ const (
 	UpdateCDPipelineStatusQuery       = "update \"%v\".cd_pipeline set status = $1 where id = $2 ;"
 	InsertCDPipelineThirdPartyService = "insert into \"%v\".cd_pipeline_third_party_service(cd_pipeline_id, third_party_service_id) values ($1, $2) ;"
 	DeleteAllPipelinesBranches        = "delete from \"%v\".cd_pipeline_codebase_branch cpcb  where cpcb.cd_pipeline_id = $1 ;"
+	InsertCDPipelineDockerStream      = "insert into \"%v\".cd_pipeline_docker_stream(cd_pipeline_id, codebase_docker_stream_id) VALUES ($1, $2);"
+	DeleteAllDockerStreams            = "delete from \"%v\".cd_pipeline_docker_stream cpds  where cpds.cd_pipeline_id = $1 ;"
 )
 
 func CreateCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, status string, schemaName string) (*model.CDPipelineDTO, error) {
@@ -102,4 +104,26 @@ func DeleteBranches(txn sql.Tx, pipelineId int, schemaName string) error {
 		return err
 	}
 	return nil
+}
+
+func CreateCDPipelineDockerStream(txn sql.Tx, pipelineId int, dockerStreamId int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDPipelineDockerStream, schemaName))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(pipelineId, dockerStreamId)
+	return err
+}
+
+func DeleteDockerStreams(txn sql.Tx, pipelineId int, schemaName string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(DeleteAllDockerStreams, schemaName))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(pipelineId)
+	return err
 }

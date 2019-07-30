@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"reconciler/pkg/model"
 )
 
 const (
@@ -54,7 +53,7 @@ func CreateCodebaseBranch(txn sql.Tx, name string, beId int, fromCommit string,
 	return &id, nil
 }
 
-func GetCodebaseBranchesId(txn sql.Tx, appBranch model.CodebaseBranchDTO, schemaName string) (*int, error) {
+func GetCodebaseBranchesId(txn sql.Tx, appName string, branchName string, schemaName string) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(SelectCodebaseBranchesId, schemaName, schemaName))
 	if err != nil {
 		return nil, err
@@ -62,7 +61,7 @@ func GetCodebaseBranchesId(txn sql.Tx, appBranch model.CodebaseBranchDTO, schema
 	defer stmt.Close()
 
 	var branchId int
-	err = stmt.QueryRow(appBranch.BranchName, appBranch.CodebaseName).Scan(&branchId)
+	err = stmt.QueryRow(branchName, appName).Scan(&branchId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
