@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"k8s.io/client-go/rest"
 	"log"
-	"reconciler/pkg/apis/edp/v1alpha1"
 	"reconciler/pkg/model"
 	"reconciler/pkg/platform"
 	"reconciler/pkg/repository"
@@ -71,17 +70,6 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 	}
 	if cdPipelineReadModel != nil {
 
-		err = repository.DeleteBranches(txn, cdPipelineReadModel.Id, schemaName)
-		if err != nil {
-			log.Printf("An error has occurred while deleting pipeline's branches: %s", err)
-			return nil, err
-		}
-
-		err = createCDPipelineCodebaseBranch(txn, edpRestClient, cdPipelineReadModel, cdPipeline, schemaName)
-		if err != nil {
-			return nil, err
-		}
-
 		err = repository.DeleteCDPipelineDockerStreams(txn, cdPipelineReadModel.Id, schemaName)
 		if err != nil {
 			log.Printf("An error has occurred while deleting pipeline's docker streams: %s", err)
@@ -116,11 +104,6 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 	}
 	log.Printf("Record for CD Pipeline %v has not been found", cdPipeline.Name)
 	cdPipelineDTO, err := createCDPipeline(txn, cdPipeline, schemaName)
-	if err != nil {
-		return nil, err
-	}
-
-	err = createCDPipelineCodebaseBranch(txn, edpRestClient, cdPipelineDTO, cdPipeline, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -245,17 +228,6 @@ func deleteStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, schemaNam
 	return outputStreamIdsToRemove, nil
 }
 
-func deleteCodebaseDockerStreams(txn sql.Tx, outputStreamIds []int, schemaName string) error {
-	for _, id := range outputStreamIds {
-		err := repository.DeleteCodebaseDockerStream(txn, id, schemaName)
-		if err != nil {
-			log.Printf("An error has occured while deleting codebase docker stream row: %v", err)
-			return err
-		}
-	}
-	return nil
-}
-
 func updateStageCodebaseDockerStream(txn sql.Tx, edpRestClient *rest.RESTClient, stages []model.Stage, pipelineName string, schemaName string) error {
 	if stages == nil {
 		log.Printf("There're no stages for %v CD Pipeline. Updating of Codebase Docker stream will not be executed.", pipelineName)
@@ -284,32 +256,6 @@ func createCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string
 
 	log.Printf("Id of the newly created CD Pipeline is %v", cdPipelineDto.Id)
 	return cdPipelineDto, nil
-}
-
-func getCodebaseBranchCR(edpRestClient *rest.RESTClient, crName string, namespace string) (*v1alpha1.CodebaseBranch, error) {
-	codebaseBranch := &v1alpha1.CodebaseBranch{}
-	err := edpRestClient.Get().Namespace(namespace).Resource("codebasebranches").Name(crName).Do().Into(codebaseBranch)
-	if err != nil {
-		log.Printf("An error has occurred while getting Release Branch CR from k8s: %s", err)
-		return nil, err
-	}
-	return codebaseBranch, nil
-}
-
-func getCodebaseBranchesData(cdPipeline model.CDPipeline, edpRestClient *rest.RESTClient) ([]model.CodebaseBranchDTO, error) {
-	var codebaseBranches []model.CodebaseBranchDTO
-	for _, v := range cdPipeline.CodebaseBranch {
-		releaseBranchCR, err := getCodebaseBranchCR(edpRestClient, v, cdPipeline.Namespace)
-		if err != nil {
-			return nil, err
-		}
-
-		codebaseBranches = append(codebaseBranches, model.CodebaseBranchDTO{
-			CodebaseName: releaseBranchCR.Spec.CodebaseName,
-			BranchName:   releaseBranchCR.Spec.BranchName,
-		})
-	}
-	return codebaseBranches, nil
 }
 
 func updateActionLog(txn sql.Tx, cdPipeline model.CDPipeline, pipelineId int, schemaName string) error {
@@ -344,29 +290,6 @@ func updateCDPipelineStatus(txn sql.Tx, cdPipelineDb model.CDPipelineDTO, status
 	return nil
 }
 
-func getCodebaseBranchesId(txn sql.Tx, codebaseBranches []model.CodebaseBranchDTO, schemaName string) ([]int, error) {
-	var codebaseBranchesId []int
-	for _, v := range codebaseBranches {
-		codebaseBranchId, err := repository.GetCodebaseBranchesId(txn, v.CodebaseName, v.BranchName, schemaName)
-		if err != nil {
-			return nil, err
-		}
-		codebaseBranchesId = append(codebaseBranchesId, *codebaseBranchId)
-	}
-	return codebaseBranchesId, nil
-}
-
-func insertCDPipelineCodebaseBranch(txn sql.Tx, cdPipelineId int, codebaseBranchesId []int, schemaName string) error {
-	for _, v := range codebaseBranchesId {
-		err := repository.CreateCDPipelineCodebaseBranch(txn, cdPipelineId, v, schemaName)
-		if err != nil {
-			log.Printf("An error has occured while inserting CD Pipeline Codebase Branch row: %s", err)
-			return err
-		}
-	}
-	return nil
-}
-
 func createCDPipelineThirdPartyService(txn sql.Tx, cdPipelineId int, servicesId []int, schemaName string) error {
 	for _, serviceId := range servicesId {
 		err := repository.CreateCDPipelineThirdPartyService(txn, cdPipelineId, serviceId, schemaName)
@@ -374,29 +297,6 @@ func createCDPipelineThirdPartyService(txn sql.Tx, cdPipelineId int, servicesId 
 			return err
 		}
 	}
-	return nil
-}
-
-func createCDPipelineCodebaseBranch(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelineReadModel *model.CDPipelineDTO, cdPipeline model.CDPipeline, schemaName string) error {
-	codebaseBranches, err := getCodebaseBranchesData(cdPipeline, edpRestClient)
-	if err != nil {
-		log.Printf("An error has occured while getting Codebase Branch from k8s: %s", err)
-		return err
-	}
-	log.Printf("Fetched Codebase Branches for %s pipeline: %s", cdPipeline.Name, codebaseBranches)
-
-	codebaseBranchesId, err := getCodebaseBranchesId(txn, codebaseBranches, schemaName)
-	if err != nil {
-		log.Printf("An error has occured while getting codebase branch id: %s", err)
-		return err
-	}
-
-	err = insertCDPipelineCodebaseBranch(txn, cdPipelineReadModel.Id, codebaseBranchesId, schemaName)
-	if err != nil {
-		log.Printf("An error has occured while inserting CD Pipeline Codebase Branch row: %s", err)
-		return err
-	}
-
 	return nil
 }
 

@@ -7,15 +7,6 @@ import (
 )
 
 const (
-	CheckDuplicateCDPipelineActionLog = "select cdp.id " +
-		"	from \"%v\".cd_pipeline as cdp " +
-		"left join \"%v\".cd_pipeline_action_log cdpal on cdp.id = cdpal.cd_pipeline_id " +
-		"left join \"%v\".action_log al on cdpal.action_log_id = al.id " +
-		"where cdp.name = $1 " +
-		"  and al.event = $2 " +
-		"  and al.updated_at = $3 " +
-		"order by al.updated_at desc " +
-		"limit 1;"
 	InsertEventActionLog = "insert into \"%v\".action_log(event, detailed_message, username, updated_at) " +
 		"VALUES($1, $2, $3, $4) returning id;"
 
@@ -47,22 +38,4 @@ func CreateEventActionLog(txn sql.Tx, actionLog model.ActionLog, schemaName stri
 	err = stmt.QueryRow(actionLog.Event, "", actionLog.Username, actionLog.UpdatedAt).Scan(&id)
 
 	return &id, err
-}
-
-func CheckCDPipelineActionLogDuplicate(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string) (bool, error) {
-	stmt, err := txn.Prepare(fmt.Sprintf(CheckDuplicateCDPipelineActionLog, schemaName, schemaName, schemaName))
-	if err != nil {
-		return false, err
-	}
-	defer stmt.Close()
-
-	var id int
-	err = stmt.QueryRow(cdPipeline.Name, cdPipeline.ActionLog.Event, cdPipeline.ActionLog.UpdatedAt).Scan(&id)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
 }

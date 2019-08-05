@@ -8,11 +8,9 @@ import (
 
 const (
 	InsertCDPipeline                  = "insert into \"%v\".cd_pipeline(name, status) VALUES ($1, $2) returning id, name, status;"
-	InsertCDPipelineCodebaseBranch    = "insert into \"%v\".cd_pipeline_codebase_branch(cd_pipeline_id, codebase_branch_id) VALUES ($1, $2);"
 	SelectCDPipeline                  = "select * from \"%v\".cd_pipeline cdp where cdp.name = $1 ;"
 	UpdateCDPipelineStatusQuery       = "update \"%v\".cd_pipeline set status = $1 where id = $2 ;"
 	InsertCDPipelineThirdPartyService = "insert into \"%v\".cd_pipeline_third_party_service(cd_pipeline_id, third_party_service_id) values ($1, $2) ;"
-	DeleteAllPipelinesBranches        = "delete from \"%v\".cd_pipeline_codebase_branch cpcb  where cpcb.cd_pipeline_id = $1 ;"
 	InsertCDPipelineDockerStream      = "insert into \"%v\".cd_pipeline_docker_stream(cd_pipeline_id, codebase_docker_stream_id) VALUES ($1, $2);"
 	DeleteAllDockerStreams            = "delete from \"%v\".cd_pipeline_docker_stream cpds  where cpds.cd_pipeline_id = $1 ;"
 )
@@ -30,20 +28,6 @@ func CreateCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, status string, sc
 		return nil, err
 	}
 	return &cdPipelineDto, nil
-}
-
-func CreateCDPipelineCodebaseBranch(txn sql.Tx, pipelineId int, codebaseBranchId int, schemaName string) error {
-	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDPipelineCodebaseBranch, schemaName))
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(pipelineId, codebaseBranchId)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func GetCDPipeline(txn sql.Tx, cdPipelineName string, schemaName string) (*model.CDPipelineDTO, error) {
@@ -83,17 +67,6 @@ func CreateCDPipelineThirdPartyService(txn sql.Tx, pipelineId int, serviceId int
 	defer stmt.Close()
 
 	_, err = stmt.Exec(pipelineId, serviceId)
-	return err
-}
-
-func DeleteBranches(txn sql.Tx, pipelineId int, schemaName string) error {
-	stmt, err := txn.Prepare(fmt.Sprintf(DeleteAllPipelinesBranches, schemaName))
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(pipelineId)
 	return err
 }
 

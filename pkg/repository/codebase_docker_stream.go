@@ -29,8 +29,7 @@ const (
 	RemoveStageCodebaseDockerStream = "delete " +
 		"	from \"%v\".stage_codebase_docker_stream scds " +
 		"where scds.cd_stage_id = $1 returning scds.output_codebase_docker_stream_id id;"
-	RemoveCodebaseDockerStream = "delete from \"%v\".codebase_docker_stream cds where cds.id = $1 ;"
-	SelectSourceInputStream    = "select cds.id " +
+	SelectSourceInputStream = "select cds.id " +
 		"	from \"%[1]v\".codebase_docker_stream cds " +
 		"left join \"%[1]v\".codebase_branch cb on cds.codebase_branch_id = cb.id " +
 		"left join \"%[1]v\".codebase c on cb.codebase_id = c.id " +
@@ -149,20 +148,6 @@ func getOutputStreamIds(rows *sql.Rows) ([]int, error) {
 		return nil, err
 	}
 	return result, err
-}
-
-func DeleteCodebaseDockerStream(txn sql.Tx, id int, schemaName string) error {
-	stmt, err := txn.Prepare(fmt.Sprintf(RemoveCodebaseDockerStream, schemaName))
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(id)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func GetSourceInputStream(txn sql.Tx, cdPipelineName, codebaseName, schemaName string) (*int, error) {
