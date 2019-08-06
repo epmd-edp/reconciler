@@ -30,7 +30,6 @@ func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline) (*CDPipeline, error) 
 		Name:                  k8sObject.Spec.Name,
 		Namespace:             k8sObject.Namespace,
 		Tenant:                strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
-		CodebaseBranch:        spec.CodebaseBranch,
 		InputDockerStreams:    spec.InputDockerStreams,
 		ThirdPartyServices:    spec.ThirdPartyServices,
 		ActionLog:             *actionLog,

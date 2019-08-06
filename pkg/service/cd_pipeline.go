@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"k8s.io/client-go/rest"
 	"log"
 	"reconciler/pkg/model"
 	"reconciler/pkg/platform"
@@ -17,12 +16,11 @@ type CdPipelineService struct {
 	ClientSet platform.ClientSet
 }
 
-func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) error {
+func (s CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) error {
 	log.Printf("Start creation of CD Pipeline %v...", cdPipeline)
 	log.Println("Start transaction...")
 
-	txn, err := service.DB.Begin()
-	edpRestClient := service.ClientSet.EDPRestClient
+	txn, err := s.DB.Begin()
 	if err != nil {
 		log.Printf("Error has occurred during opening transaction: %v", err)
 		return errors.New("error has occurred during opening transaction")
@@ -30,7 +28,7 @@ func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) erro
 
 	schemaName := cdPipeline.Tenant
 
-	cdPipelineDb, err := getCDPipelineOrCreate(*txn, edpRestClient, cdPipeline, schemaName)
+	cdPipelineDb, err := s.getCDPipelineOrCreate(*txn, cdPipeline, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during get CD pipeline or create: %v", err)
 		_ = txn.Rollback()
@@ -62,7 +60,7 @@ func (service CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) erro
 	return nil
 }
 
-func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipeline model.CDPipeline, schemaName string) (*model.CDPipelineDTO, error) {
+func (s CdPipelineService) getCDPipelineOrCreate(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string) (*model.CDPipelineDTO, error) {
 	log.Printf("Start retrieving CD Pipeline by name: %v", cdPipeline)
 	cdPipelineReadModel, err := repository.GetCDPipeline(txn, cdPipeline.Name, schemaName)
 	if err != nil {
@@ -90,7 +88,7 @@ func getCDPipelineOrCreate(txn sql.Tx, edpRestClient *rest.RESTClient, cdPipelin
 			return stages[i].Order < stages[j].Order
 		})
 
-		err = updateStageCodebaseDockerStream(txn, edpRestClient, stages, cdPipelineReadModel.Name, schemaName)
+		err = s.updateStageCodebaseDockerStream(txn, stages, cdPipelineReadModel.Name, schemaName)
 		if err != nil {
 			return nil, err
 		}
@@ -174,14 +172,14 @@ func createApplicationToPromoteRow(txn sql.Tx, cdPipelineId int, applicationsToP
 	return nil
 }
 
-func updateStageCodebaseDockerStreamRelations(txn sql.Tx, edpRestClient *rest.RESTClient, stages []model.Stage, pipelineName string, schemaName string) error {
+func (s CdPipelineService) updateStageCodebaseDockerStreamRelations(txn sql.Tx, stages []model.Stage, pipelineName string, schemaName string) error {
 	log.Printf("Try to update Stage Codebase Docker Streams relations for stages: %v", stages)
 
 	for i := range stages {
 		stages[i].Tenant = schemaName
 		stages[i].CdPipelineName = pipelineName
 
-		pipelineCR, err := getCDPipelineCR(edpRestClient, stages[i].CdPipelineName, stages[i].Tenant+"-edp-cicd")
+		pipelineCR, err := getCDPipelineCR(s.ClientSet.EDPRestClient, stages[i].CdPipelineName, stages[i].Tenant+"-edp-cicd")
 		if err != nil {
 			return err
 		}
@@ -228,7 +226,7 @@ func deleteStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, schemaNam
 	return outputStreamIdsToRemove, nil
 }
 
-func updateStageCodebaseDockerStream(txn sql.Tx, edpRestClient *rest.RESTClient, stages []model.Stage, pipelineName string, schemaName string) error {
+func (s CdPipelineService) updateStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, pipelineName string, schemaName string) error {
 	if stages == nil {
 		log.Printf("There're no stages for %v CD Pipeline. Updating of Codebase Docker stream will not be executed.", pipelineName)
 		return nil
@@ -239,7 +237,7 @@ func updateStageCodebaseDockerStream(txn sql.Tx, edpRestClient *rest.RESTClient,
 		return err
 	}
 
-	err = updateStageCodebaseDockerStreamRelations(txn, edpRestClient, stages, pipelineName, schemaName)
+	err = s.updateStageCodebaseDockerStreamRelations(txn, stages, pipelineName, schemaName)
 	if err != nil {
 		return err
 	}

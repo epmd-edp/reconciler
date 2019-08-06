@@ -165,11 +165,8 @@ func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, 
 func updateSingleOutputStreamRelation(tx sql.Tx, stageId int, stage model.Stage, dto model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
 	log.Printf("Start update single relation outputstream for stage with id %v and stream: %v", stageId, dto)
 
-	ocImageStreamName := fmt.Sprintf("%v-%v-%v-verified", stage.CdPipelineName, stage.Name, dto.CodebaseName)
-
-	outputId, err := repository.GetCodebaseDockerStreamId(tx, ocImageStreamName, stage.Tenant)
+	outputId, err := tryToCreateOutputCodebaseDockerStreamIfDoesNotExist(tx, stage, dto)
 	if err != nil {
-		log.Printf("Cannot get Codebase Docker Stream Id %v: %v", ocImageStreamName, err)
 		return err
 	}
 
@@ -185,8 +182,36 @@ func updateSingleOutputStreamRelation(tx sql.Tx, stageId int, stage model.Stage,
 		return err
 	}
 
-	log.Printf("Start update single relation outputstream for stage with id %v and stream: %v", stageId, dto)
+	log.Printf("End update single relation outputstream for stage with id %v and stream: %v", stageId, dto)
 	return nil
+}
+
+func tryToCreateOutputCodebaseDockerStreamIfDoesNotExist(tx sql.Tx, stage model.Stage, dto model.CodebaseDockerStreamReadDTO) (*int, error) {
+	ocImageStreamName := fmt.Sprintf("%v-%v-%v-verified", stage.CdPipelineName, stage.Name, dto.CodebaseName)
+
+	var outputId *int
+
+	outputId, err := repository.GetCodebaseDockerStreamId(tx, ocImageStreamName, stage.Tenant)
+	if err != nil {
+		return nil, fmt.Errorf("cannot get Codebase Docker Stream Id %v: %v", ocImageStreamName, err)
+	}
+
+	if outputId == nil {
+		log.Println("Output stream has not been created. Try to create it ...")
+
+		branchId, err := repository.GetCodebaseDockerStreamBranchId(tx, dto.CodebaseDockerStreamId, stage.Tenant)
+		if err != nil {
+			return nil, fmt.Errorf("cannot get branch id by codebase docker stream id %v: %v", dto.CodebaseDockerStreamId, err)
+		}
+
+		outputId, err = repository.CreateCodebaseDockerStream(tx, stage.Tenant, dto.CodebaseId, branchId, ocImageStreamName)
+		if err != nil {
+			return nil, fmt.Errorf("cannot create codebase docker stream for dto: %v", dto)
+		}
+		log.Printf("Id of newly created docker stream is: %v", *outputId)
+	}
+
+	return outputId, nil
 }
 
 func setPreviousStageInputImageStream(tx sql.Tx, stage model.Stage, inputId int, outputId int) error {
