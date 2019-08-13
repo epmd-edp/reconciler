@@ -17,6 +17,11 @@ type StageService struct {
 	ClientSet platform.ClientSet
 }
 
+//PutStage creates record in DB for Stage.
+//The main cases which method do:
+//	- checks if stage can be created (checks if previous stage has been added)
+//	- update stage status
+//	- add record to Action Log for last operation
 func (service StageService) PutStage(stage model.Stage) error {
 	log.Printf("Start put stage: %v ...", stage)
 
@@ -52,7 +57,14 @@ func (service StageService) PutStage(stage model.Stage) error {
 		return fmt.Errorf("cannot create stage: %v", stage)
 	}
 
-	err = addActionLog(*txn, id, stage)
+	cdPipelineReadModel, err := repository.GetCDPipeline(*txn, stage.CdPipelineName, stage.Tenant)
+	if err != nil {
+		log.Printf("error has occured while fetching CD Pipeline %v: %v", stage.CdPipelineName, err)
+		_ = txn.Rollback()
+		return fmt.Errorf("cannot fetch CD Pipeline: %v", stage.CdPipelineName)
+	}
+
+	err = addActionLog(*txn, &cdPipelineReadModel.Id, stage)
 
 	if err != nil {
 		log.Printf("error has occured during the adding action log: %v", err)
@@ -325,7 +337,7 @@ func addActionLog(tx sql.Tx, id *int, stage model.Stage) error {
 		return err
 	}
 	log.Printf("Action log has been added. Id of newly created al is %v", *actionLogId)
-	err = repository.CreateStageActionLog(tx, stage.Tenant, *id, *actionLogId)
+	err = repository.CreateCDPipelineActionLog(tx, *id, *actionLogId, stage.Tenant)
 	if err != nil {
 		return err
 	}

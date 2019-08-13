@@ -26,8 +26,14 @@ type CDPipelineStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
+	Available       bool      `json:"available"`
 	LastTimeUpdated time.Time `json:"last_time_updated"`
 	Status          string    `json:"status"`
+	Username        string    `json:"username"`
+	Action          string    `json:"action"`
+	Result          string    `json:"result"`
+	DetailedMessage string    `json:"detailed_message"`
+	Value           string    `json:"value"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

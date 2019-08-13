@@ -2,7 +2,6 @@ package model
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"reconciler/models"
 	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
 	"testing"
 	"time"
@@ -18,7 +17,7 @@ func TestConvert(t *testing.T) {
 			Lang:      "java",
 			Framework: "spring-boot",
 			BuildTool: "maven",
-			Strategy:  models.Create,
+			Strategy:  edpv1alpha1.Create,
 		},
 		Status: edpv1alpha1.CodebaseStatus{
 			Available:       true,
