@@ -23,6 +23,7 @@ var cdPipelineActionMessageMap = map[string]string{
 	"accept_cd_pipeline_registration": "Accept CD Pipeline %v registration",
 	"jenkins_configuration":           "CI Jenkins pipelines codebase %v provisioning",
 	"setup_initial_structure":         "Initial structure for CD Pipeline %v is created",
+	"cd_pipeline_registration":        "CD Pipeline %v registration",
 }
 
 // ConvertToCDPipeline returns converted to DTO CDPipeline object from K8S.
@@ -63,11 +64,4 @@ func convertCDPipelineActionLog(cdPipelineName string, status edpv1alpha1.CDPipe
 		Result:          status.Result,
 		ActionMessage:   fmt.Sprintf(cdPipelineActionMessageMap[status.Action], cdPipelineName),
 	}
-}
-
-func getStatus(eventStatus string) string {
-	if eventStatus == "created" {
-		return "active"
-	}
-	return "inactive"
 }

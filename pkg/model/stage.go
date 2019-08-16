@@ -29,7 +29,7 @@ type QualityGate struct {
 
 var cdStageActionMessageMap = map[string]string{
 	"accept_cd_stage_registration":      "Accept CD Stage %v registration",
-	"fetching_user_settings_config_map": "Fetch User Settings from config map",
+	"fetching_user_settings_config_map": "Fetch User Settings from config map during CD Stage %v provision",
 	"openshift_project_creation":        "Creation of Openshift Project %v",
 	"jenkins_configuration":             "CI Jenkins pipelines codebase %v provisioning",
 	"setup_deployment_templates":        "Setup deployment templates for cd_stage %v",
