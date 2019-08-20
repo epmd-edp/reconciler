@@ -21,9 +21,10 @@ type CDPipeline struct {
 
 var cdPipelineActionMessageMap = map[string]string{
 	"accept_cd_pipeline_registration": "Accept CD Pipeline %v registration",
-	"jenkins_configuration":           "CI Jenkins pipelines codebase %v provisioning",
+	"jenkins_configuration":           "CI Jenkins pipelines %v provisioning",
 	"setup_initial_structure":         "Initial structure for CD Pipeline %v is created",
 	"cd_pipeline_registration":        "CD Pipeline %v registration",
+	"create_jenkins_directory":        "Create directory in Jenkins for CD Pipeline %v",
 }
 
 // ConvertToCDPipeline returns converted to DTO CDPipeline object from K8S.
