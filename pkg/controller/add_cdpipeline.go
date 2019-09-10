@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"reconciler/pkg/controller/cdpipeline"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/cdpipeline"
 )
 
 func init() {

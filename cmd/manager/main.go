@@ -7,8 +7,8 @@ import (
 	"os"
 	"runtime"
 
-	"reconciler/pkg/apis"
-	"reconciler/pkg/controller"
+	"github.com/epmd-edp/reconciler/v2/pkg/apis"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller"
 
 	"github.com/operator-framework/operator-sdk/pkg/log/zap"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"

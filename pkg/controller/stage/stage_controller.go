@@ -2,13 +2,13 @@ package stage
 
 import (
 	"context"
+	"github.com/epmd-edp/reconciler/v2/pkg/db"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/platform"
+	"github.com/epmd-edp/reconciler/v2/pkg/service"
 	"log"
-	"reconciler/pkg/db"
-	"reconciler/pkg/model"
-	"reconciler/pkg/platform"
-	"reconciler/pkg/service"
 
-	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
+	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"

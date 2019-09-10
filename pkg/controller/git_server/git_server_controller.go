@@ -2,13 +2,13 @@ package git_server
 
 import (
 	"context"
+	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/reconciler/v2/pkg/db"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/git_server"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/infrastructure"
 	errWrap "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
-	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
-	"reconciler/pkg/db"
-	"reconciler/pkg/model"
-	"reconciler/pkg/service/git_server"
-	"reconciler/pkg/service/infrastructure"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"

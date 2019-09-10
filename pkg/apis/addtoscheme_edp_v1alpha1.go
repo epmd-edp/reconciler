@@ -1,8 +1,8 @@
 package apis
 
 import (
+	"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 	"github.com/openshift/api/template/v1"
-	"reconciler/pkg/apis/edp/v1alpha1"
 )
 
 func init() {

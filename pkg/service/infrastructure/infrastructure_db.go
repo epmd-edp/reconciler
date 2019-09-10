@@ -3,8 +3,8 @@ package infrastructure
 import (
 	"database/sql"
 	"fmt"
+	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"github.com/pkg/errors"
-	"reconciler/pkg/repository"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 

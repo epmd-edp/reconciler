@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"reconciler/pkg/controller/git_server"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/git_server"
 )
 
 func init() {

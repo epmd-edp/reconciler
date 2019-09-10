@@ -2,8 +2,8 @@ package repository
 
 import (
 	"fmt"
-	"reconciler/pkg/db"
-	"reconciler/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/db"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"testing"
 	"time"
 )

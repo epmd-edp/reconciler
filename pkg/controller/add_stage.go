@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"reconciler/pkg/controller/stage"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/stage"
 )
 
 func init() {

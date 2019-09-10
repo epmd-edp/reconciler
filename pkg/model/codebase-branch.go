@@ -3,7 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
-	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
+	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 	"strings"
 )
 

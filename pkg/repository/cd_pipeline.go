@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"reconciler/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
 )
 
 const (

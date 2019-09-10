@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"reconciler/pkg/controller/codebasebranch"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/codebasebranch"
 )
 
 func init() {

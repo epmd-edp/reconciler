@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"reconciler/pkg/controller/template"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/template"
 )
 
 func init() {

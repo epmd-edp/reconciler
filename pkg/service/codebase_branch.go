@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"log"
-	"reconciler/pkg/model"
-	"reconciler/pkg/repository"
 )
 
 type CodebaseBranchService struct {

@@ -2,9 +2,9 @@ package model
 
 import (
 	"fmt"
+	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
 	"testing"
 	"time"
 )

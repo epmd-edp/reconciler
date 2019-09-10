@@ -13,18 +13,18 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"reconciler/pkg/apis/edp/v1alpha1.CodebaseBranch":            schema_pkg_apis_edp_v1alpha1_CodebaseBranch(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.CodebaseBranchSpec":        schema_pkg_apis_edp_v1alpha1_CodebaseBranchSpec(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.CodebaseBranchStatus":      schema_pkg_apis_edp_v1alpha1_CodebaseBranchStatus(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.Codebase":                  schema_pkg_apis_edp_v1alpha1_Codebase(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.CodebaseStatus":            schema_pkg_apis_edp_v1alpha1_CodebaseStatus(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.CDPipeline":                schema_pkg_apis_edp_v1alpha1_CDPipeline(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.CDPipelineSpec":            schema_pkg_apis_edp_v1alpha1_CDPipelineSpec(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.CDPipelineStatus":          schema_pkg_apis_edp_v1alpha1_CDPipelineStatus(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.Repository":                schema_pkg_apis_edp_v1alpha1_Repository(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.Stage":                     schema_pkg_apis_edp_v1alpha1_Stage(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.StageSpec":                 schema_pkg_apis_edp_v1alpha1_StageSpec(ref),
-		"reconciler/pkg/apis/edp/v1alpha1.StageStatus":               schema_pkg_apis_edp_v1alpha1_StageStatus(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CodebaseBranch":       schema_pkg_apis_edp_v1alpha1_CodebaseBranch(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CodebaseBranchSpec":   schema_pkg_apis_edp_v1alpha1_CodebaseBranchSpec(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CodebaseBranchStatus": schema_pkg_apis_edp_v1alpha1_CodebaseBranchStatus(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.Codebase":             schema_pkg_apis_edp_v1alpha1_Codebase(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CodebaseStatus":       schema_pkg_apis_edp_v1alpha1_CodebaseStatus(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CDPipeline":           schema_pkg_apis_edp_v1alpha1_CDPipeline(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CDPipelineSpec":       schema_pkg_apis_edp_v1alpha1_CDPipelineSpec(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CDPipelineStatus":     schema_pkg_apis_edp_v1alpha1_CDPipelineStatus(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.Repository":           schema_pkg_apis_edp_v1alpha1_Repository(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.Stage":                schema_pkg_apis_edp_v1alpha1_Stage(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.StageSpec":            schema_pkg_apis_edp_v1alpha1_StageSpec(ref),
+		"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.StageStatus":          schema_pkg_apis_edp_v1alpha1_StageStatus(ref),
 	}
 }
 
@@ -234,19 +234,19 @@ func schema_pkg_apis_edp_v1alpha1_CDPipeline(ref common.ReferenceCallback) commo
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.CDPipelineSpec"),
+							Ref: ref("github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CDPipelineSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.CDPipelineStatus"),
+							Ref: ref("github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CDPipelineStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"reconciler/pkg/apis/edp/v1alpha1.CDPipelineSpec", "reconciler/pkg/apis/edp/v1alpha1.CDPipelineStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CDPipelineSpec", "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.CDPipelineStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -358,19 +358,19 @@ func schema_pkg_apis_edp_v1alpha1_Stage(ref common.ReferenceCallback) common.Ope
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.StageSpec"),
+							Ref: ref("github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.StageSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("reconciler/pkg/apis/edp/v1alpha1.StageStatus"),
+							Ref: ref("github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.StageStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"reconciler/pkg/apis/edp/v1alpha1.StageSpec", "reconciler/pkg/apis/edp/v1alpha1.StageStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.StageSpec", "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1.StageStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 

@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/platform"
+	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"k8s.io/client-go/rest"
 	"log"
-	"reconciler/pkg/apis/edp/v1alpha1"
-	"reconciler/pkg/model"
-	"reconciler/pkg/platform"
-	"reconciler/pkg/repository"
 )
 
 type StageService struct {

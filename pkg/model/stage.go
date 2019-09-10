@@ -2,8 +2,8 @@ package model
 
 import (
 	"fmt"
+	"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 	"github.com/pkg/errors"
-	"reconciler/pkg/apis/edp/v1alpha1"
 	"strings"
 )
 

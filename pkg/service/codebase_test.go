@@ -2,10 +2,10 @@ package service
 
 import (
 	"fmt"
+	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/reconciler/v2/pkg/db"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	edpv1alpha1 "reconciler/pkg/apis/edp/v1alpha1"
-	"reconciler/pkg/db"
-	"reconciler/pkg/model"
 	"testing"
 	"time"
 )

@@ -3,9 +3,9 @@ package git_server
 import (
 	"database/sql"
 	"fmt"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"github.com/pkg/errors"
-	"reconciler/pkg/model"
-	"reconciler/pkg/repository"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 

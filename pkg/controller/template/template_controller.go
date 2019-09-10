@@ -2,11 +2,11 @@ package template
 
 import (
 	"context"
+	"github.com/epmd-edp/reconciler/v2/pkg/db"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/service"
 	"github.com/openshift/api/template/v1"
 	"log"
-	"reconciler/pkg/db"
-	"reconciler/pkg/model"
-	"reconciler/pkg/service"
 	"strings"
 	"time"
 
