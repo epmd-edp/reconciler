@@ -13,6 +13,10 @@ type BEService struct {
 	DB *sql.DB
 }
 
+const (
+	ApplicationType = "application"
+)
+
 func (service BEService) PutBE(be model.Codebase) error {
 	log.Printf("Start creation of business entity %v...", be)
 	log.Println("Start transaction...")
@@ -83,6 +87,18 @@ func getBeIdOrCreate(txn sql.Tx, be model.Codebase, schemaName string) (*int, er
 
 func createBE(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
 	log.Println("Start insertion in the repository business entity...")
+
+	if be.Type == ApplicationType {
+		log.Println("Fetching GitServer Id to set into codebase...")
+
+		serverId, err := repository.SelectGitServer(txn, be.GitServer, schemaName)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("cannot get git server: %v", be.GitServer))
+		}
+		log.Printf("GitServer is fetched: %v", serverId)
+		be.GitServerId = serverId
+	}
+
 	id, err := repository.CreateCodebase(txn, be, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during business entity creation: %v", err)

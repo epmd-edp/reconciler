@@ -35,6 +35,9 @@ type Codebase struct {
 	Description         string
 	TestReportFramework string
 	Status              string
+	GitServer           string
+	GitUrlPath          *string
+	GitServerId         *int
 }
 
 type ActionLog struct {
@@ -77,6 +80,7 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*Codebase, error) {
 		ActionLog: *status,
 		Type:      spec.Type,
 		Status:    k8sObject.Status.Value,
+		GitServer: spec.GitServer,
 	}
 
 	framework := spec.Framework
@@ -120,6 +124,11 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*Codebase, error) {
 	if spec.TestReportFramework != nil {
 		app.TestReportFramework = *spec.TestReportFramework
 	}
+
+	if spec.Strategy == "import" {
+		app.GitUrlPath = spec.GitUrlPath
+	}
+
 	return &app, nil
 }
 
