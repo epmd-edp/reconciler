@@ -18,6 +18,7 @@ type GitServer struct {
 	CreateCodeReviewPipeline bool
 	ActionLog                ActionLog
 	Tenant                   string
+	Name                     string
 }
 
 func ConvertToGitServer(k8sObj edpv1alpha1.GitServer) (*GitServer, error) {
@@ -39,6 +40,7 @@ func ConvertToGitServer(k8sObj edpv1alpha1.GitServer) (*GitServer, error) {
 		CreateCodeReviewPipeline: spec.CreateCodeReviewPipeline,
 		ActionLog:                *actionLog,
 		Tenant:                   strings.TrimSuffix(k8sObj.Namespace, "-edp-cicd"),
+		Name:                     k8sObj.Name,
 	}
 
 	return &gitServer, nil

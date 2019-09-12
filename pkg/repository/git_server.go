@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	InsertGitServerSql = "insert into \"%v\".git_server(name, available) values ($1, $2) returning id;"
+	InsertGitServerSql = "insert into \"%v\".git_server(name, hostname, available) values ($1, $2, $3) returning id;"
 	UpdateGitServerSql = "update \"%v\".git_server set available = $1 where id = $2;"
 	SelectGitServerSql = "select id from \"%v\".git_server where name = $1;"
 )
 
-func CreateGitServer(txn sql.Tx, serverName string, available bool, tenant string) (*int, error) {
+func CreateGitServer(txn sql.Tx, name string, hostname string, available bool, tenant string) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(InsertGitServerSql, tenant))
 	if err != nil {
 		return nil, err
@@ -19,7 +19,7 @@ func CreateGitServer(txn sql.Tx, serverName string, available bool, tenant strin
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(serverName, available).Scan(&id)
+	err = stmt.QueryRow(name, hostname, available).Scan(&id)
 	return &id, err
 }
 
