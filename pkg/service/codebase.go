@@ -88,16 +88,13 @@ func getBeIdOrCreate(txn sql.Tx, be model.Codebase, schemaName string) (*int, er
 func createBE(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
 	log.Println("Start insertion in the repository business entity...")
 
-	if be.Type == ApplicationType {
-		log.Println("Fetching GitServer Id to set into codebase...")
-
-		serverId, err := repository.SelectGitServer(txn, be.GitServer, schemaName)
-		if err != nil {
-			return nil, errors.New(fmt.Sprintf("cannot get git server: %v", be.GitServer))
-		}
-		log.Printf("GitServer is fetched: %v", serverId)
-		be.GitServerId = serverId
+	serverId, err := getGitServerId(txn, be.GitServer, schemaName)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("cannot get git server: %v", be.GitServer))
 	}
+	log.Printf("GitServer is fetched: %v", serverId)
+
+	be.GitServerId = serverId
 
 	id, err := repository.CreateCodebase(txn, be, schemaName)
 	if err != nil {
@@ -106,4 +103,15 @@ func createBE(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
 	}
 	log.Printf("Id of the newly created business entity is %v", *id)
 	return id, nil
+}
+
+func getGitServerId(txn sql.Tx, gitServerName string, schemaName string) (*int, error) {
+	log.Println("Fetching GitServer Id to set relation into codebase...")
+
+	serverId, err := repository.SelectGitServer(txn, gitServerName, schemaName)
+	if err != nil {
+		return nil, err
+	}
+
+	return serverId, nil
 }
