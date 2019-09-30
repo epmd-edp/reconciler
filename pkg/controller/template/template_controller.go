@@ -7,6 +7,8 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/service"
 	"github.com/openshift/api/template/v1"
 	"log"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"strings"
 	"time"
 
@@ -46,7 +48,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Template
-	err = c.Watch(&source.Kind{Type: &v1.Template{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &v1.Template{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			return false
+		},
+	})
 	if err != nil {
 		return err
 	}
@@ -95,6 +101,7 @@ func (r *ReconcileTemplate) Reconcile(request reconcile.Request) (reconcile.Resu
 
 		err = r.service.PutService(*service)
 		if err != nil {
+			log.Printf("Couldn't save service %v to DB", service.Name)
 			return reconcile.Result{RequeueAfter: time.Second * 120}, nil
 		}
 

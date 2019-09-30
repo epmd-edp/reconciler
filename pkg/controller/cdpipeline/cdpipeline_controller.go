@@ -6,6 +6,9 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/service"
+	"reflect"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 
@@ -54,8 +57,25 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	pred := predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			oldObject := e.ObjectOld.(*edpv1alpha1.CDPipeline)
+			newObject := e.ObjectNew.(*edpv1alpha1.CDPipeline)
+
+			if oldObject.Status.Value != newObject.Status.Value {
+				return true
+			}
+
+			if !reflect.DeepEqual(oldObject.Spec, newObject.Spec) {
+				return true
+			}
+
+			return false
+		},
+	}
+
 	// Watch for changes to primary resource CDPipeline
-	err = c.Watch(&source.Kind{Type: &edpv1alpha1.CDPipeline{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &edpv1alpha1.CDPipeline{}}, &handler.EnqueueRequestForObject{}, pred)
 	if err != nil {
 		return err
 	}
