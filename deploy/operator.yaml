@@ -45,3 +45,5 @@ spec:
                   key: password
             - name: DB_SSL_MODE
               value: "disable"
+            - name: PLATFORM_TYPE
+              value: "openshift"
