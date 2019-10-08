@@ -21,6 +21,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	errWrap "github.com/pkg/errors"
 )
 
 var log = logf.Log.WithName("controller_codebase")
@@ -123,8 +125,8 @@ func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	err = r.beService.PutBE(*c)
 	if err != nil {
-		log.Error(err, "an error has occurred while adding codebase into db", "codebase name", c.Name)
-		return reconcile.Result{RequeueAfter: 10 * time.Second}, nil
+		return reconcile.Result{RequeueAfter: 10 * time.Second},
+			errWrap.Wrapf(err, "an error has occurred while adding %v codebase into db", c.Name)
 	}
 
 	return reconcile.Result{}, nil

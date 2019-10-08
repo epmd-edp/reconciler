@@ -1,4 +1,4 @@
-package repository
+package jenkins_slave
 
 import (
 	"database/sql"
@@ -7,6 +7,7 @@ import (
 
 const (
 	SelectJenkinsSlaveSql = "select id from \"%v\".jenkins_slave where name = $1;"
+	InsertJenkinsSlaveSql = "insert into \"%v\".jenkins_slave(name) values ($1)"
 )
 
 func SelectJenkinsSlave(txn sql.Tx, name, tenant string) (*int, error) {
@@ -25,4 +26,16 @@ func SelectJenkinsSlave(txn sql.Tx, name, tenant string) (*int, error) {
 		return nil, err
 	}
 	return &id, err
+}
+
+func CreateJenkinsSlave(txn sql.Tx, name string, tenant string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(InsertJenkinsSlaveSql, tenant))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(name)
+
+	return err
 }

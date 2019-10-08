@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
+	"github.com/epmd-edp/reconciler/v2/pkg/repository/jenkins-slave"
 	"log"
 )
 
@@ -97,7 +98,7 @@ func createBE(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
 	be.GitServerId = serverId
 
 	if be.JenkinsSlave != "" {
-		jsId, err := repository.SelectJenkinsSlave(txn, be.JenkinsSlave, schemaName)
+		jsId, err := jenkins_slave.SelectJenkinsSlave(txn, be.JenkinsSlave, schemaName)
 		if err != nil || jsId == nil {
 			return nil, errors.New(fmt.Sprintf("couldn't get jenkins slave id: %v", be.JenkinsSlave))
 		}
