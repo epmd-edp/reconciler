@@ -38,6 +38,8 @@ type Codebase struct {
 	GitServer           string
 	GitUrlPath          *string
 	GitServerId         *int
+	JenkinsSlave        string
+	JenkinsSlaveId      *int
 }
 
 type ActionLog struct {
@@ -71,65 +73,66 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*Codebase, error) {
 
 	status := convertActionLog(k8sObject.Name, k8sObject.Status)
 
-	app := Codebase{
-		Tenant:    strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
-		Name:      k8sObject.Name,
-		Language:  spec.Lang,
-		BuildTool: spec.BuildTool,
-		Strategy:  string(spec.Strategy),
-		ActionLog: *status,
-		Type:      spec.Type,
-		Status:    k8sObject.Status.Value,
-		GitServer: spec.GitServer,
+	c := Codebase{
+		Tenant:       strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
+		Name:         k8sObject.Name,
+		Language:     spec.Lang,
+		BuildTool:    spec.BuildTool,
+		Strategy:     string(spec.Strategy),
+		ActionLog:    *status,
+		Type:         spec.Type,
+		Status:       k8sObject.Status.Value,
+		GitServer:    spec.GitServer,
+		JenkinsSlave: spec.JenkinsSlave,
 	}
 
 	framework := spec.Framework
 	if framework == "" {
-		app.Framework = nil
+		c.Framework = nil
 	} else {
 		lowerFramework := strings.ToLower(framework)
-		app.Framework = &lowerFramework
+		c.Framework = &lowerFramework
 	}
 
 	if spec.Repository != nil {
-		app.RepositoryUrl = spec.Repository.Url
+		c.RepositoryUrl = spec.Repository.Url
 	} else {
-		app.RepositoryUrl = ""
+		c.RepositoryUrl = ""
 	}
 
 	if spec.Route != nil {
-		app.RouteSite = spec.Route.Site
-		app.RoutePath = spec.Route.Path
+		c.RouteSite = spec.Route.Site
+		c.RoutePath = spec.Route.Path
 	} else {
-		app.RouteSite = ""
-		app.RoutePath = ""
+		c.RouteSite = ""
+		c.RoutePath = ""
 	}
 
 	if spec.Database != nil {
-		app.DatabaseKind = spec.Database.Kind
-		app.DatabaseVersion = spec.Database.Version
-		app.DatabaseStorage = spec.Database.Storage
-		app.DatabaseCapacity = spec.Database.Capacity
+		c.DatabaseKind = spec.Database.Kind
+		c.DatabaseVersion = spec.Database.Version
+		c.DatabaseStorage = spec.Database.Storage
+		c.DatabaseCapacity = spec.Database.Capacity
 	} else {
-		app.DatabaseKind = ""
-		app.DatabaseVersion = ""
-		app.DatabaseStorage = ""
-		app.DatabaseCapacity = ""
+		c.DatabaseKind = ""
+		c.DatabaseVersion = ""
+		c.DatabaseStorage = ""
+		c.DatabaseCapacity = ""
 	}
 
 	if spec.Description != nil {
-		app.Description = *spec.Description
+		c.Description = *spec.Description
 	}
 
 	if spec.TestReportFramework != nil {
-		app.TestReportFramework = *spec.TestReportFramework
+		c.TestReportFramework = *spec.TestReportFramework
 	}
 
 	if spec.Strategy == "import" {
-		app.GitUrlPath = spec.GitUrlPath
+		c.GitUrlPath = spec.GitUrlPath
 	}
 
-	return &app, nil
+	return &c, nil
 }
 
 func convertActionLog(name string, status edpv1alpha1.CodebaseStatus) *ActionLog {

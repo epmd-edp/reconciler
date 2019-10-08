@@ -96,6 +96,16 @@ func createBE(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
 
 	be.GitServerId = serverId
 
+	if be.JenkinsSlave != "" {
+		jsId, err := repository.SelectJenkinsSlave(txn, be.JenkinsSlave, schemaName)
+		if err != nil || jsId == nil {
+			return nil, errors.New(fmt.Sprintf("couldn't get jenkins slave id: %v", be.JenkinsSlave))
+		}
+		log.Printf("Jenkins Slave Id for %v codebase is %v", be.Name, *jsId)
+
+		be.JenkinsSlaveId = jsId
+	}
+
 	id, err := repository.CreateCodebase(txn, be, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during business entity creation: %v", err)

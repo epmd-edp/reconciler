@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"time"
 
 	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 
@@ -118,9 +119,13 @@ func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	log.WithValues("Codebase", instance)
 
-	app, _ := model.Convert(*instance)
+	c, _ := model.Convert(*instance)
 
-	_ = r.beService.PutBE(*app)
+	err = r.beService.PutBE(*c)
+	if err != nil {
+		log.Error(err, "an error has occurred while adding codebase into db", "codebase name", c.Name)
+		return reconcile.Result{RequeueAfter: 10 * time.Second}, nil
+	}
 
 	return reconcile.Result{}, nil
 }
