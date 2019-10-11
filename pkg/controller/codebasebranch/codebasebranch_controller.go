@@ -115,8 +115,6 @@ func (r *ReconcileCodebaseBranch) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, err
 	}
 
-	reqLogger.Info("CodebaseBranch", instance)
-
 	app, _ := model.ConvertToCodebaseBranch(*instance)
 	err = r.cbService.PutCodebaseBranch(*app)
 	if err != nil {

@@ -24,6 +24,7 @@ func (s JenkinsSlaveService) CreateSlavesOrDoNothing(slaves []jenkinsV2Api.Slave
 	for _, s := range slaves {
 		id, err := jenkins_slave.SelectJenkinsSlave(*txn, s.Name, schemaName)
 		if err != nil {
+			_ = txn.Rollback()
 			return err
 		}
 
