@@ -109,7 +109,7 @@ func createBE(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
 	}
 
 	if be.JobProvisioning != "" {
-		jpId, err := jp.SelectJobProvisioning(txn, be.JobProvisioning, schemaName)
+		jpId, err := jp.SelectJobProvision(txn, be.JobProvisioning, schemaName)
 		if err != nil || jpId == nil {
 			return nil, errors.New(fmt.Sprintf("couldn't get job provisioning id: %v", be.JobProvisioning))
 		}

@@ -66,6 +66,8 @@ github.com/epmd-edp/gerrit-operator/v2 v2.1.0-52/go.mod h1:NUerZ1Gse7TCf0ltzTx08
 github.com/epmd-edp/jenkins-operator/v2 v2.1.0-32/go.mod h1:yVeuimCbYOgqjwMiqc1piFj3HohgfcYMjE4fWl2lPVw=
 github.com/epmd-edp/jenkins-operator/v2 v2.2.0-77 h1:YL4z1ogagql4c8lusef0/wjmU86tV0PdjEGILo2USU8=
 github.com/epmd-edp/jenkins-operator/v2 v2.2.0-77/go.mod h1:gxIxCMeloTqzGLL8JOh467SQvGh5GYFqn04bESr3Px8=
+github.com/epmd-edp/jenkins-operator/v2 v2.2.0-81 h1:Iz4QzR3PNcAlMpHLTMbIzgCJlIc5xkMANKTYhEcDt7U=
+github.com/epmd-edp/jenkins-operator/v2 v2.2.0-81/go.mod h1:gxIxCMeloTqzGLL8JOh467SQvGh5GYFqn04bESr3Px8=
 github.com/epmd-edp/keycloak-operator v1.0.31-alpha-56/go.mod h1:uXEmg98UyXkMVe9deHTkz0wF7fb47geazmAoiQAb/Zw=
 github.com/evanphx/json-patch v4.0.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch v4.5.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
