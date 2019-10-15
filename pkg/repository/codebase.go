@@ -10,8 +10,8 @@ import (
 const (
 	InsertCodebase = "insert into \"%v\".codebase(name, type, language, framework, build_tool, strategy, repository_url, route_site," +
 		" route_path, database_kind, database_version, database_capacity, database_storage, status, test_report_framework, description," +
-		" git_server_id, git_project_path, jenkins_slave_id)" +
-		" values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) returning id;"
+		" git_server_id, git_project_path, jenkins_slave_id, job_provisioning_id)" +
+		" values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) returning id;"
 	SelectCodebase       = "select id from \"%v\".codebase where name=$1;"
 	SelectCodebaseType   = "select type from \"%v\".codebase where id=$1;"
 	UpdateCodebaseStatus = "update \"%v\".codebase set status = $1 where id = $2;"
@@ -49,7 +49,8 @@ func CreateCodebase(txn sql.Tx, cb model.Codebase, schemaName string) (*int, err
 		strings.ToLower(cb.BuildTool), strings.ToLower(cb.Strategy), cb.RepositoryUrl, cb.RouteSite, cb.RoutePath,
 		cb.DatabaseKind, cb.DatabaseVersion, cb.DatabaseCapacity, cb.DatabaseStorage, cb.Status,
 		cb.TestReportFramework, cb.Description,
-		getIntOrNil(cb.GitServerId), getStringOrNil(cb.GitUrlPath), getIntOrNil(cb.JenkinsSlaveId)).Scan(&id)
+		getIntOrNil(cb.GitServerId), getStringOrNil(cb.GitUrlPath), getIntOrNil(cb.JenkinsSlaveId),
+		getIntOrNil(cb.JobProvisioningId)).Scan(&id)
 
 	if err != nil {
 		return nil, err

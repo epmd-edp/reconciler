@@ -40,6 +40,8 @@ type Codebase struct {
 	GitServerId         *int
 	JenkinsSlave        string
 	JenkinsSlaveId      *int
+	JobProvisioning     string
+	JobProvisioningId   *int
 }
 
 type ActionLog struct {
@@ -74,16 +76,17 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*Codebase, error) {
 	status := convertActionLog(k8sObject.Name, k8sObject.Status)
 
 	c := Codebase{
-		Tenant:       strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
-		Name:         k8sObject.Name,
-		Language:     spec.Lang,
-		BuildTool:    spec.BuildTool,
-		Strategy:     string(spec.Strategy),
-		ActionLog:    *status,
-		Type:         spec.Type,
-		Status:       k8sObject.Status.Value,
-		GitServer:    spec.GitServer,
-		JenkinsSlave: spec.JenkinsSlave,
+		Tenant:          strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
+		Name:            k8sObject.Name,
+		Language:        spec.Lang,
+		BuildTool:       spec.BuildTool,
+		Strategy:        string(spec.Strategy),
+		ActionLog:       *status,
+		Type:            spec.Type,
+		Status:          k8sObject.Status.Value,
+		GitServer:       spec.GitServer,
+		JenkinsSlave:    spec.JenkinsSlave,
+		JobProvisioning: spec.JobProvisioning,
 	}
 
 	framework := spec.Framework

@@ -7,6 +7,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository/jenkins-slave"
+	jp "github.com/epmd-edp/reconciler/v2/pkg/repository/job-provisioning"
 	"log"
 )
 
@@ -105,6 +106,17 @@ func createBE(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
 		log.Printf("Jenkins Slave Id for %v codebase is %v", be.Name, *jsId)
 
 		be.JenkinsSlaveId = jsId
+	}
+
+	if be.JobProvisioning != "" {
+		jpId, err := jp.SelectJobProvisioning(txn, be.JobProvisioning, schemaName)
+		if err != nil || jpId == nil {
+			return nil, errors.New(fmt.Sprintf("couldn't get job provisioning id: %v", be.JobProvisioning))
+		}
+
+		log.Printf("Job Probisioning Id for %v codebase is %v", be.Name, *jpId)
+
+		be.JobProvisioningId = jpId
 	}
 
 	id, err := repository.CreateCodebase(txn, be, schemaName)
