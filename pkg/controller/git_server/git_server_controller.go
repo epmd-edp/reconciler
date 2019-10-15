@@ -5,7 +5,7 @@ import (
 	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
-	"github.com/epmd-edp/reconciler/v2/pkg/service/git_server"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/git"
 	"github.com/epmd-edp/reconciler/v2/pkg/service/infrastructure"
 	errWrap "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -35,7 +35,7 @@ func Add(mgr manager.Manager) error {
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileGitServer{
 		Client: mgr.GetClient(),
-		GitServerService: git_server.GitServerService{
+		GitServerService: git.GitServerService{
 			DB: db.Instance,
 		},
 		InfrastructureDbService: infrastructure.InfrastructureDbService{
@@ -68,7 +68,7 @@ type ReconcileGitServer struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	Client                  client.Client
-	GitServerService        git_server.GitServerService
+	GitServerService        git.GitServerService
 	InfrastructureDbService infrastructure.InfrastructureDbService
 }
 
@@ -107,7 +107,7 @@ func (r *ReconcileGitServer) Reconcile(request reconcile.Request) (reconcile.Res
 	reqLogger.Info("Check schema: ", "schema", gitServer.Tenant, "exists", exists)
 
 	if exists {
-		err := r.GitServerService.CreateOrUpdateGitServerRecord(*gitServer)
+		err := r.GitServerService.PutGitServer(*gitServer)
 		if err != nil {
 			return reconcile.Result{}, err
 		}

@@ -1,4 +1,4 @@
-package git_server
+package git
 
 import (
 	"database/sql"
@@ -15,8 +15,10 @@ type GitServerService struct {
 	DB *sql.DB
 }
 
-func (s GitServerService) CreateOrUpdateGitServerRecord(gitServer model.GitServer) error {
-	log.Info("Start CreateOrUpdateGitServerRecord method", "Git host", gitServer.GitHost)
+// PutGitServer creates record in persistent storage, if corresponding git server does not exist already or updates
+// existing record
+func (s GitServerService) PutGitServer(gitServer model.GitServer) error {
+	log.Info("Start PutGitServer method", "Git host", gitServer.GitHost)
 
 	txn, err := s.DB.Begin()
 	if err != nil {
@@ -25,6 +27,7 @@ func (s GitServerService) CreateOrUpdateGitServerRecord(gitServer model.GitServe
 
 	id, err := repository.SelectGitServer(*txn, gitServer.Name, gitServer.Tenant)
 	if err != nil {
+		_ = txn.Rollback()
 		return errors.Wrap(err, fmt.Sprintf("an error has occurred while fetching Git Server Record %v", gitServer.Name))
 	}
 
@@ -33,6 +36,7 @@ func (s GitServerService) CreateOrUpdateGitServerRecord(gitServer model.GitServe
 
 		err = repository.UpdateGitServer(*txn, id, gitServer.ActionLog.Result == "success", gitServer.Tenant)
 		if err != nil {
+			_ = txn.Rollback()
 			return errors.Wrap(err, fmt.Sprintf("an error has occurred while updating Git Server Record %v", gitServer.Name))
 		}
 	} else {
@@ -40,6 +44,7 @@ func (s GitServerService) CreateOrUpdateGitServerRecord(gitServer model.GitServe
 
 		_, err = repository.CreateGitServer(*txn, gitServer.Name, gitServer.GitHost, gitServer.ActionLog.Result == "success", gitServer.Tenant)
 		if err != nil {
+			_ = txn.Rollback()
 			return errors.Wrap(err, fmt.Sprintf("an error has occurred while creating Git Server Record %v", gitServer.GitHost))
 		}
 	}
@@ -49,7 +54,7 @@ func (s GitServerService) CreateOrUpdateGitServerRecord(gitServer model.GitServe
 		return err
 	}
 
-	log.Info("End CreateOrUpdateGitServerRecord method", "Git host", gitServer.GitHost)
+	log.Info("End PutGitServer method", "Git host", gitServer.GitHost)
 
 	return nil
 }
