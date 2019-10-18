@@ -151,7 +151,7 @@ func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, 
 		return err
 	}
 
-	outputId, err := repository.CreateCodebaseDockerStream(tx, stage.Tenant, dto.CodebaseId, branchId, ocImageStreamName)
+	outputId, err := repository.CreateCodebaseDockerStream(tx, stage.Tenant, branchId, ocImageStreamName)
 	if err != nil {
 		log.Printf("Cannot create codebase docker stream for dto: %v", dto)
 		return err
@@ -216,7 +216,7 @@ func tryToCreateOutputCodebaseDockerStreamIfDoesNotExist(tx sql.Tx, stage model.
 			return nil, fmt.Errorf("cannot get branch id by codebase docker stream id %v: %v", dto.CodebaseDockerStreamId, err)
 		}
 
-		outputId, err = repository.CreateCodebaseDockerStream(tx, stage.Tenant, dto.CodebaseId, branchId, ocImageStreamName)
+		outputId, err = repository.CreateCodebaseDockerStream(tx, stage.Tenant, branchId, ocImageStreamName)
 		if err != nil {
 			return nil, fmt.Errorf("cannot create codebase docker stream for dto: %v", dto)
 		}

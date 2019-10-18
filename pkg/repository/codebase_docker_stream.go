@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	CreateCodebaseDockerStreamQuery = "insert into \"%v\".codebase_docker_stream(codebase_id, codebase_branch_id, oc_image_stream_name)" +
-		" values($1, $2, $3) returning id;"
+	CreateCodebaseDockerStreamQuery = "insert into \"%v\".codebase_docker_stream(codebase_branch_id, oc_image_stream_name)" +
+		" values($1, $2) returning id;"
 	GetDockerStreamsByPipelineNameQuery = "select cds.id, c.id codebase_id, c.name " +
 		"from \"%[1]v\".codebase_docker_stream cds " +
 		"left join \"%[1]v\".codebase_branch cb on cds.codebase_branch_id = cb.id " +
@@ -41,14 +41,14 @@ const (
 	SelectCodebaseDockerStreamBranchId = "select cds.codebase_branch_id from \"%v\".codebase_docker_stream cds where cds.id = $1;"
 )
 
-func CreateCodebaseDockerStream(txn sql.Tx, schemaName string, codebaseId int, branchId *int, ocImageStreamName string) (id *int, err error) {
+func CreateCodebaseDockerStream(txn sql.Tx, schemaName string, branchId *int, ocImageStreamName string) (id *int, err error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(CreateCodebaseDockerStreamQuery, schemaName))
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(codebaseId, branchId, ocImageStreamName).Scan(&id)
+	err = stmt.QueryRow(branchId, ocImageStreamName).Scan(&id)
 	return
 }
 
