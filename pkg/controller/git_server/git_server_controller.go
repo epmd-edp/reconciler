@@ -2,7 +2,7 @@ package git_server
 
 import (
 	"context"
-	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/service/git"
@@ -53,7 +53,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource GitServer
-	err = c.Watch(&source.Kind{Type: &edpv1alpha1.GitServer{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &edpv1alpha1Codebase.GitServer{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func (r *ReconcileGitServer) Reconcile(request reconcile.Request) (reconcile.Res
 	reqLogger.Info("Reconciling GitServer")
 
 	// Fetch the GitServer instance
-	instance := &edpv1alpha1.GitServer{}
+	instance := &edpv1alpha1Codebase.GitServer{}
 	err := r.Client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {

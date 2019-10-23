@@ -10,8 +10,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"time"
 
-	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,6 +21,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	errWrap "github.com/pkg/errors"
+
+	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
 )
 
 var log = logf.Log.WithName("controller_codebase")
@@ -59,8 +59,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	pred := predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldObject := e.ObjectOld.(*edpv1alpha1.Codebase)
-			newObject := e.ObjectNew.(*edpv1alpha1.Codebase)
+			oldObject := e.ObjectOld.(*edpv1alpha1Codebase.Codebase)
+			newObject := e.ObjectNew.(*edpv1alpha1Codebase.Codebase)
 
 			if oldObject.Status.Value != newObject.Status.Value {
 				return true
@@ -75,7 +75,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Codebase
-	err = c.Watch(&source.Kind{Type: &edpv1alpha1.Codebase{}}, &handler.EnqueueRequestForObject{}, pred)
+	err = c.Watch(&source.Kind{Type: &edpv1alpha1Codebase.Codebase{}}, &handler.EnqueueRequestForObject{}, pred)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Resu
 	reqLogger.Info("Reconciling Codebase")
 
 	// Fetch the Codebase instance
-	instance := &edpv1alpha1.Codebase{}
+	instance := &edpv1alpha1Codebase.Codebase{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {

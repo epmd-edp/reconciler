@@ -3,7 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
-	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
 	"strings"
 	"time"
 )
@@ -42,6 +42,7 @@ type Codebase struct {
 	JenkinsSlaveId      *int
 	JobProvisioning     string
 	JobProvisioningId   *int
+	DeploymentScript    string
 }
 
 type ActionLog struct {
@@ -64,58 +65,56 @@ var codebaseActionMessageMap = map[string]string{
 	"setup_deployment_templates":     "Setup deployment templates for codebase %v",
 }
 
-func Convert(k8sObject edpv1alpha1.Codebase) (*Codebase, error) {
+func Convert(k8sObject edpv1alpha1Codebase.Codebase) (*Codebase, error) {
 	if &k8sObject == nil {
 		return nil, errors.New("k8s object cannot be nil")
 	}
-	spec := k8sObject.Spec
-	if &spec == nil {
+	s := k8sObject.Spec
+	if &s == nil {
 		return nil, errors.New("k8s spec cannot be nil")
 	}
 
 	status := convertActionLog(k8sObject.Name, k8sObject.Status)
 
 	c := Codebase{
-		Tenant:          strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
-		Name:            k8sObject.Name,
-		Language:        spec.Lang,
-		BuildTool:       spec.BuildTool,
-		Strategy:        string(spec.Strategy),
-		ActionLog:       *status,
-		Type:            spec.Type,
-		Status:          k8sObject.Status.Value,
-		GitServer:       spec.GitServer,
-		JenkinsSlave:    spec.JenkinsSlave,
-		JobProvisioning: spec.JobProvisioning,
+		Tenant:           strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
+		Name:             k8sObject.Name,
+		Language:         s.Lang,
+		BuildTool:        s.BuildTool,
+		Strategy:         string(s.Strategy),
+		ActionLog:        *status,
+		Type:             s.Type,
+		Status:           k8sObject.Status.Value,
+		GitServer:        s.GitServer,
+		JenkinsSlave:     s.JenkinsSlave,
+		JobProvisioning:  s.JobProvisioning,
+		DeploymentScript: s.DeploymentScript,
 	}
 
-	framework := spec.Framework
-	if framework == "" {
-		c.Framework = nil
-	} else {
-		lowerFramework := strings.ToLower(framework)
+	if s.Framework != nil {
+		lowerFramework := strings.ToLower(*s.Framework)
 		c.Framework = &lowerFramework
 	}
 
-	if spec.Repository != nil {
-		c.RepositoryUrl = spec.Repository.Url
+	if s.Repository != nil {
+		c.RepositoryUrl = s.Repository.Url
 	} else {
 		c.RepositoryUrl = ""
 	}
 
-	if spec.Route != nil {
-		c.RouteSite = spec.Route.Site
-		c.RoutePath = spec.Route.Path
+	if s.Route != nil {
+		c.RouteSite = s.Route.Site
+		c.RoutePath = s.Route.Path
 	} else {
 		c.RouteSite = ""
 		c.RoutePath = ""
 	}
 
-	if spec.Database != nil {
-		c.DatabaseKind = spec.Database.Kind
-		c.DatabaseVersion = spec.Database.Version
-		c.DatabaseStorage = spec.Database.Storage
-		c.DatabaseCapacity = spec.Database.Capacity
+	if s.Database != nil {
+		c.DatabaseKind = s.Database.Kind
+		c.DatabaseVersion = s.Database.Version
+		c.DatabaseStorage = s.Database.Storage
+		c.DatabaseCapacity = s.Database.Capacity
 	} else {
 		c.DatabaseKind = ""
 		c.DatabaseVersion = ""
@@ -123,22 +122,22 @@ func Convert(k8sObject edpv1alpha1.Codebase) (*Codebase, error) {
 		c.DatabaseCapacity = ""
 	}
 
-	if spec.Description != nil {
-		c.Description = *spec.Description
+	if s.Description != nil {
+		c.Description = *s.Description
 	}
 
-	if spec.TestReportFramework != nil {
-		c.TestReportFramework = *spec.TestReportFramework
+	if s.TestReportFramework != nil {
+		c.TestReportFramework = *s.TestReportFramework
 	}
 
-	if spec.Strategy == "import" {
-		c.GitUrlPath = spec.GitUrlPath
+	if s.Strategy == "import" {
+		c.GitUrlPath = s.GitUrlPath
 	}
 
 	return &c, nil
 }
 
-func convertActionLog(name string, status edpv1alpha1.CodebaseStatus) *ActionLog {
+func convertActionLog(name string, status edpv1alpha1Codebase.CodebaseStatus) *ActionLog {
 	if &status == nil {
 		return nil
 	}
@@ -148,9 +147,9 @@ func convertActionLog(name string, status edpv1alpha1.CodebaseStatus) *ActionLog
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
-		Action:          status.Action,
-		Result:          status.Result,
-		ActionMessage:   fmt.Sprintf(codebaseActionMessageMap[status.Action], name),
+		Action:          string(status.Action),
+		Result:          string(status.Result),
+		ActionMessage:   fmt.Sprintf(codebaseActionMessageMap[string(status.Action)], name),
 	}
 }
 

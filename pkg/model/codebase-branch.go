@@ -3,7 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
-	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
 	"strings"
 )
 
@@ -22,7 +22,7 @@ var codebaseBranchActionMessageMap = map[string]string{
 	"accept_codebase_branch_registration": "Accept branch %v for codebase %v registration",
 }
 
-func ConvertToCodebaseBranch(k8sObject edpv1alpha1.CodebaseBranch) (*CodebaseBranch, error) {
+func ConvertToCodebaseBranch(k8sObject edpv1alpha1Codebase.CodebaseBranch) (*CodebaseBranch, error) {
 	if &k8sObject == nil {
 		return nil, errors.New("k8s object application branch object should not be nil")
 	}
@@ -42,7 +42,7 @@ func ConvertToCodebaseBranch(k8sObject edpv1alpha1.CodebaseBranch) (*CodebaseBra
 	return &branch, nil
 }
 
-func convertCodebaseBranchActionLog(brName, cbName string, status edpv1alpha1.CodebaseBranchStatus) *ActionLog {
+func convertCodebaseBranchActionLog(brName, cbName string, status edpv1alpha1Codebase.CodebaseBranchStatus) *ActionLog {
 	if &status == nil {
 		return nil
 	}
@@ -52,8 +52,8 @@ func convertCodebaseBranchActionLog(brName, cbName string, status edpv1alpha1.Co
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
-		Action:          status.Action,
-		Result:          status.Result,
-		ActionMessage:   fmt.Sprintf(codebaseBranchActionMessageMap[status.Action], brName, cbName),
+		Action:          string(status.Action),
+		Result:          string(status.Result),
+		ActionMessage:   fmt.Sprintf(codebaseBranchActionMessageMap[string(status.Action)], brName, cbName),
 	}
 }

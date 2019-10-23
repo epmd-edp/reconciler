@@ -1,7 +1,7 @@
 package platform
 
 import (
-	"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
 	appsV1client "github.com/openshift/client-go/apps/clientset/versioned/typed/apps/v1"
 	projectV1Client "github.com/openshift/client-go/project/clientset/versioned/typed/project/v1"
 	routeV1Client "github.com/openshift/client-go/route/clientset/versioned/typed/route/v1"
@@ -123,8 +123,8 @@ func createCrdClient(cfg *rest.Config) (*rest.RESTClient, error) {
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&v1alpha1.CodebaseBranch{},
-		&v1alpha1.CodebaseBranchList{},
+		&edpv1alpha1Codebase.CodebaseBranch{},
+		&edpv1alpha1Codebase.CodebaseBranchList{},
 	)
 
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
