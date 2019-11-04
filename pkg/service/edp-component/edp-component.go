@@ -2,10 +2,12 @@ package edp_component
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	ec "github.com/epmd-edp/reconciler/v2/pkg/repository/edp-component"
 	"github.com/pkg/errors"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"strings"
 )
 
 var log = logf.Log.WithName("edp-component-service")
@@ -34,6 +36,8 @@ func (s EDPComponentService) PutEDPComponent(component model.EDPComponent, schem
 		return nil
 	}
 
+	tryToModifyUrl(&component)
+
 	err = ec.CreateEDPComponent(*t, component, schemaName)
 	if err != nil {
 		_ = t.Rollback()
@@ -49,4 +53,10 @@ func (s EDPComponentService) PutEDPComponent(component model.EDPComponent, schem
 	log.Info("End executing PutEDPComponent method... ", "type", component.Type)
 
 	return nil
+}
+
+func tryToModifyUrl(c *model.EDPComponent) {
+	if !strings.HasPrefix(c.Url, "https://") {
+		c.Url = fmt.Sprintf("https://%v", c.Url)
+	}
 }
