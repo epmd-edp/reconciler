@@ -13,11 +13,18 @@ spec:
         name: reconciler-v2
     spec:
       serviceAccountName: edp
+      securityContext:
+        runAsUser: 999 
+        runAsNonRoot: true
+        runAsGroup: 999
+        fsGroup: 999
       containers:
         - name: reconciler-v2
           # Replace this with the built image name
           image: REPLACE_IMAGE
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
           env:
             - name: WATCH_NAMESPACE
               value: REPLACE_VALUE
