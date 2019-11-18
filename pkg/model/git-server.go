@@ -12,8 +12,8 @@ var log = logf.Log.WithName("git-server-model")
 type GitServer struct {
 	GitHost                  string
 	GitUser                  string
-	HttpsPort                string
-	SshPort                  string
+	HttpsPort                int32
+	SshPort                  int32
 	PrivateSshKey            string
 	CreateCodeReviewPipeline bool
 	ActionLog                ActionLog

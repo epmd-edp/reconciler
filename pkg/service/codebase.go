@@ -95,6 +95,9 @@ func createBE(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
 		return nil, errors.New(fmt.Sprintf("cannot get git server: %v", be.GitServer))
 	}
 	log.Printf("GitServer is fetched: %v", serverId)
+	if serverId == nil {
+		return nil, fmt.Errorf("git server has not been found for %v", be.GitServer)
+	}
 
 	be.GitServerId = serverId
 

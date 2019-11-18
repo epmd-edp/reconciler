@@ -67,6 +67,8 @@ github.com/emicklei/go-restful v2.9.6+incompatible/go.mod h1:otzb+WCGbkyDHkqmQmT
 github.com/emirpasic/gods v1.9.0/go.mod h1:YfzfFFoVP/catgzJb4IKIqXjX78Ha8FMSDh3ymbK86o=
 github.com/epmd-edp/codebase-operator/v2 v2.2.0-69 h1:n4IxoCYjhM34J6GG5RaEQDkbJ/XoheDDTYh0WtbSZ/o=
 github.com/epmd-edp/codebase-operator/v2 v2.2.0-69/go.mod h1:MqnZsWXSdziAmOYznnMW+C3M160So5AMuJoCSL84t8M=
+github.com/epmd-edp/codebase-operator/v2 v2.2.0-78 h1:1WWBPa9EyXeHgxBUD/mdHA6f22fva1PcSuPpTrzY2w0=
+github.com/epmd-edp/codebase-operator/v2 v2.2.0-78/go.mod h1:MqnZsWXSdziAmOYznnMW+C3M160So5AMuJoCSL84t8M=
 github.com/epmd-edp/edp-component-operator v0.0.0-20191029114826-9e5cd33f2bb5/go.mod h1:k4OqvjIznqyXgdpp1iuuSdSk4BdjiJ3j3eesPIIqO+s=
 github.com/epmd-edp/edp-component-operator v0.0.1 h1:TGoqGdmOOEmqj7LzjcoWsw9sUkZ3JExh4y6C++s6JT4=
 github.com/epmd-edp/edp-component-operator v0.0.1/go.mod h1:k4OqvjIznqyXgdpp1iuuSdSk4BdjiJ3j3eesPIIqO+s=
