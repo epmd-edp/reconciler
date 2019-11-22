@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/cdpipeline"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
@@ -17,7 +18,7 @@ type CdPipelineService struct {
 	ClientSet platform.ClientSet
 }
 
-func (s CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) error {
+func (s CdPipelineService) PutCDPipeline(cdPipeline cdpipeline.CDPipeline) error {
 	log.Printf("Start creation of CD Pipeline %v...", cdPipeline)
 	log.Println("Start transaction...")
 
@@ -61,7 +62,7 @@ func (s CdPipelineService) PutCDPipeline(cdPipeline model.CDPipeline) error {
 	return nil
 }
 
-func (s CdPipelineService) getCDPipelineOrCreate(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string) (*model.CDPipelineDTO, error) {
+func (s CdPipelineService) getCDPipelineOrCreate(txn sql.Tx, cdPipeline cdpipeline.CDPipeline, schemaName string) (*model.CDPipelineDTO, error) {
 	log.Printf("Start retrieving CD Pipeline by name: %v", cdPipeline)
 	cdPipelineReadModel, err := repository.GetCDPipeline(txn, cdPipeline.Name, schemaName)
 	if err != nil {
@@ -250,7 +251,7 @@ func (s CdPipelineService) updateStageCodebaseDockerStream(txn sql.Tx, stages []
 	return nil
 }
 
-func createCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string) (*model.CDPipelineDTO, error) {
+func createCDPipeline(txn sql.Tx, cdPipeline cdpipeline.CDPipeline, schemaName string) (*model.CDPipelineDTO, error) {
 	log.Println("Start insertion to the cd_pipeline table...")
 	cdPipelineDto, err := repository.CreateCDPipeline(txn, cdPipeline, cdPipeline.Status, schemaName)
 	if err != nil {
@@ -261,7 +262,7 @@ func createCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, schemaName string
 	return cdPipelineDto, nil
 }
 
-func updateActionLog(txn sql.Tx, cdPipeline model.CDPipeline, pipelineId int, schemaName string) error {
+func updateActionLog(txn sql.Tx, cdPipeline cdpipeline.CDPipeline, pipelineId int, schemaName string) error {
 	log.Println("Start update status of CD Pipeline...")
 	actionLogId, err := repository.CreateEventActionLog(txn, cdPipeline.ActionLog, schemaName)
 	if err != nil {

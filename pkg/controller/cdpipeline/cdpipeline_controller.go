@@ -2,8 +2,9 @@ package cdpipeline
 
 import (
 	"context"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/cdpipeline"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/service"
 	"reflect"
@@ -119,8 +120,19 @@ func (r *ReconcileCDPipeline) Reconcile(request reconcile.Request) (reconcile.Re
 
 	reqLogger.Info("CDPipeline", instance)
 
-	cdp, _ := model.ConvertToCDPipeline(*instance)
-	_ = r.cdpService.PutCDPipeline(*cdp)
+	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	cdp, err := cdpipeline.ConvertToCDPipeline(*instance, *edpN)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	err = r.cdpService.PutCDPipeline(*cdp)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
 
+	reqLogger.Info("Reconciling has been finished successfully")
 	return reconcile.Result{}, nil
 }

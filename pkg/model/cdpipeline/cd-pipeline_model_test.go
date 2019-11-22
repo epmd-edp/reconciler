@@ -1,8 +1,25 @@
-package model
+/*
+ * Copyright 2019 EPAM Systems.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package cdpipeline
 
 import (
 	"fmt"
 	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
@@ -19,6 +36,7 @@ const (
 	result                = "success"
 	cdPipelineAction      = "setup_initial_structure"
 	event                 = "created"
+	edpName               = "foobar"
 )
 
 func TestConvertMethodToCDPipeline(t *testing.T) {
@@ -47,7 +65,7 @@ func TestConvertMethodToCDPipeline(t *testing.T) {
 		},
 	}
 
-	cdPipeline, err := ConvertToCDPipeline(k8sObj)
+	cdPipeline, err := ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +80,7 @@ func TestConvertMethodToCDPipeline(t *testing.T) {
 
 	checkSpecField(t, cdPipeline.ApplicationsToPromote, applicationsToPromote, "applications to promote")
 
-	if cdPipeline.ActionLog.Event != FormatStatus(event) {
+	if cdPipeline.ActionLog.Event != model.FormatStatus(event) {
 		t.Fatal(fmt.Sprintf("event has incorrect status %v", event))
 	}
 
@@ -113,7 +131,7 @@ func TestCDPipelineActionMessages(t *testing.T) {
 		nonExistedAction             = "fake-action"
 
 		acceptCdPipelineRegistrationMsg = "Accept CD Pipeline %v registration"
-		jenkinsConfigurationMsg         = "CI Jenkins pipelines codebase %v provisioning"
+		jenkinsConfigurationMsg         = "CI Jenkins pipelines %v provisioning"
 		setupInitialStructureMsg        = "Initial structure for CD Pipeline %v is created"
 		cdPipelineRegistrationMsg       = "CD Pipeline %v registration"
 		nonExistedActionMsg             = "fake message"
@@ -142,7 +160,7 @@ func TestCDPipelineActionMessages(t *testing.T) {
 		},
 	}
 
-	cdPipeline, err := ConvertToCDPipeline(k8sObj)
+	cdPipeline, err := ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,7 +169,7 @@ func TestCDPipelineActionMessages(t *testing.T) {
 		fmt.Sprintf("converted action is incorrect %v", cdPipeline.ActionLog.ActionMessage))
 
 	k8sObj.Status.Action = jenkinsConfiguration
-	cdPipeline, err = ConvertToCDPipeline(k8sObj)
+	cdPipeline, err = ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,7 +178,7 @@ func TestCDPipelineActionMessages(t *testing.T) {
 		fmt.Sprintf("converted action is incorrect %v", cdPipeline.ActionLog.ActionMessage))
 
 	k8sObj.Status.Action = setupInitialStructure
-	cdPipeline, err = ConvertToCDPipeline(k8sObj)
+	cdPipeline, err = ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +187,7 @@ func TestCDPipelineActionMessages(t *testing.T) {
 		fmt.Sprintf("converted action is incorrect %v", cdPipeline.ActionLog.ActionMessage))
 
 	k8sObj.Status.Action = cdPipelineRegistration
-	cdPipeline, err = ConvertToCDPipeline(k8sObj)
+	cdPipeline, err = ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +196,7 @@ func TestCDPipelineActionMessages(t *testing.T) {
 		fmt.Sprintf("converted action is incorrect %v", cdPipeline.ActionLog.ActionMessage))
 
 	k8sObj.Status.Action = nonExistedAction
-	cdPipeline, err = ConvertToCDPipeline(k8sObj)
+	cdPipeline, err = ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
 	}

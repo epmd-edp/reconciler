@@ -1,10 +1,26 @@
-package model
+/*
+ * Copyright 2019 EPAM Systems.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package cdpipeline
 
 import (
 	"errors"
 	"fmt"
 	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
-	"strings"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
 )
 
 type CDPipeline struct {
@@ -14,7 +30,7 @@ type CDPipeline struct {
 	CodebaseBranch        []string
 	InputDockerStreams    []string
 	ThirdPartyServices    []string
-	ActionLog             ActionLog
+	ActionLog             model.ActionLog
 	Status                string
 	ApplicationsToPromote []string
 }
@@ -29,7 +45,7 @@ var cdPipelineActionMessageMap = map[string]string{
 
 // ConvertToCDPipeline returns converted to DTO CDPipeline object from K8S.
 // An error occurs if method received nil instead of k8s object
-func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline) (*CDPipeline, error) {
+func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline, edpName string) (*CDPipeline, error) {
 	if &k8sObject == nil {
 		return nil, errors.New("k8s object CD pipeline should not be nil")
 	}
@@ -40,7 +56,7 @@ func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline) (*CDPipeline, error) 
 	cdPipeline := CDPipeline{
 		Name:                  k8sObject.Spec.Name,
 		Namespace:             k8sObject.Namespace,
-		Tenant:                strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
+		Tenant:                edpName,
 		InputDockerStreams:    spec.InputDockerStreams,
 		ThirdPartyServices:    spec.ThirdPartyServices,
 		ActionLog:             *actionLog,
@@ -51,13 +67,13 @@ func ConvertToCDPipeline(k8sObject edpv1alpha1.CDPipeline) (*CDPipeline, error) 
 	return &cdPipeline, nil
 }
 
-func convertCDPipelineActionLog(cdPipelineName string, status edpv1alpha1.CDPipelineStatus) *ActionLog {
+func convertCDPipelineActionLog(cdPipelineName string, status edpv1alpha1.CDPipelineStatus) *model.ActionLog {
 	if &status == nil {
 		return nil
 	}
 
-	return &ActionLog{
-		Event:           FormatStatus(status.Status),
+	return &model.ActionLog{
+		Event:           model.FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/cdpipeline"
 )
 
 const (
@@ -15,7 +16,7 @@ const (
 	DeleteAllDockerStreams            = "delete from \"%v\".cd_pipeline_docker_stream cpds  where cpds.cd_pipeline_id = $1 ;"
 )
 
-func CreateCDPipeline(txn sql.Tx, cdPipeline model.CDPipeline, status string, schemaName string) (*model.CDPipelineDTO, error) {
+func CreateCDPipeline(txn sql.Tx, cdPipeline cdpipeline.CDPipeline, status string, schemaName string) (*model.CDPipelineDTO, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(InsertCDPipeline, schemaName))
 	if err != nil {
 		return nil, err
