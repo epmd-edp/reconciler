@@ -2,8 +2,9 @@ package codebase
 
 import (
 	"context"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
 	"github.com/epmd-edp/reconciler/v2/pkg/service"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -121,7 +122,14 @@ func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	log.WithValues("Codebase", instance)
 
-	c, _ := model.Convert(*instance)
+	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	c, err := codebase.Convert(*instance, *edpN)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
 
 	err = r.beService.PutBE(*c)
 	if err != nil {

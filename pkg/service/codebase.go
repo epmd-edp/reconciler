@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository/jenkins-slave"
 	jp "github.com/epmd-edp/reconciler/v2/pkg/repository/job-provisioning"
@@ -19,7 +19,7 @@ const (
 	ApplicationType = "application"
 )
 
-func (service BEService) PutBE(be model.Codebase) error {
+func (service BEService) PutBE(be codebase.Codebase) error {
 	log.Printf("Start creation of business entity %v...", be)
 	log.Println("Start transaction...")
 	txn, err := service.DB.Begin()
@@ -74,7 +74,7 @@ func (service BEService) PutBE(be model.Codebase) error {
 	return nil
 }
 
-func getBeIdOrCreate(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
+func getBeIdOrCreate(txn sql.Tx, be codebase.Codebase, schemaName string) (*int, error) {
 	log.Printf("Start retrieving BE by name, tenant and type: %v", be)
 	id, err := repository.GetCodebaseId(txn, be.Name, schemaName)
 	if err != nil {
@@ -87,7 +87,7 @@ func getBeIdOrCreate(txn sql.Tx, be model.Codebase, schemaName string) (*int, er
 	return id, nil
 }
 
-func createBE(txn sql.Tx, be model.Codebase, schemaName string) (*int, error) {
+func createBE(txn sql.Tx, be codebase.Codebase, schemaName string) (*int, error) {
 	log.Println("Start insertion in the repository business entity...")
 
 	serverId, err := getGitServerId(txn, be.GitServer, schemaName)

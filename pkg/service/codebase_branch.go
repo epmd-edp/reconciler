@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"log"
 )
@@ -91,7 +92,7 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schem
 		return nil, err
 	}
 
-	if *cbType == string(model.Application) {
+	if *cbType == string(codebase.Application) {
 		ocImageStreamName := fmt.Sprintf("%v-%v", codebaseBranch.AppName, codebaseBranch.Name)
 
 		streamId, err = repository.CreateCodebaseDockerStream(txn, schemaName, nil, ocImageStreamName)
@@ -108,7 +109,7 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schem
 		return nil, err
 	}
 
-	if *cbType == string(model.Application) {
+	if *cbType == string(codebase.Application) {
 		err := repository.UpdateBranchIdCodebaseDockerStream(txn, *streamId, *id, schemaName)
 		if err != nil {
 			return nil, err

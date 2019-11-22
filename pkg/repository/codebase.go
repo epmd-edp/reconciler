@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
 	"strings"
 )
 
@@ -37,7 +37,7 @@ func GetCodebaseId(txn sql.Tx, name string, schemaName string) (*int, error) {
 	return &id, nil
 }
 
-func CreateCodebase(txn sql.Tx, cb model.Codebase, schemaName string) (*int, error) {
+func CreateCodebase(txn sql.Tx, cb codebase.Codebase, schemaName string) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(InsertCodebase, schemaName))
 	if err != nil {
 		return nil, err

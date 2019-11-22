@@ -1,11 +1,27 @@
-package model
+/*
+ * Copyright 2019 EPAM Systems.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package codebase
 
 import (
 	"errors"
 	"fmt"
 	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"strings"
-	"time"
 )
 
 const (
@@ -31,7 +47,7 @@ type Codebase struct {
 	DatabaseVersion     string
 	DatabaseCapacity    string
 	DatabaseStorage     string
-	ActionLog           ActionLog
+	ActionLog           model.ActionLog
 	Description         string
 	TestReportFramework string
 	Status              string
@@ -45,17 +61,6 @@ type Codebase struct {
 	DeploymentScript    string
 }
 
-type ActionLog struct {
-	Id              int
-	Event           string
-	DetailedMessage string
-	Username        string
-	UpdatedAt       time.Time
-	Action          string
-	ActionMessage   string
-	Result          string
-}
-
 var codebaseActionMessageMap = map[string]string{
 	"codebase_registration":          "Codebase %v registration",
 	"accept_codebase_registration":   "Accept codebase %v registration",
@@ -65,7 +70,7 @@ var codebaseActionMessageMap = map[string]string{
 	"setup_deployment_templates":     "Setup deployment templates for codebase %v",
 }
 
-func Convert(k8sObject edpv1alpha1Codebase.Codebase) (*Codebase, error) {
+func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase, error) {
 	if &k8sObject == nil {
 		return nil, errors.New("k8s object cannot be nil")
 	}
@@ -77,7 +82,7 @@ func Convert(k8sObject edpv1alpha1Codebase.Codebase) (*Codebase, error) {
 	status := convertActionLog(k8sObject.Name, k8sObject.Status)
 
 	c := Codebase{
-		Tenant:           strings.TrimSuffix(k8sObject.Namespace, "-edp-cicd"),
+		Tenant:           edpName,
 		Name:             k8sObject.Name,
 		Language:         s.Lang,
 		BuildTool:        s.BuildTool,
@@ -137,13 +142,13 @@ func Convert(k8sObject edpv1alpha1Codebase.Codebase) (*Codebase, error) {
 	return &c, nil
 }
 
-func convertActionLog(name string, status edpv1alpha1Codebase.CodebaseStatus) *ActionLog {
+func convertActionLog(name string, status edpv1alpha1Codebase.CodebaseStatus) *model.ActionLog {
 	if &status == nil {
 		return nil
 	}
 
-	return &ActionLog{
-		Event:           FormatStatus(status.Status),
+	return &model.ActionLog{
+		Event:           model.FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
@@ -151,8 +156,4 @@ func convertActionLog(name string, status edpv1alpha1Codebase.CodebaseStatus) *A
 		Result:          string(status.Result),
 		ActionMessage:   fmt.Sprintf(codebaseActionMessageMap[string(status.Action)], name),
 	}
-}
-
-func FormatStatus(status string) string {
-	return strings.ToLower(strings.Replace(status, " ", "_", -1))
 }

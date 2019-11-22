@@ -19,7 +19,7 @@ package stage
 import (
 	"fmt"
 	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
-	selfModel "github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
@@ -125,7 +125,7 @@ func TestConvertMethodToCDStage(t *testing.T) {
 	if cdStage.Tenant != edpN {
 		t.Errorf("ConvertToStage() expected - %v, actual - %v", edpN, cdStage.Tenant)
 	}
-	if cdStage.ActionLog.Event != selfModel.FormatStatus(event) {
+	if cdStage.ActionLog.Event != model.FormatStatus(event) {
 		t.Fatal(fmt.Sprintf("event has incorrect status %v", event))
 	}
 
