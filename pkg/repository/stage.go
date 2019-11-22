@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"log"
 )
 
@@ -32,7 +33,7 @@ const (
 		"  and cb.name = $2 ; "
 )
 
-func CreateStage(txn sql.Tx, schemaName string, stage model.Stage, cdPipelineId int) (id *int, err error) {
+func CreateStage(txn sql.Tx, schemaName string, stage stage.Stage, cdPipelineId int) (id *int, err error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(InsertStage, schemaName))
 	if err != nil {
 		return nil, err
@@ -102,7 +103,7 @@ func checkNoRows(err error) (*int, error) {
 	return nil, err
 }
 
-func GetStages(txn sql.Tx, pipelineName string, schemaName string) ([]model.Stage, error) {
+func GetStages(txn sql.Tx, pipelineName string, schemaName string) ([]stage.Stage, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(GetStagesIdByCDPipelineName, schemaName, schemaName))
 
 	if err != nil {
@@ -120,11 +121,11 @@ func GetStages(txn sql.Tx, pipelineName string, schemaName string) ([]model.Stag
 	return getStage(rows)
 }
 
-func getStage(rows *sql.Rows) ([]model.Stage, error) {
-	var result []model.Stage
+func getStage(rows *sql.Rows) ([]stage.Stage, error) {
+	var result []stage.Stage
 
 	for rows.Next() {
-		dto := model.Stage{}
+		dto := stage.Stage{}
 		err := rows.Scan(&dto.Id, &dto.Name, &dto.Status, &dto.TriggerType, &dto.Description, &dto.Order)
 		if err != nil {
 			log.Printf("Error during parsing: %v", err)

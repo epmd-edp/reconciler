@@ -143,7 +143,7 @@ func convertActionLog(name string, status edpv1alpha1Codebase.CodebaseStatus) *A
 	}
 
 	return &ActionLog{
-		Event:           formatStatus(status.Status),
+		Event:           FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
@@ -153,6 +153,6 @@ func convertActionLog(name string, status edpv1alpha1Codebase.CodebaseStatus) *A
 	}
 }
 
-func formatStatus(status string) string {
+func FormatStatus(status string) string {
 	return strings.ToLower(strings.Replace(status, " ", "_", -1))
 }

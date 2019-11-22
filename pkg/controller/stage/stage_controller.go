@@ -2,16 +2,16 @@ package stage
 
 import (
 	"context"
+	edpV1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/service"
 	"log"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-
-	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -56,8 +56,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	pred := predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldObject := e.ObjectOld.(*edpv1alpha1.Stage)
-			newObject := e.ObjectNew.(*edpv1alpha1.Stage)
+			oldObject := e.ObjectOld.(*edpV1alpha1.Stage)
+			newObject := e.ObjectNew.(*edpV1alpha1.Stage)
 
 			if oldObject.Status.Value != newObject.Status.Value {
 				return true
@@ -72,7 +72,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Stage
-	err = c.Watch(&source.Kind{Type: &edpv1alpha1.Stage{}}, &handler.EnqueueRequestForObject{}, pred)
+	err = c.Watch(&source.Kind{Type: &edpV1alpha1.Stage{}}, &handler.EnqueueRequestForObject{}, pred)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (r *ReconcileStage) Reconcile(request reconcile.Request) (reconcile.Result,
 	log.Println("Reconciling Stage")
 
 	// Fetch the Stage instance
-	instance := &edpv1alpha1.Stage{}
+	instance := &edpV1alpha1.Stage{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -115,9 +115,18 @@ func (r *ReconcileStage) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	log.Printf("Stage: %v", instance)
 
-	stage, _ := model.ConvertToStage(*instance)
-
-	_ = r.service.PutStage(*stage)
+	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	st, err := stage.ConvertToStage(*instance, *edpN)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	err = r.service.PutStage(*st)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
 
 	log.Printf("Reconciling Stage %v/%v has been finished", request.Namespace, request.Name)
 	return reconcile.Result{Requeue: false}, nil

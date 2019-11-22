@@ -57,7 +57,7 @@ func convertCDPipelineActionLog(cdPipelineName string, status edpv1alpha1.CDPipe
 	}
 
 	return &ActionLog{
-		Event:           formatStatus(status.Status),
+		Event:           FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,

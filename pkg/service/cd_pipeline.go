@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"log"
@@ -87,6 +88,10 @@ func (s CdPipelineService) getCDPipelineOrCreate(txn sql.Tx, cdPipeline model.CD
 		sort.SliceStable(stages, func(i, j int) bool {
 			return stages[i].Order < stages[j].Order
 		})
+
+		for i := 0; i < len(stages); i++ {
+			stages[i].Namespace = cdPipeline.Namespace
+		}
 
 		err = s.updateStageCodebaseDockerStream(txn, stages, cdPipelineReadModel.Name, schemaName)
 		if err != nil {
@@ -172,14 +177,14 @@ func createApplicationToPromoteRow(txn sql.Tx, cdPipelineId int, applicationsToP
 	return nil
 }
 
-func (s CdPipelineService) updateStageCodebaseDockerStreamRelations(txn sql.Tx, stages []model.Stage, pipelineName string, schemaName string) error {
+func (s CdPipelineService) updateStageCodebaseDockerStreamRelations(txn sql.Tx, stages []stage.Stage, pipelineName string, schemaName string) error {
 	log.Printf("Try to update Stage Codebase Docker Streams relations for stages: %v", stages)
 
 	for i := range stages {
 		stages[i].Tenant = schemaName
 		stages[i].CdPipelineName = pipelineName
 
-		pipelineCR, err := getCDPipelineCR(s.ClientSet.EDPRestClient, stages[i].CdPipelineName, stages[i].Tenant+"-edp-cicd")
+		pipelineCR, err := getCDPipelineCR(s.ClientSet.EDPRestClient, stages[i].CdPipelineName, stages[i].Namespace)
 		if err != nil {
 			return err
 		}
@@ -196,7 +201,7 @@ func (s CdPipelineService) updateStageCodebaseDockerStreamRelations(txn sql.Tx, 
 	return nil
 }
 
-func getStages(txn sql.Tx, cdPipelineName string, schemaName string) ([]model.Stage, error) {
+func getStages(txn sql.Tx, cdPipelineName string, schemaName string) ([]stage.Stage, error) {
 	stages, err := repository.GetStages(txn, cdPipelineName, schemaName)
 	if err != nil {
 		log.Printf("An error has occured while getting Stages for CD Pipeline %v : %v", cdPipelineName, err)
@@ -207,7 +212,7 @@ func getStages(txn sql.Tx, cdPipelineName string, schemaName string) ([]model.St
 	return stages, nil
 }
 
-func deleteStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, schemaName string) ([]int, error) {
+func deleteStageCodebaseDockerStream(txn sql.Tx, stages []stage.Stage, schemaName string) ([]int, error) {
 	var outputStreamIdsToRemove []int
 	var stagesToLog []string
 
@@ -226,7 +231,7 @@ func deleteStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, schemaNam
 	return outputStreamIdsToRemove, nil
 }
 
-func (s CdPipelineService) updateStageCodebaseDockerStream(txn sql.Tx, stages []model.Stage, pipelineName string, schemaName string) error {
+func (s CdPipelineService) updateStageCodebaseDockerStream(txn sql.Tx, stages []stage.Stage, pipelineName string, schemaName string) error {
 	if stages == nil {
 		log.Printf("There're no stages for %v CD Pipeline. Updating of Codebase Docker stream will not be executed.", pipelineName)
 		return nil

@@ -18,6 +18,7 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/build v0.0.0-20190111050920-041ab4dc3f9d // indirect
+	k8s.io/api v0.0.0-20190222213804-5cb15d344471
 	k8s.io/apimachinery v0.0.0-20190221213512-86fb29eff628
 	k8s.io/client-go v0.0.0-20190228174230-b40b2a5939e4
 	k8s.io/kube-openapi v0.0.0-20181109181836-c59034cc13d5

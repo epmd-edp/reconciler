@@ -48,7 +48,7 @@ func convertCodebaseBranchActionLog(brName, cbName string, status edpv1alpha1Cod
 	}
 
 	return &ActionLog{
-		Event:           formatStatus(status.Status),
+		Event:           FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,

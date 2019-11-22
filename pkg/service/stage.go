@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"k8s.io/client-go/rest"
@@ -22,7 +23,7 @@ type StageService struct {
 //	- checks if stage can be created (checks if previous stage has been added)
 //	- update stage status
 //	- add record to Action Log for last operation
-func (service StageService) PutStage(stage model.Stage) error {
+func (service StageService) PutStage(stage stage.Stage) error {
 	log.Printf("Start put stage: %v ...", stage)
 
 	txn, err := service.DB.Begin()
@@ -78,7 +79,7 @@ func (service StageService) PutStage(stage model.Stage) error {
 	return nil
 }
 
-func createCodebaseDockerStreams(tx sql.Tx, id int, stage model.Stage, applicationsToApprove []string) error {
+func createCodebaseDockerStreams(tx sql.Tx, id int, stage stage.Stage, applicationsToApprove []string) error {
 	log.Printf("Start creation of the docker streams for stage with id: %v", id)
 
 	inputDockerStreams, err := getInputDockerStreams(tx, id, stage)
@@ -98,7 +99,7 @@ func createCodebaseDockerStreams(tx sql.Tx, id int, stage model.Stage, applicati
 	return nil
 }
 
-func updateSingleStageCodebaseDockerStreamRelations(tx sql.Tx, id int, stage model.Stage, applicationsToApprove []string) error {
+func updateSingleStageCodebaseDockerStreamRelations(tx sql.Tx, id int, stage stage.Stage, applicationsToApprove []string) error {
 	log.Printf("Start update of the docker streams relation for stage with id: %v", id)
 
 	inputDockerStreams, err := getInputDockerStreams(tx, id, stage)
@@ -118,7 +119,7 @@ func updateSingleStageCodebaseDockerStreamRelations(tx sql.Tx, id int, stage mod
 	return nil
 }
 
-func createOutputStreamsAndLink(tx sql.Tx, id int, stage model.Stage, dtos []model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
+func createOutputStreamsAndLink(tx sql.Tx, id int, stage stage.Stage, dtos []model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
 	log.Printf("Start creation of outputstreams and links for stage with id: %v", id)
 	for _, stream := range dtos {
 		err := createSingleOutputStreamAndLink(tx, id, stage, stream, applicationsToApprove)
@@ -129,7 +130,7 @@ func createOutputStreamsAndLink(tx sql.Tx, id int, stage model.Stage, dtos []mod
 	return nil
 }
 
-func updateOutputStreamsRelation(tx sql.Tx, id int, stage model.Stage, dtos []model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
+func updateOutputStreamsRelation(tx sql.Tx, id int, stage stage.Stage, dtos []model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
 	log.Printf("Start update of links for stage with id: %v", id)
 	for _, stream := range dtos {
 		err := updateSingleOutputStreamRelation(tx, id, stage, stream, applicationsToApprove)
@@ -140,7 +141,7 @@ func updateOutputStreamsRelation(tx sql.Tx, id int, stage model.Stage, dtos []mo
 	return nil
 }
 
-func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, dto model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
+func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage stage.Stage, dto model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
 	log.Printf("Start creation single outputstream and link for stage with id %v and stream: %v", stageId, dto)
 
 	ocImageStreamName := fmt.Sprintf("%v-%v-%v-verified", stage.CdPipelineName, stage.Name, dto.CodebaseName)
@@ -174,7 +175,7 @@ func createSingleOutputStreamAndLink(tx sql.Tx, stageId int, stage model.Stage, 
 	return nil
 }
 
-func updateSingleOutputStreamRelation(tx sql.Tx, stageId int, stage model.Stage, dto model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
+func updateSingleOutputStreamRelation(tx sql.Tx, stageId int, stage stage.Stage, dto model.CodebaseDockerStreamReadDTO, applicationsToApprove []string) error {
 	log.Printf("Start update single relation outputstream for stage with id %v and stream: %v", stageId, dto)
 
 	outputId, err := tryToCreateOutputCodebaseDockerStreamIfDoesNotExist(tx, stage, dto)
@@ -198,7 +199,7 @@ func updateSingleOutputStreamRelation(tx sql.Tx, stageId int, stage model.Stage,
 	return nil
 }
 
-func tryToCreateOutputCodebaseDockerStreamIfDoesNotExist(tx sql.Tx, stage model.Stage, dto model.CodebaseDockerStreamReadDTO) (*int, error) {
+func tryToCreateOutputCodebaseDockerStreamIfDoesNotExist(tx sql.Tx, stage stage.Stage, dto model.CodebaseDockerStreamReadDTO) (*int, error) {
 	ocImageStreamName := fmt.Sprintf("%v-%v-%v-verified", stage.CdPipelineName, stage.Name, dto.CodebaseName)
 
 	var outputId *int
@@ -226,12 +227,12 @@ func tryToCreateOutputCodebaseDockerStreamIfDoesNotExist(tx sql.Tx, stage model.
 	return outputId, nil
 }
 
-func setPreviousStageInputImageStream(tx sql.Tx, stage model.Stage, inputId int, outputId int) error {
+func setPreviousStageInputImageStream(tx sql.Tx, stage stage.Stage, inputId int, outputId int) error {
 	log.Printf("Previous Stage Input Stream. CD Stage {%v:%v} has InputDockerStream - %v and OutputDockerStream - %v", stage.Id, stage.Name, inputId, outputId)
 	return repository.CreateStageCodebaseDockerStream(tx, stage.Tenant, stage.Id, inputId, outputId)
 }
 
-func setOriginalInputImageStream(tx sql.Tx, stage model.Stage, codebaseName string, outputId int) error {
+func setOriginalInputImageStream(tx sql.Tx, stage stage.Stage, codebaseName string, outputId int) error {
 	sourceInputStream, err := getOriginalInputImageStream(tx, stage.CdPipelineName, codebaseName, stage.Tenant)
 	if err != nil {
 		return err
@@ -274,7 +275,7 @@ func include(applicationsToPromote []string, application string) bool {
 	return false
 }
 
-func getInputDockerStreams(tx sql.Tx, id int, stage model.Stage) ([]model.CodebaseDockerStreamReadDTO, error) {
+func getInputDockerStreams(tx sql.Tx, id int, stage stage.Stage) ([]model.CodebaseDockerStreamReadDTO, error) {
 	log.Printf("Start read input docker streams for stage with id: %v", id)
 	if stage.Order == 0 {
 		return getInputDockerStreamsForFirstStage(tx, id, stage)
@@ -282,7 +283,7 @@ func getInputDockerStreams(tx sql.Tx, id int, stage model.Stage) ([]model.Codeba
 	return getInputDockerStreamsForArbitraryStage(tx, id, stage)
 }
 
-func getInputDockerStreamsForArbitraryStage(tx sql.Tx, id int, stage model.Stage) ([]model.CodebaseDockerStreamReadDTO, error) {
+func getInputDockerStreamsForArbitraryStage(tx sql.Tx, id int, stage stage.Stage) ([]model.CodebaseDockerStreamReadDTO, error) {
 	log.Printf("Start read input docker streams for the arbitrary stage with id: %v", id)
 	streams, err := repository.GetDockerStreamsByPipelineNameAndStageOrder(tx, stage.Tenant, stage.CdPipelineName, stage.Order-1)
 	if err != nil {
@@ -293,7 +294,7 @@ func getInputDockerStreamsForArbitraryStage(tx sql.Tx, id int, stage model.Stage
 	return streams, nil
 }
 
-func getInputDockerStreamsForFirstStage(tx sql.Tx, id int, stage model.Stage) ([]model.CodebaseDockerStreamReadDTO, error) {
+func getInputDockerStreamsForFirstStage(tx sql.Tx, id int, stage stage.Stage) ([]model.CodebaseDockerStreamReadDTO, error) {
 	log.Printf("Start read input docker streams for the first stage with id: %v", id)
 	streams, err := repository.GetDockerStreamsByPipelineName(tx, stage.Tenant, stage.CdPipelineName)
 	if err != nil {
@@ -304,7 +305,7 @@ func getInputDockerStreamsForFirstStage(tx sql.Tx, id int, stage model.Stage) ([
 	return streams, nil
 }
 
-func canStageBeCreated(tx sql.Tx, stage model.Stage) bool {
+func canStageBeCreated(tx sql.Tx, stage stage.Stage) bool {
 	if stage.Order == 0 {
 		log.Printf("Stage %v is the first in the chain. Returning true..", stage)
 		return true
@@ -312,7 +313,7 @@ func canStageBeCreated(tx sql.Tx, stage model.Stage) bool {
 	return prevStageAdded(tx, stage)
 }
 
-func prevStageAdded(tx sql.Tx, stage model.Stage) bool {
+func prevStageAdded(tx sql.Tx, stage stage.Stage) bool {
 	log.Printf("Check previous stage fot stage: %v", stage)
 	stageId, err := repository.GetStageIdByPipelineNameAndOrder(tx, stage.Tenant, stage.CdPipelineName, stage.Order-1)
 
@@ -330,7 +331,7 @@ func prevStageAdded(tx sql.Tx, stage model.Stage) bool {
 	return true
 }
 
-func addActionLog(tx sql.Tx, id *int, stage model.Stage) error {
+func addActionLog(tx sql.Tx, id *int, stage stage.Stage) error {
 	log.Printf("Start adding action log: %v for stage with id %v", stage.ActionLog, *id)
 	actionLogId, err := repository.CreateEventActionLog(tx, stage.ActionLog, stage.Tenant)
 	if err != nil {
@@ -345,7 +346,7 @@ func addActionLog(tx sql.Tx, id *int, stage model.Stage) error {
 	return nil
 }
 
-func updateStageStatus(tx sql.Tx, id *int, stage model.Stage) error {
+func updateStageStatus(tx sql.Tx, id *int, stage stage.Stage) error {
 	log.Printf("Start updating status: %v for stage with id %v", stage.Status, *id)
 	err := repository.UpdateStageStatus(tx, stage.Tenant, *id, stage.Status)
 	if err != nil {
@@ -355,7 +356,7 @@ func updateStageStatus(tx sql.Tx, id *int, stage model.Stage) error {
 	return nil
 }
 
-func getStageIdOrCreate(tx sql.Tx, edpRestClient *rest.RESTClient, stage model.Stage) (*int, error) {
+func getStageIdOrCreate(tx sql.Tx, edpRestClient *rest.RESTClient, stage stage.Stage) (*int, error) {
 	log.Printf("Start get stage id or create for stage: %v", stage)
 	id, err := repository.GetStageId(tx, stage.Tenant, stage.Name, stage.CdPipelineName)
 	if err != nil {
@@ -368,7 +369,7 @@ func getStageIdOrCreate(tx sql.Tx, edpRestClient *rest.RESTClient, stage model.S
 	return createStage(tx, edpRestClient, stage)
 }
 
-func createStage(tx sql.Tx, edpRestClient *rest.RESTClient, stage model.Stage) (*int, error) {
+func createStage(tx sql.Tx, edpRestClient *rest.RESTClient, stage stage.Stage) (*int, error) {
 	log.Printf("Start create stage %v", stage)
 	cdPipeline, err := repository.GetCDPipeline(tx, stage.CdPipelineName, stage.Tenant)
 	if err != nil {
@@ -384,7 +385,7 @@ func createStage(tx sql.Tx, edpRestClient *rest.RESTClient, stage model.Stage) (
 	}
 	log.Printf("Id of newly created stage is %v", *id)
 
-	pipelineCR, err := getCDPipelineCR(edpRestClient, stage.CdPipelineName, stage.Tenant+"-edp-cicd")
+	pipelineCR, err := getCDPipelineCR(edpRestClient, stage.CdPipelineName, stage.Namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +403,7 @@ func createStage(tx sql.Tx, edpRestClient *rest.RESTClient, stage model.Stage) (
 	return id, nil
 }
 
-func insertQualityGateRow(tx sql.Tx, cdStageId int, gates []model.QualityGate, schemaName string) error {
+func insertQualityGateRow(tx sql.Tx, cdStageId int, gates []stage.QualityGate, schemaName string) error {
 	for _, gate := range gates {
 		if gate.QualityGate == "autotests" {
 			err := insertAutotestQualityGate(tx, cdStageId, gate, schemaName)
@@ -422,7 +423,7 @@ func insertQualityGateRow(tx sql.Tx, cdStageId int, gates []model.QualityGate, s
 	return nil
 }
 
-func insertAutotestQualityGate(tx sql.Tx, cdStageId int, gate model.QualityGate, schemaName string) error {
+func insertAutotestQualityGate(tx sql.Tx, cdStageId int, gate stage.QualityGate, schemaName string) error {
 	entityIdsDTO, err := repository.GetCodebaseAndBranchIds(tx, *gate.AutotestName, *gate.BranchName, schemaName)
 	if err != nil {
 		return err
@@ -433,7 +434,7 @@ func insertAutotestQualityGate(tx sql.Tx, cdStageId int, gate model.QualityGate,
 	return err
 }
 
-func insertManualQualityGate(tx sql.Tx, cdStageId int, gate model.QualityGate, schemaName string) error {
+func insertManualQualityGate(tx sql.Tx, cdStageId int, gate stage.QualityGate, schemaName string) error {
 	_, err := repository.CreateQualityGate(tx, gate.QualityGate, gate.JenkinsStepName, cdStageId, nil, nil, schemaName)
 
 	return err

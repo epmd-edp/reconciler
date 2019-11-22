@@ -62,7 +62,7 @@ func TestConvertMethodToCDPipeline(t *testing.T) {
 
 	checkSpecField(t, cdPipeline.ApplicationsToPromote, applicationsToPromote, "applications to promote")
 
-	if cdPipeline.ActionLog.Event != formatStatus(event) {
+	if cdPipeline.ActionLog.Event != FormatStatus(event) {
 		t.Fatal(fmt.Sprintf("event has incorrect status %v", event))
 	}
 

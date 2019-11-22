@@ -52,7 +52,7 @@ func convertGitServerActionLog(status edpv1alpha1Codebase.GitServerStatus) *Acti
 	}
 
 	return &ActionLog{
-		Event:           formatStatus(status.Status),
+		Event:           FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,

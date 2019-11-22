@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"testing"
 	"time"
 )
@@ -12,7 +13,7 @@ func TestPutStage(t *testing.T) {
 		DB: db.Instance,
 	}
 
-	stage := model.Stage{
+	stage := stage.Stage{
 		Name:            "stage",
 		CdPipelineName:  "team-a",
 		Description:     "Description for stage",
