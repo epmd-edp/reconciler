@@ -2,8 +2,9 @@ package template
 
 import (
 	"context"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/thirdpartyservice"
 	"github.com/epmd-edp/reconciler/v2/pkg/service"
 	"github.com/openshift/api/template/v1"
 	"log"
@@ -97,11 +98,18 @@ func (r *ReconcileTemplate) Reconcile(request reconcile.Request) (reconcile.Resu
 		instance.APIVersion)
 
 	if strings.Contains(instance.Annotations["tags"], "edp") {
-		service, _ := model.ConvertToService(*instance)
-
-		err = r.service.PutService(*service)
+		edpN, err := helper.GetEDPName(r.client, instance.Namespace)
 		if err != nil {
-			log.Printf("Couldn't save service %v to DB", service.Name)
+			return reconcile.Result{}, err
+		}
+		s, err := thirdpartyservice.ConvertToService(*instance, *edpN)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		err = r.service.PutService(*s)
+		if err != nil {
+			log.Printf("Couldn't save s %v to DB", s.Name)
 			return reconcile.Result{RequeueAfter: time.Second * 120}, nil
 		}
 

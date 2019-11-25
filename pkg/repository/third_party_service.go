@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/thirdpartyservice"
 )
 
 const (
@@ -11,7 +11,7 @@ const (
 	SelectService = "select id from \"%v\".third_party_service where name=$1;"
 )
 
-func CreateThirdPartyService(txn sql.Tx, service model.ThirdPartyService, schemaName string) (*int, error) {
+func CreateThirdPartyService(txn sql.Tx, service thirdpartyservice.ThirdPartyService, schemaName string) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(InsertService, schemaName))
 	if err != nil {
 		return nil, err

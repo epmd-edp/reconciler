@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/thirdpartyservice"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"log"
 )
@@ -13,7 +13,7 @@ type ThirdPartyService struct {
 	DB *sql.DB
 }
 
-func (c ThirdPartyService) PutService(service model.ThirdPartyService) error {
+func (c ThirdPartyService) PutService(service thirdpartyservice.ThirdPartyService) error {
 	log.Printf("Start ThirdPartyService entity creation %v...", service)
 	log.Println("Start transaction...")
 	txn, err := c.DB.Begin()
@@ -43,7 +43,7 @@ func (c ThirdPartyService) PutService(service model.ThirdPartyService) error {
 
 }
 
-func skipCatalogOrCreate(txn sql.Tx, service model.ThirdPartyService, schemaName string) (*int, error) {
+func skipCatalogOrCreate(txn sql.Tx, service thirdpartyservice.ThirdPartyService, schemaName string) (*int, error) {
 	log.Printf("Start retrieving ThirdPartyService by name and tenant: %v", service)
 	id, err := repository.GetThirdPartyService(txn, service.Name, schemaName)
 	if err != nil {
@@ -56,7 +56,7 @@ func skipCatalogOrCreate(txn sql.Tx, service model.ThirdPartyService, schemaName
 	return id, nil
 }
 
-func createService(txn sql.Tx, service model.ThirdPartyService, schemaName string) (*int, error) {
+func createService(txn sql.Tx, service thirdpartyservice.ThirdPartyService, schemaName string) (*int, error) {
 	log.Println("Start ThirdPartyService entity saving...")
 	id, err := repository.CreateThirdPartyService(txn, service, schemaName)
 	if err != nil {
