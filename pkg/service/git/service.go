@@ -3,7 +3,7 @@ package git
 import (
 	"database/sql"
 	"fmt"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/gitserver"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"github.com/pkg/errors"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -17,7 +17,7 @@ type GitServerService struct {
 
 // PutGitServer creates record in persistent storage, if corresponding git server does not exist already or updates
 // existing record
-func (s GitServerService) PutGitServer(gitServer model.GitServer) error {
+func (s GitServerService) PutGitServer(gitServer gitserver.GitServer) error {
 	log.Info("Start PutGitServer method", "Git host", gitServer.GitHost)
 
 	txn, err := s.DB.Begin()

@@ -3,8 +3,9 @@ package git_server
 import (
 	"context"
 	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/gitserver"
 	"github.com/epmd-edp/reconciler/v2/pkg/service/git"
 	"github.com/epmd-edp/reconciler/v2/pkg/service/infrastructure"
 	errWrap "github.com/pkg/errors"
@@ -97,8 +98,14 @@ func (r *ReconcileGitServer) Reconcile(request reconcile.Request) (reconcile.Res
 		return reconcile.Result{}, err
 	}
 	log.WithValues("GitServer", instance)
-
-	gitServer, _ := model.ConvertToGitServer(*instance)
+	edpN, err := helper.GetEDPName(r.Client, instance.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	gitServer, err := gitserver.ConvertToGitServer(*instance, *edpN)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
 
 	exists, err := r.InfrastructureDbService.DoesSchemaExist(gitServer.Tenant)
 	if err != nil {
