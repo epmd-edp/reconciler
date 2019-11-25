@@ -2,13 +2,13 @@ package jenkins_slave
 
 import (
 	"context"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/service/jenkins-slave"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sort"
-	"strings"
 	"time"
 
 	jenkinsV2Api "github.com/epmd-edp/jenkins-operator/v2/pkg/apis/v2/v1alpha1"
@@ -115,7 +115,11 @@ func (r *ReconcileJenkinsSlave) Reconcile(request reconcile.Request) (reconcile.
 
 	cs := instance.Status.Slaves
 
-	err = r.JenkinsSlaveService.CreateSlavesOrDoNothing(cs, strings.TrimSuffix(instance.Namespace, "-edp-cicd"))
+	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	err = r.JenkinsSlaveService.CreateSlavesOrDoNothing(cs, *edpN)
 	if err != nil {
 		return reconcile.Result{RequeueAfter: time.Second * 120},
 			errWrap.Wrapf(err, "an error has occurred while adding {%v} slaves into DB", cs)
