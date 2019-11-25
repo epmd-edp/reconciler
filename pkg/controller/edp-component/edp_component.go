@@ -2,13 +2,13 @@ package edp_component
 
 import (
 	"context"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	ec "github.com/epmd-edp/reconciler/v2/pkg/service/edp-component"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"strings"
 	"time"
 
 	edpComponentV1Api "github.com/epmd-edp/edp-component-operator/pkg/apis/v1/v1alpha1"
@@ -105,8 +105,11 @@ func (r *EDPComponent) Reconcile(request reconcile.Request) (reconcile.Result, e
 		return reconcile.Result{}, err
 	}
 	log.Info("start reconciling for component", "type", c.Type, "url", c.Url)
-
-	err = r.EDPComponentService.PutEDPComponent(*c, strings.TrimSuffix(i.Namespace, "-edp-cicd"))
+	edpN, err := helper.GetEDPName(r.client, i.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	err = r.EDPComponentService.PutEDPComponent(*c, *edpN)
 	if err != nil {
 		return reconcile.Result{RequeueAfter: time.Second * 120}, err
 	}
