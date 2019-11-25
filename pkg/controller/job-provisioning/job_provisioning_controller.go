@@ -2,13 +2,13 @@ package job_provisioning
 
 import (
 	"context"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	jp "github.com/epmd-edp/reconciler/v2/pkg/service/job-provisioning"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sort"
-	"strings"
 	"time"
 
 	jenkinsV2Api "github.com/epmd-edp/jenkins-operator/v2/pkg/apis/v2/v1alpha1"
@@ -112,8 +112,11 @@ func (r *ReconcileJobProvision) Reconcile(request reconcile.Request) (reconcile.
 	}
 
 	jp := instance.Status.JobProvisions
-
-	err = r.JobProvisionService.PutJobProvisions(jp, strings.TrimSuffix(instance.Namespace, "-edp-cicd"))
+	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	err = r.JobProvisionService.PutJobProvisions(jp, *edpN)
 	if err != nil {
 		return reconcile.Result{RequeueAfter: time.Second * 120},
 			errWrap.Wrapf(err, "an error has occurred while adding {%v} job provisions into DB", jp)
