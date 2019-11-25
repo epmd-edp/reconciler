@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/codebasebranch"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"log"
 )
@@ -14,7 +14,7 @@ type CodebaseBranchService struct {
 	DB *sql.DB
 }
 
-func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.CodebaseBranch) error {
+func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch codebasebranch.CodebaseBranch) error {
 	log.Printf("Start creation of codebase branch %v...", codebaseBranch)
 	log.Println("Start transaction...")
 	txn, err := service.DB.Begin()
@@ -75,7 +75,7 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch model.Code
 	return nil
 }
 
-func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schemaName string) (*int, error) {
+func createCodebaseBranch(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBranch, schemaName string) (*int, error) {
 	log.Println("Start insertion to the codebase_branch table...")
 	var streamId *int = nil
 
@@ -120,7 +120,7 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch model.CodebaseBranch, schem
 	return id, nil
 }
 
-func getCodebaseBranchIdOrCreate(txn sql.Tx, codebaseBranch model.CodebaseBranch, schemaName string) (*int, error) {
+func getCodebaseBranchIdOrCreate(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBranch, schemaName string) (*int, error) {
 	log.Printf("Start retrieving Codebase Branch by name, tenant and appName: %v", codebaseBranch)
 	id, err := repository.GetCodebaseBranchId(txn, codebaseBranch.AppName, codebaseBranch.Name, schemaName)
 	if err != nil {

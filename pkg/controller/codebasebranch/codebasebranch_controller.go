@@ -3,8 +3,9 @@ package codebasebranch
 import (
 	"context"
 	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	"github.com/epmd-edp/reconciler/v2/pkg/model/codebasebranch"
 	"github.com/epmd-edp/reconciler/v2/pkg/service"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -114,7 +115,14 @@ func (r *ReconcileCodebaseBranch) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, err
 	}
 
-	app, _ := model.ConvertToCodebaseBranch(*instance)
+	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	app, err := codebasebranch.ConvertToCodebaseBranch(*instance, *edpN)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
 	err = r.cbService.PutCodebaseBranch(*app)
 	if err != nil {
 		return reconcile.Result{RequeueAfter: 10 * time.Second}, nil
