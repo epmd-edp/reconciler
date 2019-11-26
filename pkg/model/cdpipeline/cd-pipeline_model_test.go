@@ -18,7 +18,7 @@ package cdpipeline
 
 import (
 	"fmt"
-	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	edpv1alpha1 "github.com/epmd-edp/cd-pipeline-operator/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -124,17 +124,9 @@ func checkSpecField(t *testing.T, src []string, toCheck string, entityName strin
 func TestCDPipelineActionMessages(t *testing.T) {
 
 	var (
-		acceptCdPipelineRegistration = "accept_cd_pipeline_registration"
-		jenkinsConfiguration         = "jenkins_configuration"
-		setupInitialStructure        = "setup_initial_structure"
-		cdPipelineRegistration       = "cd_pipeline_registration"
-		nonExistedAction             = "fake-action"
-
 		acceptCdPipelineRegistrationMsg = "Accept CD Pipeline %v registration"
 		jenkinsConfigurationMsg         = "CI Jenkins pipelines %v provisioning"
 		setupInitialStructureMsg        = "Initial structure for CD Pipeline %v is created"
-		cdPipelineRegistrationMsg       = "CD Pipeline %v registration"
-		nonExistedActionMsg             = "fake message"
 	)
 
 	k8sObj := edpv1alpha1.CDPipeline{
@@ -152,7 +144,7 @@ func TestCDPipelineActionMessages(t *testing.T) {
 			Username:        username,
 			DetailedMessage: detailedMessage,
 			Value:           "active",
-			Action:          acceptCdPipelineRegistration,
+			Action:          edpv1alpha1.AcceptCDPipelineRegistration,
 			Result:          result,
 			Available:       true,
 			LastTimeUpdated: time.Now(),
@@ -168,7 +160,7 @@ func TestCDPipelineActionMessages(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(acceptCdPipelineRegistrationMsg, name), cdPipeline.ActionLog.ActionMessage,
 		fmt.Sprintf("converted action is incorrect %v", cdPipeline.ActionLog.ActionMessage))
 
-	k8sObj.Status.Action = jenkinsConfiguration
+	k8sObj.Status.Action = edpv1alpha1.JenkinsConfiguration
 	cdPipeline, err = ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
@@ -177,7 +169,7 @@ func TestCDPipelineActionMessages(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(jenkinsConfigurationMsg, name), cdPipeline.ActionLog.ActionMessage,
 		fmt.Sprintf("converted action is incorrect %v", cdPipeline.ActionLog.ActionMessage))
 
-	k8sObj.Status.Action = setupInitialStructure
+	k8sObj.Status.Action = edpv1alpha1.SetupInitialStructureForCDPipeline
 	cdPipeline, err = ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
@@ -186,20 +178,18 @@ func TestCDPipelineActionMessages(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(setupInitialStructureMsg, name), cdPipeline.ActionLog.ActionMessage,
 		fmt.Sprintf("converted action is incorrect %v", cdPipeline.ActionLog.ActionMessage))
 
-	k8sObj.Status.Action = cdPipelineRegistration
+	k8sObj.Status.Action = edpv1alpha1.AcceptCDPipelineRegistration
 	cdPipeline, err = ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, fmt.Sprintf(cdPipelineRegistrationMsg, name), cdPipeline.ActionLog.ActionMessage,
+	assert.Equal(t, fmt.Sprintf(acceptCdPipelineRegistrationMsg, name), cdPipeline.ActionLog.ActionMessage,
 		fmt.Sprintf("converted action is incorrect %v", cdPipeline.ActionLog.ActionMessage))
 
-	k8sObj.Status.Action = nonExistedAction
+	k8sObj.Status = edpv1alpha1.CDPipelineStatus{}
 	cdPipeline, err = ConvertToCDPipeline(k8sObj, edpName)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	assert.NotEqual(t, nonExistedActionMsg, cdPipeline.ActionLog.ActionMessage)
 }

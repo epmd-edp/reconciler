@@ -18,7 +18,7 @@ package stage
 
 import (
 	"fmt"
-	"github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/cd-pipeline-operator/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/pkg/errors"
 	"strings"
@@ -48,7 +48,7 @@ type QualityGate struct {
 var cdStageActionMessageMap = map[string]string{
 	"accept_cd_stage_registration":      "Accept CD Stage %v registration",
 	"fetching_user_settings_config_map": "Fetch User Settings from config map during CD Stage %v provision",
-	"openshift_project_creation":        "Create Openshift Project for Stage %v",
+	"platform_project_creation":         "Create Platform Project for Stage %v",
 	"jenkins_configuration":             "CI Jenkins pipelines %v provisioning",
 	"setup_deployment_templates":        "Setup deployment templates for cd_stage %v",
 	"create_jenkins_pipeline":           "Create Jenkins pipeline for CD Stage %v",
@@ -107,8 +107,8 @@ func convertStageActionLog(cdStageName string, status v1alpha1.StageStatus) *mod
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
-		Action:          status.Action,
-		Result:          status.Result,
-		ActionMessage:   fmt.Sprintf(cdStageActionMessageMap[status.Action], cdStageName),
+		Action:          fmt.Sprint(status.Action),
+		Result:          fmt.Sprint(status.Result),
+		ActionMessage:   fmt.Sprintf(cdStageActionMessageMap[fmt.Sprint(status.Action)], cdStageName),
 	}
 }

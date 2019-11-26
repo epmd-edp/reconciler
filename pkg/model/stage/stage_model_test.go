@@ -18,7 +18,7 @@ package stage
 
 import (
 	"fmt"
-	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	edpv1alpha1 "github.com/epmd-edp/cd-pipeline-operator/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -158,13 +158,6 @@ func TestConvertMethodToCDStage(t *testing.T) {
 func TestCDStageActionMessages(t *testing.T) {
 
 	var (
-		acceptCdStageRegistration     = "accept_cd_stage_registration"
-		fetchingUserSettingsConfigMap = "fetching_user_settings_config_map"
-		openshiftProjectCreation      = "openshift_project_creation"
-		jenkinsConfiguration          = "jenkins_configuration"
-		setupDeploymentTemplates      = "setup_deployment_templates"
-		nonExistedAction              = "fake-action"
-
 		acceptCdStageRegistrationMsg     = "Accept CD Stage %v registration"
 		fetchingUserSettingsConfigMapMsg = "Fetch User Settings from config map during CD Stage %v provision"
 		openshiftProjectCreationMsg      = "Create Openshift Project for Stage %v"
@@ -200,7 +193,7 @@ func TestCDStageActionMessages(t *testing.T) {
 			Username:        username,
 			DetailedMessage: detailedMessage,
 			Value:           "active",
-			Action:          acceptCdStageRegistration,
+			Action:          edpv1alpha1.AcceptCDStageRegistration,
 			Result:          result,
 			Available:       true,
 			LastTimeUpdated: time.Now(),
@@ -216,7 +209,7 @@ func TestCDStageActionMessages(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(acceptCdStageRegistrationMsg, name), cdStage.ActionLog.ActionMessage,
 		fmt.Sprintf("converted action is incorrect %v", cdStage.ActionLog.ActionMessage))
 
-	k8sObj.Status.Action = fetchingUserSettingsConfigMap
+	k8sObj.Status.Action = edpv1alpha1.FetchingUserSettingsConfigMap
 	cdStage, err = ConvertToStage(k8sObj, edpN)
 	if err != nil {
 		t.Fatal(err)
@@ -225,7 +218,7 @@ func TestCDStageActionMessages(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(fetchingUserSettingsConfigMapMsg, name), cdStage.ActionLog.ActionMessage,
 		fmt.Sprintf("converted action is incorrect %v", cdStage.ActionLog.ActionMessage))
 
-	k8sObj.Status.Action = openshiftProjectCreation
+	k8sObj.Status.Action = edpv1alpha1.PlatformProjectCreation
 	cdStage, err = ConvertToStage(k8sObj, edpN)
 	if err != nil {
 		t.Fatal(err)
@@ -234,7 +227,7 @@ func TestCDStageActionMessages(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(openshiftProjectCreationMsg, name), cdStage.ActionLog.ActionMessage,
 		fmt.Sprintf("converted action is incorrect %v", cdStage.ActionLog.ActionMessage))
 
-	k8sObj.Status.Action = jenkinsConfiguration
+	k8sObj.Status.Action = edpv1alpha1.JenkinsConfiguration
 	cdStage, err = ConvertToStage(k8sObj, edpN)
 	if err != nil {
 		t.Fatal(err)
@@ -243,7 +236,7 @@ func TestCDStageActionMessages(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(jenkinsConfigurationMsg, name), cdStage.ActionLog.ActionMessage,
 		fmt.Sprintf("converted action is incorrect %v", cdStage.ActionLog.ActionMessage))
 
-	k8sObj.Status.Action = setupDeploymentTemplates
+	k8sObj.Status.Action = edpv1alpha1.SetupDeploymentTemplates
 	cdStage, err = ConvertToStage(k8sObj, edpN)
 	if err != nil {
 		t.Fatal(err)
@@ -252,7 +245,7 @@ func TestCDStageActionMessages(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(setupDeploymentTemplatesMsg, name), cdStage.ActionLog.ActionMessage,
 		fmt.Sprintf("converted action is incorrect %v", cdStage.ActionLog.ActionMessage))
 
-	k8sObj.Status.Action = nonExistedAction
+	k8sObj.Status = edpv1alpha1.StageStatus{}
 	cdStage, err = ConvertToStage(k8sObj, edpN)
 	if err != nil {
 		t.Fatal(err)

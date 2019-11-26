@@ -19,7 +19,7 @@ package cdpipeline
 import (
 	"errors"
 	"fmt"
-	edpv1alpha1 "github.com/epmd-edp/reconciler/v2/pkg/apis/edp/v1alpha1"
+	edpv1alpha1 "github.com/epmd-edp/cd-pipeline-operator/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 )
 
@@ -77,8 +77,8 @@ func convertCDPipelineActionLog(cdPipelineName string, status edpv1alpha1.CDPipe
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
-		Action:          status.Action,
-		Result:          status.Result,
-		ActionMessage:   fmt.Sprintf(cdPipelineActionMessageMap[status.Action], cdPipelineName),
+		Action:          fmt.Sprint(status.Action),
+		Result:          fmt.Sprint(status.Result),
+		ActionMessage:   fmt.Sprintf(cdPipelineActionMessageMap[fmt.Sprint(status.Action)], cdPipelineName),
 	}
 }
