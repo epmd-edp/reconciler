@@ -312,6 +312,10 @@ func createCDPipelineDockerStream(txn sql.Tx, cdPipelineId int, dockerStreams []
 			log.Printf("An error has occured while getting id of docker stream %v: %v", dockerStream, err)
 			return err
 		}
+		if id == nil {
+			return fmt.Errorf("cannot find docker stream by name: %v in the schema: %v", dockerStream, schemaName)
+		}
+
 		dockerStreamIds = append(dockerStreamIds, *id)
 	}
 

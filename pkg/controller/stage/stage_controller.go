@@ -8,10 +8,11 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/service"
-	"log"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -22,6 +23,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
+
+var log = logf.Log.WithName("controller_stage")
 
 // Add creates a new Stage Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -97,7 +100,8 @@ type ReconcileStage struct {
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileStage) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	log.Println("Reconciling Stage")
+	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger.Info("Reconciling Stage")
 
 	// Fetch the Stage instance
 	instance := &edpV1alpha1.Stage{}
@@ -113,21 +117,24 @@ func (r *ReconcileStage) Reconcile(request reconcile.Request) (reconcile.Result,
 		return reconcile.Result{}, err
 	}
 
-	log.Printf("Stage: %v", instance)
+	reqLogger.Info("Stage has been retrieved", "cd pipeline", instance)
 
 	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot get edp name")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 	st, err := stage.ConvertToStage(*instance, *edpN)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot convert to stage dto")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 	err = r.service.PutStage(*st)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot put stage")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 
-	log.Printf("Reconciling Stage %v/%v has been finished", request.Namespace, request.Name)
-	return reconcile.Result{Requeue: false}, nil
+	reqLogger.Info("Reconciling has been finished successfully")
+	return reconcile.Result{}, nil
 }

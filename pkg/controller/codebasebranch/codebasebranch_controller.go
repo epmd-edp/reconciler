@@ -117,16 +117,20 @@ func (r *ReconcileCodebaseBranch) Reconcile(request reconcile.Request) (reconcil
 
 	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot get edp name")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 	app, err := codebasebranch.ConvertToCodebaseBranch(*instance, *edpN)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot convert to codebase branch dto")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 	err = r.cbService.PutCodebaseBranch(*app)
 	if err != nil {
-		return reconcile.Result{RequeueAfter: 10 * time.Second}, nil
+		reqLogger.Error(err, "cannot put codebase branch")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 
+	reqLogger.Info("Reconciling has been finished successfully")
 	return reconcile.Result{}, nil
 }

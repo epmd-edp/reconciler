@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"time"
 
 	edpv1alpha1 "github.com/epmd-edp/cd-pipeline-operator/v2/pkg/apis/edp/v1alpha1"
 
@@ -118,19 +119,22 @@ func (r *ReconcileCDPipeline) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 
-	reqLogger.Info("CDPipeline", instance)
+	reqLogger.Info("CD pipeline has been retrieved", "cd pipeline", instance)
 
 	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot get edp name")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 	cdp, err := cdpipeline.ConvertToCDPipeline(*instance, *edpN)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot convert to cd pipeline dto")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 	err = r.cdpService.PutCDPipeline(*cdp)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot put cd pipeline")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 
 	reqLogger.Info("Reconciling has been finished successfully")

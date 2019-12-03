@@ -21,8 +21,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	errWrap "github.com/pkg/errors"
-
 	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
 )
 
@@ -120,22 +118,25 @@ func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
-	log.WithValues("Codebase", instance)
+	reqLogger.Info("Codebase has been retrieved", "codebase", instance)
 
 	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot get edp name")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 	c, err := codebase.Convert(*instance, *edpN)
 	if err != nil {
-		return reconcile.Result{}, err
+		reqLogger.Error(err, "cannot convert codebase to dto")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 
 	err = r.beService.PutBE(*c)
 	if err != nil {
-		return reconcile.Result{RequeueAfter: 10 * time.Second},
-			errWrap.Wrapf(err, "an error has occurred while adding %v codebase into db", c.Name)
+		reqLogger.Error(err, "cannot put codebase branch")
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 
+	reqLogger.Info("Reconciling has been finished successfully")
 	return reconcile.Result{}, nil
 }
