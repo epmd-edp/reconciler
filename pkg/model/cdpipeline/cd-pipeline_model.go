@@ -72,13 +72,20 @@ func convertCDPipelineActionLog(cdPipelineName string, status edpv1alpha1.CDPipe
 		return nil
 	}
 
-	return &model.ActionLog{
+	al := &model.ActionLog{
 		Event:           model.FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
 		Action:          fmt.Sprint(status.Action),
 		Result:          fmt.Sprint(status.Result),
-		ActionMessage:   fmt.Sprintf(cdPipelineActionMessageMap[fmt.Sprint(status.Action)], cdPipelineName),
 	}
+
+	if status.Result == "error" {
+		al.ActionMessage = status.DetailedMessage
+		return al
+	}
+
+	al.ActionMessage = fmt.Sprintf(cdPipelineActionMessageMap[fmt.Sprint(status.Action)], cdPipelineName)
+	return al
 }

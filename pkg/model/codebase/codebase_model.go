@@ -147,13 +147,20 @@ func convertActionLog(name string, status edpv1alpha1Codebase.CodebaseStatus) *m
 		return nil
 	}
 
-	return &model.ActionLog{
+	al := &model.ActionLog{
 		Event:           model.FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
 		Action:          string(status.Action),
 		Result:          string(status.Result),
-		ActionMessage:   fmt.Sprintf(codebaseActionMessageMap[string(status.Action)], name),
 	}
+
+	if status.Result == "error" {
+		al.ActionMessage = status.DetailedMessage
+		return al
+	}
+
+	al.ActionMessage = fmt.Sprintf(codebaseActionMessageMap[string(status.Action)], name)
+	return al
 }

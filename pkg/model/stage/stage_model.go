@@ -102,13 +102,20 @@ func convertStageActionLog(cdStageName string, status v1alpha1.StageStatus) *mod
 		return nil
 	}
 
-	return &model.ActionLog{
+	al := &model.ActionLog{
 		Event:           model.FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
 		Action:          fmt.Sprint(status.Action),
 		Result:          fmt.Sprint(status.Result),
-		ActionMessage:   fmt.Sprintf(cdStageActionMessageMap[fmt.Sprint(status.Action)], cdStageName),
 	}
+
+	if status.Result == "error" {
+		al.ActionMessage = status.DetailedMessage
+		return al
+	}
+
+	al.ActionMessage = fmt.Sprintf(cdStageActionMessageMap[fmt.Sprint(status.Action)], cdStageName)
+	return al
 }

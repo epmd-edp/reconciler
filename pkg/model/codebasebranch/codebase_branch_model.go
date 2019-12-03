@@ -63,13 +63,20 @@ func convertCodebaseBranchActionLog(brName, cbName string, status edpv1alpha1Cod
 		return nil
 	}
 
-	return &model.ActionLog{
+	al := &model.ActionLog{
 		Event:           model.FormatStatus(status.Status),
 		DetailedMessage: status.DetailedMessage,
 		Username:        status.Username,
 		UpdatedAt:       status.LastTimeUpdated,
 		Action:          string(status.Action),
 		Result:          string(status.Result),
-		ActionMessage:   fmt.Sprintf(codebaseBranchActionMessageMap[string(status.Action)], brName, cbName),
 	}
+
+	if status.Result == "error" {
+		al.ActionMessage = status.DetailedMessage
+		return al
+	}
+
+	al.ActionMessage = fmt.Sprintf(codebaseBranchActionMessageMap[string(status.Action)], brName, cbName)
+	return al
 }

@@ -61,7 +61,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			oldObject := e.ObjectOld.(*edpv1alpha1Codebase.Codebase)
 			newObject := e.ObjectNew.(*edpv1alpha1Codebase.Codebase)
 
-			if oldObject.Status.Value != newObject.Status.Value {
+			if oldObject.Status.Value != newObject.Status.Value ||
+				oldObject.Status.Action != newObject.Status.Action {
 				return true
 			}
 
