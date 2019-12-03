@@ -43,12 +43,12 @@ spec:
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: admin-console-db
+                  name: db-admin-console
                   key: username
             - name: DB_PASS
               valueFrom:
                 secretKeyRef:
-                  name: admin-console-db
+                  name: db-admin-console
                   key: password
             - name: DB_SSL_MODE
               value: "disable"
