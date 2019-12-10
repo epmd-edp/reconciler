@@ -9,6 +9,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
+	errWrap "github.com/pkg/errors"
 	"k8s.io/client-go/rest"
 	"log"
 )
@@ -23,26 +24,22 @@ type StageService struct {
 //	- checks if stage can be created (checks if previous stage has been added)
 //	- update stage status
 //	- add record to Action Log for last operation
-func (service StageService) PutStage(stage stage.Stage) error {
+func (s StageService) PutStage(stage stage.Stage) error {
 	log.Printf("Start put stage: %v ...", stage)
 
-	txn, err := service.DB.Begin()
+	txn, err := s.DB.Begin()
 	if err != nil {
 		log.Printf("Error has occurred during opening transaction: %v", err)
 		return errors.New("error has occurred during opening transaction")
 	}
 
-	prevStageAdded := canStageBeCreated(*txn, stage)
-
-	if !prevStageAdded {
+	if !canStageBeCreated(*txn, stage) {
 		log.Printf("previous stage has not been added yet for stage %v", stage)
 		_ = txn.Rollback()
 		return fmt.Errorf("cannot create stage: %v", stage)
 	}
 
-	edpRestClient := service.ClientSet.EDPRestClient
-
-	id, err := getStageIdOrCreate(*txn, edpRestClient, stage)
+	id, err := getStageIdOrCreate(*txn, s.ClientSet.EDPRestClient, stage)
 	if err != nil {
 		log.Printf("error has occured during retrieving or creation stage: %v", err)
 		_ = txn.Rollback()
@@ -50,24 +47,20 @@ func (service StageService) PutStage(stage stage.Stage) error {
 	}
 	log.Printf("Id of stage to be updated: %v", *id)
 
-	err = updateStageStatus(*txn, id, stage)
-
-	if err != nil {
+	if err := updateStageStatus(*txn, id, stage); err != nil {
 		log.Printf("error has occured during the updating stage status: %v", err)
 		_ = txn.Rollback()
 		return fmt.Errorf("cannot create stage: %v", stage)
 	}
 
-	cdPipelineReadModel, err := repository.GetCDPipeline(*txn, stage.CdPipelineName, stage.Tenant)
+	p, err := repository.GetCDPipeline(*txn, stage.CdPipelineName, stage.Tenant)
 	if err != nil {
 		log.Printf("error has occured while fetching CD Pipeline %v: %v", stage.CdPipelineName, err)
 		_ = txn.Rollback()
 		return fmt.Errorf("cannot fetch CD Pipeline: %v", stage.CdPipelineName)
 	}
 
-	err = addActionLog(*txn, &cdPipelineReadModel.Id, stage)
-
-	if err != nil {
+	if err := addActionLog(*txn, &p.Id, stage); err != nil {
 		log.Printf("error has occured during the adding action log: %v", err)
 		_ = txn.Rollback()
 		return fmt.Errorf("cannot create stage: %v", stage)
@@ -379,6 +372,11 @@ func createStage(tx sql.Tx, edpRestClient *rest.RESTClient, stage stage.Stage) (
 	if cdPipeline == nil {
 		return nil, fmt.Errorf("record for cd pipeline with name %v has not been found", stage.CdPipelineName)
 	}
+
+	if err := setLibraryIdOrDoNothing(tx, &stage.Source, stage.Tenant); err != nil {
+		return nil, err
+	}
+
 	id, err := repository.CreateStage(tx, stage.Tenant, stage, cdPipeline.Id)
 	if err != nil {
 		return nil, err
@@ -401,6 +399,26 @@ func createStage(tx sql.Tx, edpRestClient *rest.RESTClient, stage stage.Stage) (
 	}
 
 	return id, nil
+}
+
+func setLibraryIdOrDoNothing(txn sql.Tx, source *stage.Source, schemaName string) error {
+	if source.Type == "default" {
+		return nil
+	}
+
+	id, err := repository.GetCodebaseId(txn, source.Library.Name, schemaName)
+	if err != nil {
+		return errWrap.Wrapf(err, "an error has occurred while getting library id by %v codebase name",
+			source.Library.Name)
+	}
+	if id == nil {
+		return fmt.Errorf("library wasn't found by %v name", source.Library.Name)
+	}
+
+	source.Library.Id = id
+	log.Printf("Fetched %v id for %v library", id, source.Library.Name)
+
+	return nil
 }
 
 func insertQualityGateRow(tx sql.Tx, cdStageId int, gates []stage.QualityGate, schemaName string) error {

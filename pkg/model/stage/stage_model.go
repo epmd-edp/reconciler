@@ -36,6 +36,18 @@ type Stage struct {
 	ActionLog      model.ActionLog
 	Status         string
 	QualityGates   []QualityGate
+	Source         Source
+}
+
+type Source struct {
+	Type    string
+	Library Library
+}
+
+type Library struct {
+	Id     *int
+	Name   string
+	Branch string
 }
 
 type QualityGate struct {
@@ -73,6 +85,13 @@ func ConvertToStage(k8sObject v1alpha1.Stage, edpName string) (*Stage, error) {
 		ActionLog:      *actionLog,
 		Status:         k8sObject.Status.Value,
 		QualityGates:   convertQualityGatesFromRequest(spec.QualityGates),
+		Source: Source{
+			Type: spec.Source.Type,
+			Library: Library{
+				Name:   spec.Source.Library.Name,
+				Branch: spec.Source.Library.Branch,
+			},
+		},
 	}
 	return &stage, nil
 }
