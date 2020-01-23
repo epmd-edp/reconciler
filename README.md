@@ -29,6 +29,6 @@ kubectl patch -n <edp_cicd_project> -f deploy/operator.yaml --local=true --patch
 
 - _<platform_type> - a platform type that can be "kubernetes" or "openshift"_.
 
--_<db_host> - a hostname of database. If it is deployed in the edp-deploy project then it will be as follows: "edp-install-wizard-db.edp-deploy"._
+- _<db_host> - a hostname of database. If it is deployed in the edp-deploy project then it will be as follows: "edp-install-wizard-db.edp-deploy"._
 
 * Check the <edp_deploy_project> namespace that should be in a pending state of creating a secret by indicating the following message: "Error: secrets "db-admin-console" not found". Such notification is a normal flow and it will be fixed during the EDP installation.
