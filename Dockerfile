@@ -7,7 +7,8 @@ ENV OPERATOR=/usr/local/bin/reconciler \
 # install operator binary
 COPY reconciler ${OPERATOR}
 
-COPY bin /usr/local/bin
+COPY build/bin /usr/local/bin
+
 RUN  chmod u+x /usr/local/bin/user_setup && chmod ugo+x /usr/local/bin/entrypoint && /usr/local/bin/user_setup
 
 ENTRYPOINT ["/usr/local/bin/entrypoint"]
