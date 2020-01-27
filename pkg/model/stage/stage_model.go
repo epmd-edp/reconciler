@@ -45,9 +45,10 @@ type Source struct {
 }
 
 type Library struct {
-	Id     *int
-	Name   string
-	Branch string
+	Id       *int
+	BranchId *int
+	Name     string
+	Branch   string
 }
 
 type QualityGate struct {
