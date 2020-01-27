@@ -70,6 +70,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				return true
 			}
 
+			if newObject.DeletionTimestamp != nil {
+				return true
+			}
 			return false
 		},
 	}
@@ -85,6 +88,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 var _ reconcile.Reconciler = &ReconcileCodebase{}
 
+const CodebaseReconcilerFinalizerName = "codebase.reconciler.finalizer.name"
+
 // ReconcileCodebase reconciles a Codebase object
 type ReconcileCodebase struct {
 	// This client, initialized using mgr.Client() above, is a split client
@@ -94,39 +99,31 @@ type ReconcileCodebase struct {
 	beService service.BEService
 }
 
-// Reconcile reads that state of the cluster for a Codebase object and makes changes based on the state read
-// and what is in the Codebase.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
-// a Pod as an example
-// Note:
-// The Controller will requeue the Request to be processed again if the returned error is non-nil or
-// Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling Codebase")
 
-	// Fetch the Codebase instance
-	instance := &edpv1alpha1Codebase.Codebase{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
-	if err != nil {
+	i := &edpv1alpha1Codebase.Codebase{}
+	if err := r.client.Get(context.TODO(), request.NamespacedName, i); err != nil {
 		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-			// Return and don't requeue
 			return reconcile.Result{}, nil
 		}
-		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
+	reqLogger.Info("Codebase has been retrieved", "codebase", i)
 
-	reqLogger.Info("Codebase has been retrieved", "codebase", instance)
-
-	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
+	edpN, err := helper.GetEDPName(r.client, i.Namespace)
 	if err != nil {
 		reqLogger.Error(err, "cannot get edp name")
 		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
-	c, err := codebase.Convert(*instance, *edpN)
+
+	result, err := r.tryToDeleteCodebase(i, *edpN)
+	if err != nil || result != nil {
+		return *result, err
+	}
+
+	c, err := codebase.Convert(*i, *edpN)
 	if err != nil {
 		reqLogger.Error(err, "cannot convert codebase to dto")
 		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
@@ -140,4 +137,25 @@ func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	reqLogger.Info("Reconciling has been finished successfully")
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileCodebase) tryToDeleteCodebase(i *edpv1alpha1Codebase.Codebase, schema string) (*reconcile.Result, error) {
+	if i.GetDeletionTimestamp().IsZero() {
+		if !helper.ContainsString(i.ObjectMeta.Finalizers, CodebaseReconcilerFinalizerName) {
+			i.ObjectMeta.Finalizers = append(i.ObjectMeta.Finalizers, CodebaseReconcilerFinalizerName)
+			if err := r.client.Update(context.TODO(), i); err != nil {
+				return &reconcile.Result{}, err
+			}
+		}
+		return nil, nil
+	}
+	if err := r.beService.Delete(i.Name, schema); err != nil {
+		return &reconcile.Result{}, err
+	}
+
+	i.ObjectMeta.Finalizers = helper.RemoveString(i.ObjectMeta.Finalizers, CodebaseReconcilerFinalizerName)
+	if err := r.client.Update(context.TODO(), i); err != nil {
+		return &reconcile.Result{}, err
+	}
+	return &reconcile.Result{}, nil
 }

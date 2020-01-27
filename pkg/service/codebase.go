@@ -2,22 +2,18 @@ package service
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository/jenkins-slave"
 	jp "github.com/epmd-edp/reconciler/v2/pkg/repository/job-provisioning"
+	"github.com/pkg/errors"
 	"log"
 )
 
 type BEService struct {
 	DB *sql.DB
 }
-
-const (
-	ApplicationType = "application"
-)
 
 func (service BEService) PutBE(be codebase.Codebase) error {
 	log.Printf("Start creation of business entity %v...", be)
@@ -140,4 +136,22 @@ func getGitServerId(txn sql.Tx, gitServerName string, schemaName string) (*int, 
 	}
 
 	return serverId, nil
+}
+
+func (s BEService) Delete(name, schema string) error {
+	log.Printf("start deleting %v codebase", name)
+	txn, err := s.DB.Begin()
+	if err != nil {
+		return errors.Wrapf(err, "couldn't open transaction while deleting codebase %v", name)
+	}
+
+	if err := repository.Delete(*txn, name, schema); err != nil {
+		return errors.Wrapf(err, "couldn't delete codebase %v", name)
+	}
+
+	if err := txn.Commit(); err != nil {
+		return errors.Wrapf(err, "couldn't close transaction while deleting codebase %v", name)
+	}
+	log.Printf("end deleting %v codebase", name)
+	return nil
 }

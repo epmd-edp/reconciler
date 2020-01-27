@@ -16,6 +16,7 @@ const (
 	SelectCodebaseType   = "select type from \"%v\".codebase where id=$1;"
 	UpdateCodebaseStatus = "update \"%v\".codebase set status = $1 where id = $2;"
 	SelectApplication    = "select id from \"%v\".codebase where name=$1 and type='application';"
+	DeleteCodebase       = "delete from \"%v\".codebase where name=$1;"
 )
 
 func GetCodebaseId(txn sql.Tx, name string, schemaName string) (*int, error) {
@@ -117,4 +118,11 @@ func GetApplicationId(txn sql.Tx, name string, schemaName string) (*int, error) 
 		return nil, err
 	}
 	return &id, nil
+}
+
+func Delete(txn sql.Tx, name, schema string) error {
+	if _, err := txn.Exec(fmt.Sprintf(DeleteCodebase, schema), name); err != nil {
+		return err
+	}
+	return nil
 }
