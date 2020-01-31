@@ -4,12 +4,13 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
+	stage2 "github.com/epmd-edp/reconciler/v2/pkg/service/stage"
 	"testing"
 	"time"
 )
 
 func TestPutStage(t *testing.T) {
-	service := StageService{
+	service := stage2.StageService{
 		DB: db.Instance,
 	}
 

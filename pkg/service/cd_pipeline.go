@@ -9,6 +9,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
+	service_stage "github.com/epmd-edp/reconciler/v2/pkg/service/stage"
 	"log"
 	"sort"
 )
@@ -185,12 +186,12 @@ func (s CdPipelineService) updateStageCodebaseDockerStreamRelations(txn sql.Tx, 
 		stages[i].Tenant = schemaName
 		stages[i].CdPipelineName = pipelineName
 
-		pipelineCR, err := getCDPipelineCR(s.ClientSet.EDPRestClient, stages[i].CdPipelineName, stages[i].Namespace)
+		pipelineCR, err := service_stage.GetCDPipelineCR(s.ClientSet.EDPRestClient, stages[i].CdPipelineName, stages[i].Namespace)
 		if err != nil {
 			return err
 		}
 
-		err = updateSingleStageCodebaseDockerStreamRelations(txn, stages[i].Id, stages[i], pipelineCR.Spec.ApplicationsToPromote)
+		err = service_stage.UpdateSingleStageCodebaseDockerStreamRelations(txn, stages[i].Id, stages[i], pipelineCR.Spec.ApplicationsToPromote)
 		if err != nil {
 			log.Printf("Error has occurred while creating Codebase Docker Stream row: %v", err)
 			return err
