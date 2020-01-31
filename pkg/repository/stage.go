@@ -15,7 +15,6 @@ const (
 		"left join \"%v\".cd_pipeline pl on st.cd_pipeline_id = pl.id " +
 		"where (st.name = $1 and pl.name = $2);"
 	UpdateStageStatusQuery                = "update \"%v\".cd_stage set status = $1 where id = $2;"
-	CreateStageActionLogQuery             = "insert into \"%v\".cd_stage_action_log(cd_stage_id, action_log_id) values ($1, $2);"
 	GetStageIdByPipelineNameAndOrderQuery = "select stage.id from \"%v\".cd_stage stage " +
 		"left join \"%v\".cd_pipeline pipe on stage.cd_pipeline_id = pipe.id " +
 		"where pipe.name = $1 and stage.\"order\" = $2;"
@@ -31,6 +30,11 @@ const (
 		"where c.type = 'autotests' " +
 		"  and c.name = $1 " +
 		"  and cb.name = $2 ; "
+	deleteCDStage = "delete " +
+		"	from \"%[1]v\".cd_stage cs using \"%[1]v\".cd_pipeline cp " +
+		"where cs.cd_pipeline_id = cp.id " +
+		"and cp.name = $1 " +
+		"  and cs.name = $2 ;"
 )
 
 func CreateStage(txn sql.Tx, stage stage.Stage, cdPipelineId int) (id *int, err error) {
@@ -76,17 +80,6 @@ func UpdateStageStatus(txn sql.Tx, schemaName string, id int, status string) err
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(status, id)
-	return err
-}
-
-func CreateStageActionLog(txn sql.Tx, schemaName string, stageId int, actionLogId int) error {
-	stmt, err := txn.Prepare(fmt.Sprintf(CreateStageActionLogQuery, schemaName))
-
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-	_, err = stmt.Exec(stageId, actionLogId)
 	return err
 }
 
@@ -181,4 +174,11 @@ func GetCodebaseAndBranchIds(txn sql.Tx, autotestName, branchName, schemaName st
 	}
 
 	return &dto, nil
+}
+
+func DeleteCDStage(txn sql.Tx, pipeName, stageName, schema string) error {
+	if _, err := txn.Exec(fmt.Sprintf(deleteCDStage, schema), pipeName, stageName); err != nil {
+		return err
+	}
+	return nil
 }

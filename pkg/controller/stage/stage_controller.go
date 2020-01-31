@@ -7,14 +7,15 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
-	"github.com/epmd-edp/reconciler/v2/pkg/service"
+	stage2 "github.com/epmd-edp/reconciler/v2/pkg/service/stage"
+	"github.com/pkg/errors"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -24,7 +25,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_stage")
+var (
+	_                            reconcile.Reconciler = &ReconcileStage{}
+	log                                               = logf.Log.WithName("controller_stage")
+	StageReconcilerFinalizerName                      = "stage.reconciler.finalizer.name"
+)
 
 // Add creates a new Stage Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -42,7 +47,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileStage{
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
-		service: service.StageService{
+		service: stage2.StageService{
 			DB:        db.Instance,
 			ClientSet: *clientSet,
 		},
@@ -69,7 +74,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			if !reflect.DeepEqual(oldObject.Spec, newObject.Spec) {
 				return true
 			}
-
+			if newObject.DeletionTimestamp != nil {
+				return true
+			}
 			return false
 		},
 	}
@@ -83,58 +90,58 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileStage{}
-
-// ReconcileStage reconciles a Stage object
 type ReconcileStage struct {
-	// This client, initialized using mgr.Client() above, is a split client
-	// that reads objects from the cache and writes to the apiserver
 	client  client.Client
 	scheme  *runtime.Scheme
-	service service.StageService
+	service stage2.StageService
 }
 
-// Reconcile reads that state of the cluster for a Stage object and makes changes based on the state read
-// and what is in the Stage.Spec
-// Note:
-// The Controller will requeue the Request to be processed again if the returned error is non-nil or
-// Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileStage) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling Stage")
-
-	// Fetch the Stage instance
-	instance := &edpV1alpha1.Stage{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-			// Return and don't requeue
+	rl := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	rl.V(2).Info("Reconciling Stage")
+	i := &edpV1alpha1.Stage{}
+	if err := r.client.Get(context.TODO(), request.NamespacedName, i); err != nil {
+		if k8serrors.IsNotFound(err) {
 			return reconcile.Result{}, nil
 		}
-		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
 
-	reqLogger.Info("Stage has been retrieved", "cd pipeline", instance)
-
-	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
-	if err != nil {
-		reqLogger.Error(err, "cannot get edp name")
-		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
-	}
-	st, err := stage.ConvertToStage(*instance, *edpN)
-	if err != nil {
-		reqLogger.Error(err, "cannot convert to stage dto")
-		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
-	}
-	err = r.service.PutStage(*st)
-	if err != nil {
-		reqLogger.Error(err, "cannot put stage")
-		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
+	edpN := "oc-mr-3620-1"
+	if r, err := r.tryToDeleteCDStage(i, edpN); err != nil || r != nil {
+		return *r, err
 	}
 
-	reqLogger.Info("Reconciling has been finished successfully")
+	st, err := stage.ConvertToStage(*i, edpN)
+	if err != nil {
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, errors.Wrap(err, "couldn't convert to stage dto")
+	}
+
+	if err = r.service.PutStage(*st); err != nil {
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, errors.Wrap(err, "couldn't put stage")
+	}
+	rl.V(2).Info("Reconciling has been finished successfully")
 	return reconcile.Result{}, nil
+}
+
+func (r ReconcileStage) tryToDeleteCDStage(i *edpV1alpha1.Stage, schema string) (*reconcile.Result, error) {
+	if i.GetDeletionTimestamp().IsZero() {
+		if !helper.ContainsString(i.ObjectMeta.Finalizers, StageReconcilerFinalizerName) {
+			i.ObjectMeta.Finalizers = append(i.ObjectMeta.Finalizers, StageReconcilerFinalizerName)
+			if err := r.client.Update(context.TODO(), i); err != nil {
+				return &reconcile.Result{}, err
+			}
+		}
+		return nil, nil
+	}
+
+	if err := r.service.DeleteCDStage(i.Spec.CdPipeline, i.Spec.Name, schema); err != nil {
+		return &reconcile.Result{}, err
+	}
+
+	i.ObjectMeta.Finalizers = helper.RemoveString(i.ObjectMeta.Finalizers, StageReconcilerFinalizerName)
+	if err := r.client.Update(context.TODO(), i); err != nil {
+		return &reconcile.Result{}, err
+	}
+	return &reconcile.Result{}, nil
 }
