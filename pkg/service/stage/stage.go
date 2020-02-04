@@ -48,17 +48,6 @@ func (s StageService) PutStage(stage stage.Stage) error {
 		return errors.Wrapf(err, "cannot create stage %v", stage.Name)
 	}
 
-	p, err := repository.GetCDPipeline(*txn, stage.CdPipelineName, stage.Tenant)
-	if err != nil {
-		_ = txn.Rollback()
-		return errors.Wrapf(err, "cannot get CD Pipeline %v", stage.CdPipelineName)
-	}
-
-	if err := addActionLog(*txn, &p.Id, stage); err != nil {
-		_ = txn.Rollback()
-		return errors.Wrapf(err, "error has been occurred while adding action log for stage %v", stage.Name)
-	}
-
 	_ = txn.Commit()
 
 	log.Info("stage has been inserted successfully", "name", stage.Name)
@@ -278,20 +267,6 @@ func prevStageAdded(tx sql.Tx, stage stage.Stage) bool {
 	}
 	log.V(2).Info("previous stage id", "id", stageId)
 	return true
-}
-
-func addActionLog(tx sql.Tx, id *int, stage stage.Stage) error {
-	log.V(2).Info("start adding action log for stage", "stage", stage.Name)
-	actionLogId, err := repository.CreateEventActionLog(tx, stage.ActionLog, stage.Tenant)
-	if err != nil {
-		return err
-	}
-
-	if err = repository.CreateCDPipelineActionLog(tx, *id, *actionLogId, stage.Tenant); err != nil {
-		return err
-	}
-	log.V(2).Info("action log for stage", "name", stage.Name)
-	return nil
 }
 
 func updateStageStatus(tx sql.Tx, id *int, stage stage.Stage) error {
