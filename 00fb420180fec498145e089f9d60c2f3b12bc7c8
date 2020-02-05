@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da8d2930_f71dbcca",
+        "filename": "pkg/service/cd_pipeline.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000006
+      },
+      "writtenOn": "2020-02-05T14:37:27Z",
+      "side": 1,
+      "message": "2?) let\u0027s use some meaningful name",
+      "range": {
+        "startLine": 12,
+        "startChar": 1,
+        "endLine": 12,
+        "endChar": 8
+      },
+      "revId": "00fb420180fec498145e089f9d60c2f3b12bc7c8",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "150a2a3e_c7c5b378",
+        "filename": "pkg/service/stage/stage.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000006
+      },
+      "writtenOn": "2020-02-05T14:37:27Z",
+      "side": 1,
+      "message": "Here is better))",
+      "range": {
+        "startLine": 11,
+        "startChar": 1,
+        "endLine": 11,
+        "endChar": 4
+      },
+      "revId": "00fb420180fec498145e089f9d60c2f3b12bc7c8",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": true
+    }
+  ]
+}
