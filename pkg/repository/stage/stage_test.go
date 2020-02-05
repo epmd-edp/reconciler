@@ -1,56 +1,53 @@
-package repository
+package stage
 
 import (
 	"fmt"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	sm "github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"testing"
 	"time"
 )
 
-func rTestInsertStage(t *testing.T) {
-	database, err := db.InitConnection()
+func TestInsertStage(t *testing.T) {
+	txn, err := db.Instance.Begin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	txn, err := database.Begin()
-	stage := model.Stage{
-		Name:            "sit",
-		CdPipelineName:  "test",
-		Description:     "Description for stage",
-		TriggerType:     "manual",
-		QualityGate:     "manual",
-		JenkinsStepName: "manual",
-		Order:           1,
+	s := sm.Stage{
+		Name:           "sit",
+		CdPipelineName: "test",
+		Description:    "Description for stage",
+		TriggerType:    "manual",
+		Order:          1,
 		ActionLog: model.ActionLog{
 			Event:           "created",
 			DetailedMessage: "",
 			Username:        "",
-			UpdatedAt:       time.Now().Unix(),
+			UpdatedAt:       time.Now(),
 		},
 		Status: "active",
 	}
 
-	id, err := CreateStage(*txn, "tarianyk-test", stage, 1)
-
+	id, err := CreateStage(*txn, s, 1)
 	if err != nil {
-		txn.Rollback()
+		_ = txn.Rollback()
 		t.Fatal(err)
 	}
 
-	txn.Commit()
+	if err := txn.Commit(); err != nil {
+		t.Fatal(err)
+	}
 
 	fmt.Printf("id of created stage: %v", id)
 }
 
 func TestGetStageId(t *testing.T) {
-	database, err := db.InitConnection()
+	txn, err := db.Instance.Begin()
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	txn, err := database.Begin()
 
 	id, err := GetStageId(*txn, "tarianyk-test", "sit-1", "team-a")
 

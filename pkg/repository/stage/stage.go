@@ -1,4 +1,4 @@
-package repository
+package stage
 
 import (
 	"database/sql"
@@ -34,6 +34,14 @@ const (
 		"	from \"%[1]v\".cd_stage cs using \"%[1]v\".cd_pipeline cp " +
 		"where cs.cd_pipeline_id = cp.id " +
 		"and cp.name = $1 " +
+		"  and cs.name = $2 ;"
+	deleteCodebaseDockerStream   = "delete from \"%v\".codebase_docker_stream where id = $1 ;"
+	selectCodebaseDockerStreamId = "select cds.id " +
+		"	from \"%[1]v\".codebase_docker_stream cds " +
+		"left join \"%[1]v\".stage_codebase_docker_stream scds on cds.id = scds.output_codebase_docker_stream_id " +
+		"left join \"%[1]v\".cd_stage cs on scds.cd_stage_id = cs.id " +
+		"left join \"%[1]v\".cd_pipeline cp on cs.cd_pipeline_id = cp.id " +
+		"where cp.name = $1 " +
 		"  and cs.name = $2 ;"
 )
 
@@ -178,6 +186,26 @@ func GetCodebaseAndBranchIds(txn sql.Tx, autotestName, branchName, schemaName st
 
 func DeleteCDStage(txn sql.Tx, pipeName, stageName, schema string) error {
 	if _, err := txn.Exec(fmt.Sprintf(deleteCDStage, schema), pipeName, stageName); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SelectCodebaseDockerStreamId(txn sql.Tx, pipeName, stageName, schema string) (id *int, err error) {
+	stmt, err := txn.Prepare(fmt.Sprintf(selectCodebaseDockerStreamId, schema))
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+
+	if err = stmt.QueryRow(pipeName, stageName).Scan(&id); err != nil {
+		return checkNoRows(err)
+	}
+	return
+}
+
+func DeleteCodebaseDockerStream(txn sql.Tx, id int, schema string) error {
+	if _, err := txn.Exec(fmt.Sprintf(deleteCodebaseDockerStream, schema), id); err != nil {
 		return err
 	}
 	return nil

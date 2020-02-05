@@ -8,6 +8,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
+	sr "github.com/epmd-edp/reconciler/v2/pkg/repository/stage"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/rest"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -256,7 +257,7 @@ func canStageBeCreated(tx sql.Tx, stage stage.Stage) bool {
 
 func prevStageAdded(tx sql.Tx, stage stage.Stage) bool {
 	log.V(2).Info("check previous stage fot stage", "name", stage.Name)
-	stageId, err := repository.GetStageIdByPipelineNameAndOrder(tx, stage.Tenant, stage.CdPipelineName, stage.Order-1)
+	stageId, err := sr.GetStageIdByPipelineNameAndOrder(tx, stage.Tenant, stage.CdPipelineName, stage.Order-1)
 	if err != nil {
 		log.Error(err, "an error has been occurred while retrieving prev stage id : %v", stageId)
 		return false
@@ -271,7 +272,7 @@ func prevStageAdded(tx sql.Tx, stage stage.Stage) bool {
 
 func updateStageStatus(tx sql.Tx, id *int, stage stage.Stage) error {
 	log.V(2).Info("start updating status for stage", "id", *id, "status", stage.Status)
-	err := repository.UpdateStageStatus(tx, stage.Tenant, *id, stage.Status)
+	err := sr.UpdateStageStatus(tx, stage.Tenant, *id, stage.Status)
 	if err != nil {
 		return errors.Wrapf(err, "an error has been occurred while updating stage status: %v", stage.Name)
 	}
@@ -280,7 +281,7 @@ func updateStageStatus(tx sql.Tx, id *int, stage stage.Stage) error {
 }
 
 func getStageIdOrCreate(tx sql.Tx, edpRestClient *rest.RESTClient, stage stage.Stage) (*int, error) {
-	id, err := repository.GetStageId(tx, stage.Tenant, stage.Name, stage.CdPipelineName)
+	id, err := sr.GetStageId(tx, stage.Tenant, stage.Name, stage.CdPipelineName)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +306,7 @@ func createStage(tx sql.Tx, edpRestClient *rest.RESTClient, stage stage.Stage) (
 		return nil, err
 	}
 
-	id, err := repository.CreateStage(tx, stage, cdPipeline.Id)
+	id, err := sr.CreateStage(tx, stage, cdPipeline.Id)
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't create stage id db")
 	}
@@ -375,18 +376,18 @@ func insertQualityGateRow(tx sql.Tx, cdStageId int, gates []stage.QualityGate, s
 }
 
 func insertAutotestQualityGate(tx sql.Tx, cdStageId int, gate stage.QualityGate, schemaName string) error {
-	entityIdsDTO, err := repository.GetCodebaseAndBranchIds(tx, *gate.AutotestName, *gate.BranchName, schemaName)
+	entityIdsDTO, err := sr.GetCodebaseAndBranchIds(tx, *gate.AutotestName, *gate.BranchName, schemaName)
 	if err != nil {
 		return err
 	}
 
-	_, err = repository.CreateQualityGate(tx, gate.QualityGate, gate.JenkinsStepName, cdStageId, &entityIdsDTO.CodebaseId, &entityIdsDTO.BranchId, schemaName)
+	_, err = sr.CreateQualityGate(tx, gate.QualityGate, gate.JenkinsStepName, cdStageId, &entityIdsDTO.CodebaseId, &entityIdsDTO.BranchId, schemaName)
 
 	return err
 }
 
 func insertManualQualityGate(tx sql.Tx, cdStageId int, gate stage.QualityGate, schemaName string) error {
-	_, err := repository.CreateQualityGate(tx, gate.QualityGate, gate.JenkinsStepName, cdStageId, nil, nil, schemaName)
+	_, err := sr.CreateQualityGate(tx, gate.QualityGate, gate.JenkinsStepName, cdStageId, nil, nil, schemaName)
 
 	return err
 }
@@ -397,10 +398,23 @@ func (s StageService) DeleteCDStage(pipeName, stageName, schema string) error {
 	if err != nil {
 		return errors.New("error has occurred during opening transaction")
 	}
-	if err := repository.DeleteCDStage(*txn, pipeName, stageName, schema); err != nil {
+
+	id, err := sr.SelectCodebaseDockerStreamId(*txn, pipeName, stageName, schema)
+	if err != nil {
+		_ = txn.Rollback()
+		return errors.Wrapf(err, "couldn't get codebase docker stream id by cd stage %v for cd pipeline", stageName, pipeName)
+	}
+
+	if err := sr.DeleteCDStage(*txn, pipeName, stageName, schema); err != nil {
 		_ = txn.Rollback()
 		return errors.Wrapf(err, "couldn't delete cd stage %v for cd pipeline", stageName, pipeName)
 	}
+
+	if err := sr.DeleteCodebaseDockerStream(*txn, *id, schema); err != nil {
+		_ = txn.Rollback()
+		return errors.Wrapf(err, "couldn't delete codebase docker stream with %v id", *id)
+	}
+
 	if err := txn.Commit(); err != nil {
 		return err
 	}
