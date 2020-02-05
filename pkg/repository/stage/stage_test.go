@@ -1,4 +1,4 @@
-package repository
+package stage
 
 import (
 	"fmt"
@@ -32,7 +32,7 @@ func rTestInsertStage(t *testing.T) {
 		Status: "active",
 	}
 
-	id, err := CreateStage(*txn, "tarianyk-test", stage, 1)
+	id, err := stage2.CreateStage(*txn, "tarianyk-test", stage, 1)
 
 	if err != nil {
 		txn.Rollback()
@@ -52,7 +52,7 @@ func TestGetStageId(t *testing.T) {
 
 	txn, err := database.Begin()
 
-	id, err := GetStageId(*txn, "tarianyk-test", "sit-1", "team-a")
+	id, err := stage2.GetStageId(*txn, "tarianyk-test", "sit-1", "team-a")
 
 	if err != nil {
 		t.Fatal(err)

@@ -9,6 +9,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
+	stage2 "github.com/epmd-edp/reconciler/v2/pkg/repository/stage"
 	service_stage "github.com/epmd-edp/reconciler/v2/pkg/service/stage"
 	"log"
 	"sort"
@@ -204,7 +205,7 @@ func (s CdPipelineService) updateStageCodebaseDockerStreamRelations(txn sql.Tx, 
 }
 
 func getStages(txn sql.Tx, cdPipelineName string, schemaName string) ([]stage.Stage, error) {
-	stages, err := repository.GetStages(txn, cdPipelineName, schemaName)
+	stages, err := stage2.GetStages(txn, cdPipelineName, schemaName)
 	if err != nil {
 		log.Printf("An error has occured while getting Stages for CD Pipeline %v : %v", cdPipelineName, err)
 		return nil, err
