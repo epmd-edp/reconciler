@@ -211,3 +211,10 @@ func GetCodebaseDockerStreamBranchId(txn sql.Tx, dockerStreamId int, schemaName 
 
 	return &id, nil
 }
+
+func checkNoRows(err error) (*int, error) {
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return nil, err
+}
