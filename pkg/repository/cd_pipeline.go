@@ -14,6 +14,7 @@ const (
 	InsertCDPipelineThirdPartyService = "insert into \"%v\".cd_pipeline_third_party_service(cd_pipeline_id, third_party_service_id) values ($1, $2) ;"
 	InsertCDPipelineDockerStream      = "insert into \"%v\".cd_pipeline_docker_stream(cd_pipeline_id, codebase_docker_stream_id) VALUES ($1, $2);"
 	DeleteAllDockerStreams            = "delete from \"%v\".cd_pipeline_docker_stream cpds  where cpds.cd_pipeline_id = $1 ;"
+	deleteCDPipeline                  = "delete from \"%v\".cd_pipeline where name = $1 ;"
 )
 
 func CreateCDPipeline(txn sql.Tx, cdPipeline cdpipeline.CDPipeline, status string, schemaName string) (*model.CDPipelineDTO, error) {
@@ -91,4 +92,11 @@ func DeleteCDPipelineDockerStreams(txn sql.Tx, pipelineId int, schemaName string
 
 	_, err = stmt.Exec(pipelineId)
 	return err
+}
+
+func DeleteCDPipeline(txn sql.Tx, pipeName, schema string) error {
+	if _, err := txn.Exec(fmt.Sprintf(deleteCDPipeline, schema), pipeName); err != nil {
+		return err
+	}
+	return nil
 }

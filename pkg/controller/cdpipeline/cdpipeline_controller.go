@@ -6,7 +6,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/cdpipeline"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
-	"github.com/epmd-edp/reconciler/v2/pkg/service"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/cd-pipeline"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -44,7 +44,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	if err != nil {
 		panic(err)
 	}
-	cdpService := service.CdPipelineService{
+	cdpService := cd_pipeline.CdPipelineService{
 		DB:        db.Instance,
 		ClientSet: *clientSet,
 	}
@@ -87,13 +87,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 var _ reconcile.Reconciler = &ReconcileCDPipeline{}
 
+const cdPipelineReconcilerFinalizerName = "cdpipeline.reconciler.finalizer.name"
+
 // ReconcileCDPipeline reconciles a CDPipeline object
 type ReconcileCDPipeline struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client     client.Client
 	scheme     *runtime.Scheme
-	cdpService service.CdPipelineService
+	cdpService cd_pipeline.CdPipelineService
 }
 
 // Reconcile reads that state of the cluster for a CDPipeline object and makes changes based on the state read
@@ -126,6 +128,11 @@ func (r *ReconcileCDPipeline) Reconcile(request reconcile.Request) (reconcile.Re
 		reqLogger.Error(err, "cannot get edp name")
 		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
+
+	if res, err := r.tryToDeleteCDPipeline(instance, *edpN); err != nil || r != nil {
+		return *res, err
+	}
+
 	cdp, err := cdpipeline.ConvertToCDPipeline(*instance, *edpN)
 	if err != nil {
 		reqLogger.Error(err, "cannot convert to cd pipeline dto")
@@ -139,4 +146,26 @@ func (r *ReconcileCDPipeline) Reconcile(request reconcile.Request) (reconcile.Re
 
 	reqLogger.Info("Reconciling has been finished successfully")
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileCDPipeline) tryToDeleteCDPipeline(p *edpv1alpha1.CDPipeline, schema string) (*reconcile.Result, error) {
+	if p.GetDeletionTimestamp().IsZero() {
+		if !helper.ContainsString(p.ObjectMeta.Finalizers, cdPipelineReconcilerFinalizerName) {
+			p.ObjectMeta.Finalizers = append(p.ObjectMeta.Finalizers, cdPipelineReconcilerFinalizerName)
+			if err := r.client.Update(context.TODO(), p); err != nil {
+				return &reconcile.Result{}, err
+			}
+		}
+		return nil, nil
+	}
+
+	if err := r.cdpService.DeleteCDPipeline(p.Name, schema); err != nil {
+		return &reconcile.Result{}, err
+	}
+
+	p.ObjectMeta.Finalizers = helper.RemoveString(p.ObjectMeta.Finalizers, cdPipelineReconcilerFinalizerName)
+	if err := r.client.Update(context.TODO(), p); err != nil {
+		return &reconcile.Result{}, err
+	}
+	return &reconcile.Result{}, nil
 }

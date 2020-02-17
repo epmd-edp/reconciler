@@ -66,7 +66,7 @@ func createService(txn sql.Tx, service thirdpartyservice.ThirdPartyService, sche
 	return id, nil
 }
 
-func getServicesId(txn sql.Tx, serviceNames []string, schemaName string) ([]int, error) {
+func GetServicesId(txn sql.Tx, serviceNames []string, schemaName string) ([]int, error) {
 	var servicesId []int
 	for _, name := range serviceNames {
 		id, err := repository.GetThirdPartyService(txn, name, schemaName)

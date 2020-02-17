@@ -112,8 +112,8 @@ func (r *ReconcileStage) Reconcile(request reconcile.Request) (reconcile.Result,
 		return reconcile.Result{RequeueAfter: 2 * time.Second}, errors.Wrap(err, "cannot get edp name")
 	}
 
-	if r, err := r.tryToDeleteCDStage(i, *edpN); err != nil || r != nil {
-		return *r, err
+	if res, err := r.tryToDeleteCDStage(i, *edpN); err != nil || r != nil {
+		return *res, err
 	}
 
 	st, err := stage.ConvertToStage(*i, *edpN)

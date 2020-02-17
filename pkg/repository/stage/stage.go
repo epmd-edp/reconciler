@@ -43,6 +43,14 @@ const (
 		"left join \"%[1]v\".cd_pipeline cp on cs.cd_pipeline_id = cp.id " +
 		"where cp.name = $1 " +
 		"  and cs.name = $2 ;"
+	deleteCodebaseDockerStreamIds = "delete " +
+		"	from \"%[1]v\".codebase_docker_stream cds " +
+		"where cds.id in (select cds.id " +
+		"from \"%[1]v\".codebase_docker_stream cds " +
+		"left join \"%[1]v\".stage_codebase_docker_stream scds on cds.id = scds.output_codebase_docker_stream_id " +
+		"left join \"%[1]v\".cd_stage cs on scds.cd_stage_id = cs.id " +
+		"left join \"%[1]v\".cd_pipeline cp on cs.cd_pipeline_id = cp.id " +
+		"where cp.name = $1 );"
 )
 
 func CreateStage(txn sql.Tx, stage stage.Stage, cdPipelineId int) (id *int, err error) {
@@ -206,6 +214,13 @@ func SelectCodebaseDockerStreamId(txn sql.Tx, pipeName, stageName, schema string
 
 func DeleteCodebaseDockerStream(txn sql.Tx, id int, schema string) error {
 	if _, err := txn.Exec(fmt.Sprintf(deleteCodebaseDockerStream, schema), id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteCodebaseDockerStreams(txn sql.Tx, pipeName, schema string) error {
+	if _, err := txn.Exec(fmt.Sprintf(deleteCodebaseDockerStreamIds, schema), pipeName); err != nil {
 		return err
 	}
 	return nil
