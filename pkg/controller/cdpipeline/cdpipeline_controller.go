@@ -129,7 +129,7 @@ func (r *ReconcileCDPipeline) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 
-	if res, err := r.tryToDeleteCDPipeline(instance, *edpN); err != nil || r != nil {
+	if res, err := r.tryToDeleteCDPipeline(instance, *edpN); err != nil || res != nil {
 		return *res, err
 	}
 

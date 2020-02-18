@@ -55,16 +55,20 @@ func (s JenkinsJobService) UpdateActionLog(jj *jenv1alpha1.JenkinsJob) error {
 		return err
 	}
 
-	alid, err := repository.CreateEventActionLog(*tx, *l, *edpN)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-
 	p, err := repository.GetCDPipeline(*tx, stage.Spec.CdPipeline, *edpN)
 	if err != nil {
 		_ = tx.Rollback()
 		return errors.Wrapf(err, "cannot get CD Pipeline %v", stage.Spec.CdPipeline)
+	}
+
+	if p == nil {
+		return fmt.Errorf("cd pipeline %v is not inserted into table yet", stage.Spec.CdPipeline)
+	}
+
+	alid, err := repository.CreateEventActionLog(*tx, *l, *edpN)
+	if err != nil {
+		_ = tx.Rollback()
+		return err
 	}
 
 	if err = repository.CreateCDPipelineActionLog(*tx, p.Id, *alid, *edpN); err != nil {

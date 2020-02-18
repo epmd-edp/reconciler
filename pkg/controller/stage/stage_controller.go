@@ -112,7 +112,7 @@ func (r *ReconcileStage) Reconcile(request reconcile.Request) (reconcile.Result,
 		return reconcile.Result{RequeueAfter: 2 * time.Second}, errors.Wrap(err, "cannot get edp name")
 	}
 
-	if res, err := r.tryToDeleteCDStage(i, *edpN); err != nil || r != nil {
+	if res, err := r.tryToDeleteCDStage(i, *edpN); err != nil || res != nil {
 		return *res, err
 	}
 

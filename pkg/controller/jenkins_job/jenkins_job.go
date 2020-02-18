@@ -16,6 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"time"
 )
 
 var (
@@ -89,7 +90,7 @@ func (r *ReconcileJenkinsJob) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 
 	if err := r.JenkinsJobService.UpdateActionLog(i); err != nil {
-		return reconcile.Result{}, err
+		return reconcile.Result{RequeueAfter: 5 * time.Second}, err
 	}
 
 	rl.V(2).Info("Reconciling JenkinsJob has been finished successfully")
