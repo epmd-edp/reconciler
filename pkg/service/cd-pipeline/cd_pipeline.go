@@ -44,6 +44,7 @@ func (s CdPipelineService) PutCDPipeline(cdPipeline cdpipeline.CDPipeline) error
 	}
 
 	if err := updateActionLog(*txn, cdPipeline, cdPipelineDb.Id, schemaName); err != nil {
+		_ = txn.Rollback()
 		return errors.Wrapf(err, "an error has occurred while updating CD Pipelin %ve Action Event Log", cdPipeline.Name)
 	}
 
@@ -58,19 +59,23 @@ func (s CdPipelineService) getCDPipelineOrCreate(txn sql.Tx, cdPipeline cdpipeli
 	log.V(2).Info("start retrieving CD Pipeline", "name", cdPipeline.Name)
 	cdPipelineReadModel, err := repository.GetCDPipeline(txn, cdPipeline.Name, schemaName)
 	if err != nil {
+		_ = txn.Rollback()
 		return nil, err
 	}
 	if cdPipelineReadModel != nil {
 		if err := repository.DeleteCDPipelineDockerStreams(txn, cdPipelineReadModel.Id, schemaName); err != nil {
+			_ = txn.Rollback()
 			return nil, errors.Wrap(err, "an error has occurred while deleting pipeline's docker streams")
 		}
 
 		if err := createCDPipelineDockerStream(txn, cdPipelineReadModel.Id, cdPipeline.InputDockerStreams, schemaName); err != nil {
+			_ = txn.Rollback()
 			return nil, err
 		}
 
 		stages, err := getStages(txn, cdPipelineReadModel.Name, schemaName)
 		if err != nil {
+			_ = txn.Rollback()
 			return nil, err
 		}
 
@@ -83,10 +88,12 @@ func (s CdPipelineService) getCDPipelineOrCreate(txn sql.Tx, cdPipeline cdpipeli
 		}
 
 		if err := s.updateStageCodebaseDockerStream(txn, stages, cdPipelineReadModel.Name, schemaName); err != nil {
+			_ = txn.Rollback()
 			return nil, err
 		}
 
 		if err := updateApplicationsToPromote(txn, cdPipelineReadModel.Id, cdPipeline.ApplicationsToPromote, schemaName); err != nil {
+			_ = txn.Rollback()
 			return nil, err
 		}
 
@@ -96,10 +103,12 @@ func (s CdPipelineService) getCDPipelineOrCreate(txn sql.Tx, cdPipeline cdpipeli
 
 	cdPipelineDTO, err := createCDPipeline(txn, cdPipeline, schemaName)
 	if err != nil {
+		_ = txn.Rollback()
 		return nil, err
 	}
 
 	if err := createCDPipelineDockerStream(txn, cdPipelineDTO.Id, cdPipeline.InputDockerStreams, schemaName); err != nil {
+		_ = txn.Rollback()
 		return nil, err
 	}
 
@@ -107,15 +116,18 @@ func (s CdPipelineService) getCDPipelineOrCreate(txn sql.Tx, cdPipeline cdpipeli
 		log.V(2).Info("try to create records in ThirdPartyServices", "values", cdPipeline.ThirdPartyServices)
 		servicesId, err := service.GetServicesId(txn, cdPipeline.ThirdPartyServices, schemaName)
 		if err != nil {
+			_ = txn.Rollback()
 			return nil, errors.Wrap(err, "an error has occurred while getting services id:")
 		}
 
 		if err := createCDPipelineThirdPartyService(txn, cdPipelineDTO.Id, servicesId, schemaName); err != nil {
+			_ = txn.Rollback()
 			return nil, errors.Wrap(err, "an error has occurred while inserting record into cd_pipeline_third_party_service")
 		}
 	}
 
 	if err := createApplicationToPromoteRow(txn, cdPipelineDTO.Id, cdPipeline.ApplicationsToPromote, schemaName); err != nil {
+		_ = txn.Rollback()
 		return nil, errors.Wrap(err, "an error has occurred while inserting record into applications_to_promote")
 	}
 	return cdPipelineDTO, nil

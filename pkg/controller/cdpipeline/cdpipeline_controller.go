@@ -72,6 +72,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				return true
 			}
 
+			if newObject.DeletionTimestamp != nil {
+				return true
+			}
 			return false
 		},
 	}
@@ -160,12 +163,12 @@ func (r *ReconcileCDPipeline) tryToDeleteCDPipeline(p *edpv1alpha1.CDPipeline, s
 	}
 
 	if err := r.cdpService.DeleteCDPipeline(p.Name, schema); err != nil {
-		return &reconcile.Result{}, err
+		return &reconcile.Result{RequeueAfter: 2 * time.Second}, err
 	}
 
 	p.ObjectMeta.Finalizers = helper.RemoveString(p.ObjectMeta.Finalizers, cdPipelineReconcilerFinalizerName)
 	if err := r.client.Update(context.TODO(), p); err != nil {
-		return &reconcile.Result{}, err
+		return &reconcile.Result{RequeueAfter: 2 * time.Second}, err
 	}
 	return &reconcile.Result{}, nil
 }

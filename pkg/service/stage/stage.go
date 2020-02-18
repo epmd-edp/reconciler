@@ -405,14 +405,20 @@ func (s StageService) DeleteCDStage(pipeName, stageName, schema string) error {
 		return errors.Wrapf(err, "couldn't get codebase docker stream id by cd stage %v for cd pipeline", stageName, pipeName)
 	}
 
-	if err := sr.DeleteCDStage(*txn, pipeName, stageName, schema); err != nil {
+	if id == nil {
 		_ = txn.Rollback()
-		return errors.Wrapf(err, "couldn't delete cd stage %v for cd pipeline", stageName, pipeName)
+		log.V(2).Info("docker stream has been deleted", "pipe", pipeName, "stage", stageName)
+		return nil
 	}
 
 	if err := sr.DeleteCodebaseDockerStream(*txn, *id, schema); err != nil {
 		_ = txn.Rollback()
 		return errors.Wrapf(err, "couldn't delete codebase docker stream with %v id", *id)
+	}
+
+	if err := sr.DeleteCDStage(*txn, pipeName, stageName, schema); err != nil {
+		_ = txn.Rollback()
+		return errors.Wrapf(err, "couldn't delete cd stage %v for cd pipeline", stageName, pipeName)
 	}
 
 	if err := txn.Commit(); err != nil {

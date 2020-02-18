@@ -62,6 +62,7 @@ func (s JenkinsJobService) UpdateActionLog(jj *jenv1alpha1.JenkinsJob) error {
 	}
 
 	if p == nil {
+		_ = tx.Rollback()
 		return fmt.Errorf("cd pipeline %v is not inserted into table yet", stage.Spec.CdPipeline)
 	}
 
