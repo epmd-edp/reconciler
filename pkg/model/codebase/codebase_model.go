@@ -59,6 +59,8 @@ type Codebase struct {
 	JobProvisioning     string
 	JobProvisioningId   *int
 	DeploymentScript    string
+	VersioningType      string
+	StartVersioningFrom *string
 }
 
 var codebaseActionMessageMap = map[string]string{
@@ -94,6 +96,8 @@ func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase,
 		JenkinsSlave:     s.JenkinsSlave,
 		JobProvisioning:  s.JobProvisioning,
 		DeploymentScript: s.DeploymentScript,
+		VersioningType:   string(s.Versioning.Type),
+		StartVersioningFrom: s.Versioning.StartFrom,
 	}
 
 	if s.Framework != nil {
