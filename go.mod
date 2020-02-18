@@ -9,7 +9,7 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-201808011710
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/epmd-edp/cd-pipeline-operator/v2 v2.2.0-50
-	github.com/epmd-edp/codebase-operator/v2 v2.3.0-88
+	github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200213090052-53578bdc8158
 	github.com/epmd-edp/edp-component-operator v0.0.1-2
 	github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200130180740-456dfd955ec4
 	github.com/lib/pq v1.0.0
