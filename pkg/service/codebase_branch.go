@@ -33,6 +33,14 @@ func (service CodebaseBranchService) PutCodebaseBranch(codebaseBranch codebasebr
 	}
 	log.Printf("Id of Codebase Branch to be updated: %v", *id)
 
+	err = updateCodebaseBranch(*txn, codebaseBranch, *id, schemaName)
+	if err != nil {
+		log.Printf("Error has occurred during codebaseBranch updating: %v", err)
+		_ = txn.Rollback()
+		return errors.New(fmt.Sprintf("cannot insert codebaseBranch update %v", codebaseBranch))
+	}
+	log.Printf("CodebaseBranch has been updated: %v", codebaseBranch)
+
 	log.Println("Start update status of codebase branch...")
 	actionLogId, err := repository.CreateActionLog(*txn, codebaseBranch.ActionLog, schemaName)
 	if err != nil {
@@ -104,7 +112,8 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBran
 
 	}
 	id, err := repository.CreateCodebaseBranch(txn, codebaseBranch.Name, *beId,
-		codebaseBranch.FromCommit, schemaName, streamId, codebaseBranch.Status)
+		codebaseBranch.FromCommit, schemaName, streamId, codebaseBranch.Status, codebaseBranch.Version,
+		codebaseBranch.BuildNumber, codebaseBranch.LastSuccessBuild)
 	if err != nil {
 		return nil, err
 	}
@@ -131,4 +140,15 @@ func getCodebaseBranchIdOrCreate(txn sql.Tx, codebaseBranch codebasebranch.Codeb
 		return createCodebaseBranch(txn, codebaseBranch, schemaName)
 	}
 	return id, nil
+}
+
+func updateCodebaseBranch(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBranch, id int, schemaName string) error {
+	log.Printf("Start updating CodebaseBranch by id: %v", id)
+
+	err := repository.UpdateCodebaseBranch(txn, id, codebaseBranch.Version, codebaseBranch.BuildNumber,
+		codebaseBranch.LastSuccessBuild, schemaName)
+	if err != nil {
+		return err
+	}
+	return nil
 }
