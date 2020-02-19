@@ -24,12 +24,15 @@ import (
 )
 
 type CodebaseBranch struct {
-	Name       string
-	Tenant     string
-	AppName    string
-	FromCommit string
-	Status     string
-	ActionLog  model.ActionLog
+	Name             string
+	Tenant           string
+	AppName          string
+	FromCommit       string
+	Version          *string
+	BuildNumber      *string
+	LastSuccessBuild *string
+	Status           string
+	ActionLog        model.ActionLog
 }
 
 var codebaseBranchActionMessageMap = map[string]string{
@@ -47,12 +50,15 @@ func ConvertToCodebaseBranch(k8sObject edpv1alpha1Codebase.CodebaseBranch, edpNa
 	actionLog := convertCodebaseBranchActionLog(spec.BranchName, spec.CodebaseName, k8sObject.Status)
 
 	branch := CodebaseBranch{
-		Name:       spec.BranchName,
-		Tenant:     edpName,
-		AppName:    spec.CodebaseName,
-		FromCommit: spec.FromCommit,
-		Status:     k8sObject.Status.Value,
-		ActionLog:  *actionLog,
+		Name:             spec.BranchName,
+		Tenant:           edpName,
+		AppName:          spec.CodebaseName,
+		FromCommit:       spec.FromCommit,
+		Version:          spec.Version,
+		BuildNumber:      spec.Build,
+		LastSuccessBuild: k8sObject.Status.LastSuccessfulBuild,
+		Status:           k8sObject.Status.Value,
+		ActionLog:        *actionLog,
 	}
 
 	return &branch, nil
