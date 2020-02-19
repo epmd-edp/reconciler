@@ -22,6 +22,23 @@
       "revId": "102d0656fc7f7bdabcb9c6d30cb933d5df3772b5",
       "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac7ad6ae_1b67d59a",
+        "filename": "pkg/service/codebase_branch.go",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2020-02-19T10:51:35Z",
+      "side": 1,
+      "message": "should we really log there ? operator will log error which you have been thrown",
+      "revId": "102d0656fc7f7bdabcb9c6d30cb933d5df3772b5",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
     }
   ]
 }
