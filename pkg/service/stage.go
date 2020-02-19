@@ -416,7 +416,16 @@ func setLibraryIdOrDoNothing(txn sql.Tx, source *stage.Source, schemaName string
 	}
 
 	source.Library.Id = id
-	log.Printf("Fetched %v id for %v library", id, source.Library.Name)
+
+	bid, err := repository.GetCodebaseBranchId(txn, source.Library.Name, source.Library.Branch, schemaName)
+	if err != nil {
+		return errWrap.Wrapf(err, "an error has occurred while getting library branch id by %v codebase name and %v branch",
+			source.Library.Name, source.Library.Branch)
+	}
+	if bid == nil {
+		return fmt.Errorf("branch wasn't found by %v name", source.Library.Branch)
+	}
+	source.Library.BranchId = bid
 
 	return nil
 }
