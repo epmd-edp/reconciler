@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a53ef822_f8362a2b",
+        "filename": "pkg/model/stage/stage_model.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-02-19T16:11:32Z",
+      "side": 1,
+      "message": "Why do we need to have both branch and branchId?",
+      "revId": "eef8caebe5c26a4890fa0985f5e6ab7ed5151c5b",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    }
+  ]
+}
