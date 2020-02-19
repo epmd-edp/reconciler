@@ -1,0 +1,8 @@
+Code-Review+2: Alexander Morozov <alexander_morozov@epam.com>
+Verified+1: Stanislav Kostenko <stanislav_kostenko@epam.com>
+Verified+1: CI Jenkins
+Submitted-by: Stanislav Kostenko <stanislav_kostenko@epam.com>
+Submitted-at: Wed, 19 Feb 2020 14:20:50 +0000
+Reviewed-on: https://gerrit-oc-green-edp-cicd.delivery.aws.main.edp.projects.epam.com/c/reconciler/+/287
+Project: reconciler
+Branch: refs/heads/master
