@@ -42,18 +42,18 @@ func CreateStage(txn sql.Tx, schemaName string, stage stage.Stage, cdPipelineId 
 
 	err = stmt.QueryRow(stage.Name, cdPipelineId, stage.Description,
 		stage.TriggerType, stage.Order, stage.Status,
-		getLibraryIdOrNil(stage.Source)).Scan(&id)
+		getLibraryBranchIdOrNil(stage.Source)).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
 	return id, nil
 }
 
-func getLibraryIdOrNil(source stage.Source) *int {
+func getLibraryBranchIdOrNil(source stage.Source) *int {
 	if source.Type == "default" {
 		return nil
 	}
-	return source.Library.Id
+	return source.Library.BranchId
 }
 
 func GetStageId(txn sql.Tx, schemaName string, name string, cdPipelineName string) (id *int, err error) {
