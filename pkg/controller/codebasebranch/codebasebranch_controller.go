@@ -69,6 +69,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				return true
 			}
 
+			if oldObject.Status.LastSuccessfulBuild != newObject.Status.LastSuccessfulBuild {
+				return true
+			}
+
 			return false
 		},
 	}
