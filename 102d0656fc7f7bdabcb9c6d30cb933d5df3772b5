@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1da99d20_e363fee3",
+        "filename": "pkg/model/codebasebranch/codebase_branch_model.go",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000006
+      },
+      "writtenOn": "2020-02-19T09:01:30Z",
+      "side": 1,
+      "message": "This leads to the situation when reflect.DeepEqual(oldObject.Spec, newObject.Spec) will be always false, is it ok?",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 25
+      },
+      "revId": "102d0656fc7f7bdabcb9c6d30cb933d5df3772b5",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": true
+    }
+  ]
+}
