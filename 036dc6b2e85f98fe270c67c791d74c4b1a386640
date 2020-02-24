@@ -1,0 +1,7 @@
+Verified+1: CI Jenkins
+Code-Review+2: Pavlo Yemelianov <pavlo_yemelianov@epam.com>
+Submitted-by: Anton Tarianyk <anton_tarianyk@epam.com>
+Submitted-at: Mon, 24 Feb 2020 14:01:17 +0000
+Reviewed-on: https://gerrit-oc-green-edp-cicd.delivery.aws.main.edp.projects.epam.com/c/reconciler/+/327
+Project: reconciler
+Branch: refs/heads/master
