@@ -2,16 +2,17 @@ package codebasebranch
 
 import (
 	"context"
-	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/codebasebranch"
-	"github.com/epmd-edp/reconciler/v2/pkg/service"
+	codebasebranch2 "github.com/epmd-edp/reconciler/v2/pkg/service/codebasebranch"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"time"
 
+	errWrap "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -25,31 +26,21 @@ import (
 
 var log = logf.Log.WithName("controller_codebasebranch")
 
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
-
-// Add creates a new CodebaseBranch Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
 }
 
-// newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileCodebaseBranch{
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
-		cbService: service.CodebaseBranchService{
+		cbService: codebasebranch2.CodebaseBranchService{
 			DB: db.Instance,
 		},
 	}
 }
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
 	c, err := controller.New("codebasebranch-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
@@ -57,8 +48,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	pred := predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldObject := e.ObjectOld.(*edpv1alpha1Codebase.CodebaseBranch)
-			newObject := e.ObjectNew.(*edpv1alpha1Codebase.CodebaseBranch)
+			oldObject := e.ObjectOld.(*v1alpha1.CodebaseBranch)
+			newObject := e.ObjectNew.(*v1alpha1.CodebaseBranch)
 
 			if oldObject.Status.Value != newObject.Status.Value ||
 				oldObject.Status.Action != newObject.Status.Action {
@@ -73,12 +64,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				return true
 			}
 
+			if newObject.DeletionTimestamp != nil {
+				return true
+			}
 			return false
 		},
 	}
 
-	// Watch for changes to primary resource CodebaseBranch
-	err = c.Watch(&source.Kind{Type: &edpv1alpha1Codebase.CodebaseBranch{}}, &handler.EnqueueRequestForObject{}, pred)
+	err = c.Watch(&source.Kind{Type: &v1alpha1.CodebaseBranch{}}, &handler.EnqueueRequestForObject{}, pred)
 	if err != nil {
 		return err
 	}
@@ -88,54 +81,64 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 var _ reconcile.Reconciler = &ReconcileCodebaseBranch{}
 
-// ReconcileCodebaseBranch reconciles a CodebaseBranch object
+const codebaseBranchReconcilerFinalizerName = "codebasebranch.reconciler.finalizer.name"
+
 type ReconcileCodebaseBranch struct {
-	// This client, initialized using mgr.Client() above, is a split client
-	// that reads objects from the cache and writes to the apiserver
 	client    client.Client
 	scheme    *runtime.Scheme
-	cbService service.CodebaseBranchService
+	cbService codebasebranch2.CodebaseBranchService
 }
 
-// Reconcile reads that state of the cluster for a CodebaseBranch object and makes changes based on the state read
-// and what is in the CodebaseBranch.Spec
-// Note:
-// The Controller will requeue the Request to be processed again if the returned error is non-nil or
-// Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileCodebaseBranch) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling CodebaseBranch")
+	rl := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	rl.Info("Reconciling CodebaseBranch")
 
-	// Fetch the CodebaseBranch instance
-	instance := &edpv1alpha1Codebase.CodebaseBranch{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
-	if err != nil {
+	i := &v1alpha1.CodebaseBranch{}
+	if err := r.client.Get(context.TODO(), request.NamespacedName, i); err != nil {
 		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-			// Return and don't requeue
 			return reconcile.Result{}, nil
 		}
-		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
 
-	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
+	edpN, err := helper.GetEDPName(r.client, i.Namespace)
 	if err != nil {
-		reqLogger.Error(err, "cannot get edp name")
-		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
-	}
-	app, err := codebasebranch.ConvertToCodebaseBranch(*instance, *edpN)
-	if err != nil {
-		reqLogger.Error(err, "cannot convert to codebase branch dto")
-		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
-	}
-	err = r.cbService.PutCodebaseBranch(*app)
-	if err != nil {
-		reqLogger.Error(err, "cannot put codebase branch")
-		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, errWrap.Wrap(err, "couldn't get edp name")
 	}
 
-	reqLogger.Info("Reconciling has been finished successfully")
+	if res, err := r.tryToDeleteCodebaseBranch(i, *edpN); err != nil || res != nil {
+		return *res, err
+	}
+
+	app, err := codebasebranch.ConvertToCodebaseBranch(*i, *edpN)
+	if err != nil {
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, errWrap.Wrap(err, "cannot convert to codebase branch dto")
+	}
+	if err := r.cbService.PutCodebaseBranch(*app); err != nil {
+		return reconcile.Result{RequeueAfter: 2 * time.Second}, errWrap.Wrap(err, "couldn't insert codebase branch")
+	}
+	rl.Info("Reconciling has been finished successfully")
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileCodebaseBranch) tryToDeleteCodebaseBranch(cb *v1alpha1.CodebaseBranch, schema string) (*reconcile.Result, error) {
+	if cb.GetDeletionTimestamp().IsZero() {
+		if !helper.ContainsString(cb.ObjectMeta.Finalizers, codebaseBranchReconcilerFinalizerName) {
+			cb.ObjectMeta.Finalizers = append(cb.ObjectMeta.Finalizers, codebaseBranchReconcilerFinalizerName)
+			if err := r.client.Update(context.TODO(), cb); err != nil {
+				return &reconcile.Result{}, err
+			}
+		}
+		return nil, nil
+	}
+
+	if err := r.cbService.Delete(cb.Spec.CodebaseName, cb.Spec.BranchName, schema); err != nil {
+		return &reconcile.Result{RequeueAfter: 2 * time.Second}, err
+	}
+
+	cb.ObjectMeta.Finalizers = helper.RemoveString(cb.ObjectMeta.Finalizers, codebaseBranchReconcilerFinalizerName)
+	if err := r.client.Update(context.TODO(), cb); err != nil {
+		return &reconcile.Result{RequeueAfter: 2 * time.Second}, err
+	}
+	return &reconcile.Result{}, nil
 }
