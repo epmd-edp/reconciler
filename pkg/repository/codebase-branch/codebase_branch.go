@@ -1,4 +1,4 @@
-package repository
+package codebase_branch
 
 import (
 	"database/sql"
@@ -70,4 +70,8 @@ func UpdateCodebaseBranch(txn sql.Tx, branchId int, version *string, build *stri
 
 	_, err = stmt.Exec(version, build, lastSuccess, branchId)
 	return err
+}
+
+func Delete(txn sql.Tx, codebase, branch, schemaName string) error {
+
 }

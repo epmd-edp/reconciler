@@ -8,6 +8,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
+	"github.com/epmd-edp/reconciler/v2/pkg/repository/codebase-branch"
 	sr "github.com/epmd-edp/reconciler/v2/pkg/repository/stage"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/rest"
@@ -342,7 +343,7 @@ func setLibraryIdOrDoNothing(txn sql.Tx, source *stage.Source, schemaName string
 	}
 	source.Library.Id = id
 
-	bid, err := repository.GetCodebaseBranchId(txn, source.Library.Name, source.Library.Branch, schemaName)
+	bid, err := codebase_branch.GetCodebaseBranchId(txn, source.Library.Name, source.Library.Branch, schemaName)
 	if err != nil {
 		return errors.Wrapf(err, "an error has occurred while getting library branch id by %v codebase name and %v branch",
 			source.Library.Name, source.Library.Branch)
