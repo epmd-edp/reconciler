@@ -4,12 +4,13 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/codebasebranch"
+	cbs "github.com/epmd-edp/reconciler/v2/pkg/service/codebasebranch"
 	"testing"
 	"time"
 )
 
 func TestCodebaseBranchService_PutCodebaseBranchIfApplicationDoesNotExist(t *testing.T) {
-	beService := CodebaseBranchService{
+	beService := cbs.CodebaseBranchService{
 		DB: db.Instance,
 	}
 
@@ -26,7 +27,7 @@ func TestCodebaseBranchService_PutCodebaseBranchIfApplicationDoesNotExist(t *tes
 }
 
 func TestCreateBranch(t *testing.T) {
-	service := CodebaseBranchService{
+	service := cbs.CodebaseBranchService{
 		DB: db.Instance,
 	}
 
