@@ -1,0 +1,14 @@
+name: reconciler
+namespace: ""
+platform: "openshift"
+dnsWildcard: ""
+database:
+  required: false
+  host: edp-install-wizard-db
+  name: edp-install-wizard-db
+  port: 5432
+ingress:
+  required: false
+image:
+  name: reconciler-master
+  version: latest
