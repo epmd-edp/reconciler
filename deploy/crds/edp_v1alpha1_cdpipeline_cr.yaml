@@ -3,5 +3,4 @@ kind: CDPipeline
 metadata:
   name: example-cdpipeline
 spec:
-  # Add fields here
   size: 3
