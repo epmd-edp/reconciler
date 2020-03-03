@@ -1,0 +1,14 @@
+name: reconciler
+namespace: "oc-mr-3640-1-edp-cicd"
+platform: "openshift"
+dnsWildcard: ""
+database:
+  required: false
+  host: edp-install-wizard-db.oc-mr-3640-1-deploy-project.svc
+  name: edp-install-wizard-db
+  port: 5432
+ingress:
+  required: false
+image:
+  name: docker-registry.default.svc:5000/oc-green-edp-cicd/reconciler-master
+  version: latest

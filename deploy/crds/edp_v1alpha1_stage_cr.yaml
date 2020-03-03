@@ -1,0 +1,23 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: Stage
+metadata:
+  name: team-a-sit
+spec:
+  name: "sit"
+  cdPipeline: "test"
+  description: "SIT environment for dedicated team"
+  qualityGates:
+    - autotestName: "tests"
+      branchName: "branch-name"
+      qualityGateType: "manual"
+      stepName: "sit"
+  triggerType: "is-changed"
+  order: 1
+  source:
+    type: "library"
+    library:
+      name: "lib-name"
+      branch: "branch-name"
+status:
+  status: "initialized"
+  lastTimeUpdated: 0001-01-01T00:00:00Z
