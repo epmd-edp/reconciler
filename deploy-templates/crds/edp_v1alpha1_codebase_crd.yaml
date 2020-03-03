@@ -12,4 +12,45 @@ spec:
     shortNames:
       - cdbs
   scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            lang:
+              type: string
+            framework:
+              type: string
+            buildTool:
+              type: string
+            strategy:
+              type: string
+            git:
+              properties:
+                url:
+                  type: string
+              required:
+                - url
+              type: object
+            route:
+              properties:
+                site:
+                  type: string
+                path:
+                  type: string
+              type: object
+          required:
+            - lang
+            - framework
+            - buildTool
+            - strategy
+          type: object
+        status:
+          type: object
   version: v1alpha1
