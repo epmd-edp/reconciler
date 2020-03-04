@@ -31,6 +31,7 @@ type CodebaseBranch struct {
 	Version          *string
 	BuildNumber      *string
 	LastSuccessBuild *string
+	Release          bool
 	Status           string
 	ActionLog        model.ActionLog
 }
@@ -55,6 +56,7 @@ func ConvertToCodebaseBranch(k8sObject edpv1alpha1Codebase.CodebaseBranch, edpNa
 		AppName:          spec.CodebaseName,
 		FromCommit:       spec.FromCommit,
 		Version:          spec.Version,
+		Release:          spec.Release,
 		BuildNumber:      spec.Build,
 		LastSuccessBuild: k8sObject.Status.LastSuccessfulBuild,
 		Status:           k8sObject.Status.Value,

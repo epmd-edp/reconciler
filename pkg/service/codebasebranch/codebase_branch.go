@@ -97,7 +97,7 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBran
 	}
 	id, err := cbs.CreateCodebaseBranch(txn, codebaseBranch.Name, *beId,
 		codebaseBranch.FromCommit, schemaName, streamId, codebaseBranch.Status, codebaseBranch.Version,
-		codebaseBranch.BuildNumber, codebaseBranch.LastSuccessBuild)
+		codebaseBranch.BuildNumber, codebaseBranch.LastSuccessBuild, codebaseBranch.Release)
 	if err != nil {
 		return nil, err
 	}
