@@ -8,8 +8,8 @@ import (
 const (
 	SelectCodebaseBranch = "select cb.id as codebase_branch_id from \"%v\".codebase_branch cb" +
 		" left join \"%v\".codebase c on cb.codebase_id = c.id where cb.name=$1 and c.name=$2;"
-	InsertCodebaseBranch = "insert into \"%v\".codebase_branch(name, codebase_id, from_commit, output_codebase_docker_stream_id, status, version, build_number, last_success_build)" +
-		" values ($1, $2, $3, $4, $5, $6, $7, $8) returning id;"
+	InsertCodebaseBranch = "insert into \"%v\".codebase_branch(name, codebase_id, from_commit, output_codebase_docker_stream_id, status, version, build_number, last_success_build, release)" +
+		" values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id;"
 	UpdateCodebaseBranchStatus = "update \"%v\".codebase_branch set status = $1 where id = $2;"
 	UpdateCodebaseBranchValues = "update \"%v\".codebase_branch set version = $1, build_number = $2, last_success_build = $3 where id = $4;"
 	deleteCodebaseBranch       = "delete from \"%[1]v\".codebase_branch cb " +
@@ -38,7 +38,7 @@ func GetCodebaseBranchId(txn sql.Tx, codebaseName string, codebaseBranchName str
 }
 
 func CreateCodebaseBranch(txn sql.Tx, name string, beId int, fromCommit string,
-	schemaName string, streamId *int, status string, version *string, buildNumber *string, lastSuccessBuild *string) (*int, error) {
+	schemaName string, streamId *int, status string, version *string, buildNumber *string, lastSuccessBuild *string, release bool) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(InsertCodebaseBranch, schemaName))
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func CreateCodebaseBranch(txn sql.Tx, name string, beId int, fromCommit string,
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(name, beId, fromCommit, streamId, status, version, buildNumber, lastSuccessBuild).Scan(&id)
+	err = stmt.QueryRow(name, beId, fromCommit, streamId, status, version, buildNumber, lastSuccessBuild, release).Scan(&id)
 	if err != nil {
 		return nil, err
 	}

@@ -18,10 +18,6 @@
 package helper
 
 import (
-	"context"
-	"fmt"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -33,7 +29,7 @@ const (
 // GetEDPName tries to find edp name parameter from edp-config CM using
 // provided client and namespace to search
 func GetEDPName(client client.Client, namespace string) (*string, error) {
-	cm := &v1.ConfigMap{}
+	/*cm := &v1.ConfigMap{}
 	err := client.Get(context.TODO(), types.NamespacedName{
 		Namespace: namespace,
 		Name:      EDPConfigCM,
@@ -45,5 +41,7 @@ func GetEDPName(client client.Client, namespace string) (*string, error) {
 	if len(r) == 0 {
 		return nil, fmt.Errorf("there is not key %v in cm %v", EDPNameKey, EDPConfigCM)
 	}
-	return &r, nil
+	return &r, nil*/
+	name := "test-skostenko"
+	return &name, nil
 }
