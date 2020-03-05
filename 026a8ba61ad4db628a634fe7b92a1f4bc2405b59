@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a69bbe51_532363f3",
+        "filename": "deploy-templates/templates/clusterrole_openshift.yaml",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2020-03-05T09:24:11Z",
+      "side": 1,
+      "message": "Do we really need this privileges to be cluster wide? Is admin role in namespace not enough?",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 12
+      },
+      "revId": "026a8ba61ad4db628a634fe7b92a1f4bc2405b59",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbe81571_5f00a4d7",
+        "filename": "deploy-templates/templates/rolebinding_kubernetes.yaml",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2020-03-05T09:24:11Z",
+      "side": 1,
+      "message": "This file should be removed since we decided to add kubernetes support later",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 11
+      },
+      "revId": "026a8ba61ad4db628a634fe7b92a1f4bc2405b59",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f45f770_b37ddd40",
+        "filename": "deploy-templates/templates/secrets.yaml",
+        "patchSetId": 6
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2020-03-05T09:24:11Z",
+      "side": 1,
+      "message": "It is not supposed to store this secret in repository. It should come from database service",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 22
+      },
+      "revId": "026a8ba61ad4db628a634fe7b92a1f4bc2405b59",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "26b05dbb_ae7d70e3",
+        "filename": "deploy-templates/values.yaml",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2020-03-05T09:24:11Z",
+      "side": 1,
+      "message": "Remove this",
+      "range": {
+        "startLine": 2,
+        "startChar": 12,
+        "endLine": 2,
+        "endChar": 33
+      },
+      "revId": "026a8ba61ad4db628a634fe7b92a1f4bc2405b59",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8345ae3_3078cbab",
+        "filename": "deploy-templates/values.yaml",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2020-03-05T09:24:11Z",
+      "side": 1,
+      "message": "Remove this",
+      "range": {
+        "startLine": 13,
+        "startChar": 8,
+        "endLine": 13,
+        "endChar": 59
+      },
+      "revId": "026a8ba61ad4db628a634fe7b92a1f4bc2405b59",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    }
+  ]
+}
