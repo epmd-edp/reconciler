@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a362d633_8524fd24",
+        "filename": "deploy-templates/Chart.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1000017
+      },
+      "writtenOn": "2020-03-10T16:44:41Z",
+      "side": 1,
+      "message": "space",
+      "range": {
+        "startLine": 6,
+        "startChar": 0,
+        "endLine": 6,
+        "endChar": 4
+      },
+      "revId": "d7cd4abbcf30eb04ca0756e53bb2723e688028cd",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe407e7c_6b21a1ac",
+        "filename": "deploy-templates/templates/clusterrole_openshift.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000017
+      },
+      "writtenOn": "2020-03-10T16:44:41Z",
+      "side": 1,
+      "message": "I\u0027m not sure that we need such rule here?",
+      "range": {
+        "startLine": 10,
+        "startChar": 2,
+        "endLine": 21,
+        "endChar": 14
+      },
+      "revId": "d7cd4abbcf30eb04ca0756e53bb2723e688028cd",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7abd40cc_56ff44e9",
+        "filename": "deploy-templates/templates/deployment.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000017
+      },
+      "writtenOn": "2020-03-10T16:44:41Z",
+      "side": 1,
+      "message": "comment",
+      "range": {
+        "startLine": 20,
+        "startChar": 10,
+        "endLine": 20,
+        "endChar": 50
+      },
+      "revId": "d7cd4abbcf30eb04ca0756e53bb2723e688028cd",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4820ce65_131596e2",
+        "filename": "deploy-templates/templates/serviceaccount.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1000017
+      },
+      "writtenOn": "2020-03-10T16:44:41Z",
+      "side": 1,
+      "message": "space",
+      "range": {
+        "startLine": 4,
+        "startChar": 0,
+        "endLine": 4,
+        "endChar": 4
+      },
+      "revId": "d7cd4abbcf30eb04ca0756e53bb2723e688028cd",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9e9c5453_b71667f0",
+        "filename": "deploy/crds/edp_v1alpha1_cdpipeline_cr.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1000017
+      },
+      "writtenOn": "2020-03-10T16:44:41Z",
+      "side": 1,
+      "message": "comment",
+      "range": {
+        "startLine": 6,
+        "startChar": 2,
+        "endLine": 6,
+        "endChar": 19
+      },
+      "revId": "d7cd4abbcf30eb04ca0756e53bb2723e688028cd",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a1262ce_a65ffea8",
+        "filename": "deploy/crds/edp_v1alpha1_codebase_crd.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000017
+      },
+      "writtenOn": "2020-03-10T16:44:41Z",
+      "side": 1,
+      "message": "let\u0027s add here a list of variables for openshift\\k8s validation e.g. required and types",
+      "range": {
+        "startLine": 12,
+        "startChar": 4,
+        "endLine": 14,
+        "endChar": 19
+      },
+      "revId": "d7cd4abbcf30eb04ca0756e53bb2723e688028cd",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4e7f8d0_28936c18",
+        "filename": "deploy/crds/edp_v1alpha1_codebasebranch_crd.yaml",
+        "patchSetId": 9
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000017
+      },
+      "writtenOn": "2020-03-10T16:44:41Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 11,
+        "startChar": 4,
+        "endLine": 13,
+        "endChar": 10
+      },
+      "revId": "d7cd4abbcf30eb04ca0756e53bb2723e688028cd",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    }
+  ]
+}
