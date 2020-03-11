@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e61a60c_36e59e78",
+        "filename": "deploy-templates/values.yaml",
+        "patchSetId": 13
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2020-03-11T13:45:54Z",
+      "side": 1,
+      "message": "Remove this",
+      "range": {
+        "startLine": 2,
+        "startChar": 12,
+        "endLine": 2,
+        "endChar": 33
+      },
+      "revId": "bc30150786a94c091a3657ef206dd08bd70f29f3",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ac23511_e67740d1",
+        "filename": "deploy-templates/values.yaml",
+        "patchSetId": 13
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2020-03-11T13:45:54Z",
+      "side": 1,
+      "message": "Remove this",
+      "range": {
+        "startLine": 7,
+        "startChar": 29,
+        "endLine": 7,
+        "endChar": 61
+      },
+      "revId": "bc30150786a94c091a3657ef206dd08bd70f29f3",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": false
+    }
+  ]
+}
