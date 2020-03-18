@@ -1,0 +1,49 @@
+{{- if eq .Values.platform "kubernetes" -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    openshift.io/description: Role for reconciler-edp service account
+    openshift.io/reconcile-protect: "false"
+  name: {{ .Values.name }}-{{ .Values.namespace }}-clusterrole
+rules:
+  - apiGroups:
+      - '*'
+    attributeRestrictions: null
+    resources:
+      - gitservers
+      - gitservers/status
+      - gitservers/finalizers
+      - cdpipelines
+      - cdpipelines/finalizers
+      - cdpipelines/status
+      - codebases
+      - codebases/status
+      - codebases/finalizers
+      - codebasebranches
+      - codebasebranches/status
+      - codebasebranches/finalizers
+      - codebaseimagestreams
+      - codebaseimagestreams/status
+      - codebaseimagestreams/finalizers
+      - jenkins
+      - jenkins/finalizers
+      - jenkins/status
+      - jenkinses
+      - jenkinses/finalizers
+      - jenkinses/status
+      - jenkinsserviceaccounts
+      - jenkinsserviceaccounts/finalizers
+      - jenkinsserviceaccounts/status
+      - jenkinsjobs
+      - jenkinsjobs/finalizers
+      - jenkinsjobs/status
+      - jenkinsserviceaccounts
+      - jenkinsscripts
+      - edpcomponents
+      - stages
+      - stages/finalizers
+      - stages/status
+    verbs:
+      - '*'
+  {{ end }}
