@@ -24,7 +24,7 @@ func (c ThirdPartyService) PutService(service thirdpartyservice.ThirdPartyServic
 
 	schemaName := service.Tenant
 
-	id, err := skipCatalogOrCreate(*txn, service, schemaName)
+	id, err := skipCatalogOrCreate(txn, service, schemaName)
 	if err != nil {
 		_ = txn.Rollback()
 		return err
@@ -43,9 +43,9 @@ func (c ThirdPartyService) PutService(service thirdpartyservice.ThirdPartyServic
 
 }
 
-func skipCatalogOrCreate(txn sql.Tx, service thirdpartyservice.ThirdPartyService, schemaName string) (*int, error) {
+func skipCatalogOrCreate(txn *sql.Tx, service thirdpartyservice.ThirdPartyService, schemaName string) (*int, error) {
 	log.Printf("Start retrieving ThirdPartyService by name and tenant: %v", service)
-	id, err := repository.GetThirdPartyService(txn, service.Name, schemaName)
+	id, err := repository.GetThirdPartyService(*txn, service.Name, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +56,9 @@ func skipCatalogOrCreate(txn sql.Tx, service thirdpartyservice.ThirdPartyService
 	return id, nil
 }
 
-func createService(txn sql.Tx, service thirdpartyservice.ThirdPartyService, schemaName string) (*int, error) {
+func createService(txn *sql.Tx, service thirdpartyservice.ThirdPartyService, schemaName string) (*int, error) {
 	log.Println("Start ThirdPartyService entity saving...")
-	id, err := repository.CreateThirdPartyService(txn, service, schemaName)
+	id, err := repository.CreateThirdPartyService(*txn, service, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during ThirdPartyService entity creation: %v", err)
 		return nil, errors.New(fmt.Sprintf("cannot create ThirdPartyService entity %v", service))
@@ -66,10 +66,10 @@ func createService(txn sql.Tx, service thirdpartyservice.ThirdPartyService, sche
 	return id, nil
 }
 
-func GetServicesId(txn sql.Tx, serviceNames []string, schemaName string) ([]int, error) {
+func GetServicesId(txn *sql.Tx, serviceNames []string, schemaName string) ([]int, error) {
 	var servicesId []int
 	for _, name := range serviceNames {
-		id, err := repository.GetThirdPartyService(txn, name, schemaName)
+		id, err := repository.GetThirdPartyService(*txn, name, schemaName)
 		if err != nil {
 			return nil, err
 		}

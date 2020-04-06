@@ -25,14 +25,14 @@ func (s CodebaseBranchService) PutCodebaseBranch(codebaseBranch codebasebranch.C
 	}
 	schemaName := codebaseBranch.Tenant
 
-	id, err := getCodebaseBranchIdOrCreate(*txn, codebaseBranch, schemaName)
+	id, err := getCodebaseBranchIdOrCreate(txn, codebaseBranch, schemaName)
 	if err != nil {
 		_ = txn.Rollback()
 		return errors.Wrapf(err, "an error has occurred while getting Codebase Branch id or create",
 			"branch", codebaseBranch.Name)
 	}
 
-	if err := updateCodebaseBranch(*txn, codebaseBranch, *id, schemaName); err != nil {
+	if err := updateCodebaseBranch(txn, codebaseBranch, *id, schemaName); err != nil {
 		_ = txn.Rollback()
 		return errors.New(fmt.Sprintf("cannot insert codebaseBranch update %v", codebaseBranch))
 	}
@@ -71,10 +71,10 @@ func (s CodebaseBranchService) PutCodebaseBranch(codebaseBranch codebasebranch.C
 	return nil
 }
 
-func createCodebaseBranch(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBranch, schemaName string) (*int, error) {
+func createCodebaseBranch(txn *sql.Tx, codebaseBranch codebasebranch.CodebaseBranch, schemaName string) (*int, error) {
 	log.V(2).Info("start codebase_branch insertion", "name", codebaseBranch.Name)
 	var streamId *int = nil
-	beId, err := repository.GetCodebaseId(txn, codebaseBranch.AppName, schemaName)
+	beId, err := repository.GetCodebaseId(*txn, codebaseBranch.AppName, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -82,20 +82,20 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBran
 		return nil, fmt.Errorf("%v codebase record has not been found", codebaseBranch.AppName)
 	}
 
-	cbType, err := repository.GetCodebaseTypeById(txn, *beId, schemaName)
+	cbType, err := repository.GetCodebaseTypeById(*txn, *beId, schemaName)
 	if err != nil {
 		return nil, err
 	}
 
 	if *cbType == string(codebase.Application) {
 		ocImageStreamName := fmt.Sprintf("%v-%v", codebaseBranch.AppName, codebaseBranch.Name)
-		streamId, err = repository.CreateCodebaseDockerStream(txn, schemaName, nil, ocImageStreamName)
+		streamId, err = repository.CreateCodebaseDockerStream(*txn, schemaName, nil, ocImageStreamName)
 		if err != nil {
 			return nil, err
 		}
 		log.V(2).Info("codebase docker stream has been created", "id", streamId)
 	}
-	id, err := cbs.CreateCodebaseBranch(txn, codebaseBranch.Name, *beId,
+	id, err := cbs.CreateCodebaseBranch(*txn, codebaseBranch.Name, *beId,
 		codebaseBranch.FromCommit, schemaName, streamId, codebaseBranch.Status, codebaseBranch.Version,
 		codebaseBranch.BuildNumber, codebaseBranch.LastSuccessBuild, codebaseBranch.Release)
 	if err != nil {
@@ -103,7 +103,7 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBran
 	}
 
 	if *cbType == string(codebase.Application) {
-		if err := repository.UpdateBranchIdCodebaseDockerStream(txn, *streamId, *id, schemaName); err != nil {
+		if err := repository.UpdateBranchIdCodebaseDockerStream(*txn, *streamId, *id, schemaName); err != nil {
 			return nil, err
 		}
 	}
@@ -111,10 +111,10 @@ func createCodebaseBranch(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBran
 	return id, nil
 }
 
-func getCodebaseBranchIdOrCreate(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBranch, schemaName string) (*int, error) {
+func getCodebaseBranchIdOrCreate(txn *sql.Tx, codebaseBranch codebasebranch.CodebaseBranch, schemaName string) (*int, error) {
 	log.V(2).Info("start retrieving Codebase Branch",
 		"codebase", codebaseBranch.AppName, "branch", codebaseBranch.Name)
-	id, err := cbs.GetCodebaseBranchId(txn, codebaseBranch.AppName, codebaseBranch.Name, schemaName)
+	id, err := cbs.GetCodebaseBranchId(*txn, codebaseBranch.AppName, codebaseBranch.Name, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -125,9 +125,9 @@ func getCodebaseBranchIdOrCreate(txn sql.Tx, codebaseBranch codebasebranch.Codeb
 	return id, nil
 }
 
-func updateCodebaseBranch(txn sql.Tx, codebaseBranch codebasebranch.CodebaseBranch, id int, schemaName string) error {
+func updateCodebaseBranch(txn *sql.Tx, codebaseBranch codebasebranch.CodebaseBranch, id int, schemaName string) error {
 	log.V(2).Info("start updating CodebaseBranch by id", "id", id)
-	err := cbs.UpdateCodebaseBranch(txn, id, codebaseBranch.Version, codebaseBranch.BuildNumber,
+	err := cbs.UpdateCodebaseBranch(*txn, id, codebaseBranch.Version, codebaseBranch.BuildNumber,
 		codebaseBranch.LastSuccessBuild, schemaName)
 	if err != nil {
 		return err

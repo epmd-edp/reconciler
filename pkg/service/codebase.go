@@ -26,7 +26,7 @@ func (service BEService) PutBE(be codebase.Codebase) error {
 
 	schemaName := be.Tenant
 
-	id, err := getBeIdOrCreate(*txn, be, schemaName)
+	id, err := getBeIdOrCreate(txn, be, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during get BE id or create: %v", err)
 		_ = txn.Rollback()
@@ -70,9 +70,9 @@ func (service BEService) PutBE(be codebase.Codebase) error {
 	return nil
 }
 
-func getBeIdOrCreate(txn sql.Tx, be codebase.Codebase, schemaName string) (*int, error) {
+func getBeIdOrCreate(txn *sql.Tx, be codebase.Codebase, schemaName string) (*int, error) {
 	log.Printf("Start retrieving BE by name, tenant and type: %v", be)
-	id, err := repository.GetCodebaseId(txn, be.Name, schemaName)
+	id, err := repository.GetCodebaseId(*txn, be.Name, schemaName)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func getBeIdOrCreate(txn sql.Tx, be codebase.Codebase, schemaName string) (*int,
 	return id, nil
 }
 
-func createBE(txn sql.Tx, be codebase.Codebase, schemaName string) (*int, error) {
+func createBE(txn *sql.Tx, be codebase.Codebase, schemaName string) (*int, error) {
 	log.Println("Start insertion in the repository business entity...")
 
 	serverId, err := getGitServerId(txn, be.GitServer, schemaName)
@@ -98,7 +98,7 @@ func createBE(txn sql.Tx, be codebase.Codebase, schemaName string) (*int, error)
 	be.GitServerId = serverId
 
 	if be.JenkinsSlave != "" {
-		jsId, err := jenkins_slave.SelectJenkinsSlave(txn, be.JenkinsSlave, schemaName)
+		jsId, err := jenkins_slave.SelectJenkinsSlave(*txn, be.JenkinsSlave, schemaName)
 		if err != nil || jsId == nil {
 			return nil, errors.New(fmt.Sprintf("couldn't get jenkins slave id: %v", be.JenkinsSlave))
 		}
@@ -108,7 +108,7 @@ func createBE(txn sql.Tx, be codebase.Codebase, schemaName string) (*int, error)
 	}
 
 	if be.JobProvisioning != "" {
-		jpId, err := jp.SelectJobProvision(txn, be.JobProvisioning, schemaName)
+		jpId, err := jp.SelectJobProvision(*txn, be.JobProvisioning, schemaName)
 		if err != nil || jpId == nil {
 			return nil, errors.New(fmt.Sprintf("couldn't get job provisioning id: %v", be.JobProvisioning))
 		}
@@ -118,7 +118,7 @@ func createBE(txn sql.Tx, be codebase.Codebase, schemaName string) (*int, error)
 		be.JobProvisioningId = jpId
 	}
 
-	id, err := repository.CreateCodebase(txn, be, schemaName)
+	id, err := repository.CreateCodebase(*txn, be, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during business entity creation: %v", err)
 		return nil, errors.New(fmt.Sprintf("cannot create business entity %v", be))
@@ -127,10 +127,10 @@ func createBE(txn sql.Tx, be codebase.Codebase, schemaName string) (*int, error)
 	return id, nil
 }
 
-func getGitServerId(txn sql.Tx, gitServerName string, schemaName string) (*int, error) {
+func getGitServerId(txn *sql.Tx, gitServerName string, schemaName string) (*int, error) {
 	log.Println("Fetching GitServer Id to set relation into codebase...")
 
-	serverId, err := repository.SelectGitServer(txn, gitServerName, schemaName)
+	serverId, err := repository.SelectGitServer(*txn, gitServerName, schemaName)
 	if err != nil {
 		return nil, err
 	}
