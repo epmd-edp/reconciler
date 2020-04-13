@@ -70,6 +70,10 @@ var codebaseActionMessageMap = map[string]string{
 	"jenkins_configuration":          "CI Jenkins pipelines codebase %v provisioning",
 	"perf_registration":              "Registration codebase %v in Perf",
 	"setup_deployment_templates":     "Setup deployment templates for codebase %v",
+	"put_s2i":                        "Put s2i for %v codebase",
+	"put_jenkins_folder":             "Put JenkinsFolder CR for %v codebase",
+	"clean_data":                     "Clean temporary data for %v codebase",
+	"import_project":                 "Start importing project %v",
 }
 
 func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase, error) {
@@ -84,19 +88,19 @@ func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase,
 	status := convertActionLog(k8sObject.Name, k8sObject.Status)
 
 	c := Codebase{
-		Tenant:           edpName,
-		Name:             k8sObject.Name,
-		Language:         s.Lang,
-		BuildTool:        s.BuildTool,
-		Strategy:         string(s.Strategy),
-		ActionLog:        *status,
-		Type:             s.Type,
-		Status:           k8sObject.Status.Value,
-		GitServer:        s.GitServer,
-		JenkinsSlave:     s.JenkinsSlave,
-		JobProvisioning:  s.JobProvisioning,
-		DeploymentScript: s.DeploymentScript,
-		VersioningType:   string(s.Versioning.Type),
+		Tenant:              edpName,
+		Name:                k8sObject.Name,
+		Language:            s.Lang,
+		BuildTool:           s.BuildTool,
+		Strategy:            string(s.Strategy),
+		ActionLog:           *status,
+		Type:                s.Type,
+		Status:              k8sObject.Status.Value,
+		GitServer:           s.GitServer,
+		JenkinsSlave:        s.JenkinsSlave,
+		JobProvisioning:     s.JobProvisioning,
+		DeploymentScript:    s.DeploymentScript,
+		VersioningType:      string(s.Versioning.Type),
 		StartVersioningFrom: s.Versioning.StartFrom,
 	}
 
