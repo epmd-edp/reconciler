@@ -1,5 +1,5 @@
-## Local Development
-### Requirements
+# Local Development
+## Requirements
 * Golang version higher than 1.13;
 
 >_**NOTE**: The GOPATH and GOROOT environment variables should be added in PATH._
@@ -11,7 +11,7 @@
 * Configured access to the VCS, for details, refer to the [Gerrit Setup for Developer](https://kb.epam.com/display/EPMDEDP/Gerrit+Setup+for+Developer) page;
 * GoLand IntelliJ IDEA or another IDE.
 
-### Operator Launch
+## Operator Launch
 In order to run the operator, follow the steps below:
 
 1. Clone repository;
@@ -36,8 +36,8 @@ In order to run the operator, follow the steps below:
 {"level":"info","ts":1580910954.8339577,"logger":"cmd","msg":"Registering Components."}
 ```
 
-### Exceptional Cases
-##### CASE 1
+## Exceptional Cases
+#### CASE 1
 
 After starting the Go build process, the following error will appear: 
 ```
@@ -54,7 +54,7 @@ To resolve the issue, update the go dependency by applying the Golang command:
 go get github.com/openshift/api@v3.9.0
 ```
 
-##### CASE 2
+#### CASE 2
 
 If you get the **Unauthorized** error in logs, check the current **KUBECONFIG** path. Before running the operator in the Go build configuration (see point 4), you can specify another **KUBECONFIG** path:
 
