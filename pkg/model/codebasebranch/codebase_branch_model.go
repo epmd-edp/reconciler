@@ -57,7 +57,7 @@ func ConvertToCodebaseBranch(k8sObject edpv1alpha1Codebase.CodebaseBranch, edpNa
 		FromCommit:       spec.FromCommit,
 		Version:          spec.Version,
 		Release:          spec.Release,
-		BuildNumber:      spec.Build,
+		BuildNumber:      k8sObject.Status.Build,
 		LastSuccessBuild: k8sObject.Status.LastSuccessfulBuild,
 		Status:           k8sObject.Status.Value,
 		ActionLog:        *actionLog,

@@ -64,6 +64,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				return true
 			}
 
+			if oldObject.Status.Build != newObject.Status.Build {
+				return true
+			}
+
 			if newObject.DeletionTimestamp != nil {
 				return true
 			}
