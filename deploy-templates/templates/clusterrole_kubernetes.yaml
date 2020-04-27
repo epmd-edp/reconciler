@@ -44,6 +44,9 @@ rules:
       - stages
       - stages/finalizers
       - stages/status
+      - jiraservers
+      - jiraservers/finalizers
+      - jiraservers/status
     verbs:
       - '*'
   {{ end }}
