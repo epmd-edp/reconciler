@@ -61,6 +61,8 @@ type Codebase struct {
 	DeploymentScript    string
 	VersioningType      string
 	StartVersioningFrom *string
+	JiraServer          *string
+	JiraServerId        *int
 }
 
 var codebaseActionMessageMap = map[string]string{
@@ -102,6 +104,7 @@ func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase,
 		DeploymentScript:    s.DeploymentScript,
 		VersioningType:      string(s.Versioning.Type),
 		StartVersioningFrom: s.Versioning.StartFrom,
+		JiraServer:          s.JiraServer,
 	}
 
 	if s.Framework != nil {

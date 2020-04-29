@@ -10,8 +10,8 @@ import (
 const (
 	InsertCodebase = "insert into \"%v\".codebase(name, type, language, framework, build_tool, strategy, repository_url, route_site," +
 		" route_path, database_kind, database_version, database_capacity, database_storage, status, test_report_framework, description," +
-		" git_server_id, git_project_path, jenkins_slave_id, job_provisioning_id, deployment_script, project_status, versioning_type, start_versioning_from)" +
-		" values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24) returning id;"
+		" git_server_id, git_project_path, jenkins_slave_id, job_provisioning_id, deployment_script, project_status, versioning_type, start_versioning_from, jira_server_id)" +
+		" values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25) returning id;"
 	SelectCodebase       = "select id from \"%v\".codebase where name=$1;"
 	SelectCodebaseType   = "select type from \"%v\".codebase where id=$1;"
 	UpdateCodebaseStatus = "update \"%v\".codebase set status = $1 where id = $2;"
@@ -43,7 +43,7 @@ func GetCodebaseId(txn sql.Tx, name string, schemaName string) (*int, error) {
 	return &id, nil
 }
 
-func CreateCodebase(txn sql.Tx, cb codebase.Codebase, schemaName string) (*int, error) {
+func CreateCodebase(txn sql.Tx, c codebase.Codebase, schemaName string) (*int, error) {
 	stmt, err := txn.Prepare(fmt.Sprintf(InsertCodebase, schemaName))
 	if err != nil {
 		return nil, err
@@ -51,17 +51,16 @@ func CreateCodebase(txn sql.Tx, cb codebase.Codebase, schemaName string) (*int, 
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(cb.Name, cb.Type, strings.ToLower(cb.Language), cb.Framework,
-		strings.ToLower(cb.BuildTool), strings.ToLower(cb.Strategy), cb.RepositoryUrl, cb.RouteSite, cb.RoutePath,
-		cb.DatabaseKind, cb.DatabaseVersion, cb.DatabaseCapacity, cb.DatabaseStorage, cb.Status,
-		cb.TestReportFramework, cb.Description,
-		getIntOrNil(cb.GitServerId), getStringOrNil(cb.GitUrlPath), getIntOrNil(cb.JenkinsSlaveId),
-		getIntOrNil(cb.JobProvisioningId), cb.DeploymentScript, getStatus(cb.Strategy), cb.VersioningType, cb.StartVersioningFrom).Scan(&id)
-
+	err = stmt.QueryRow(c.Name, c.Type, strings.ToLower(c.Language), c.Framework,
+		strings.ToLower(c.BuildTool), strings.ToLower(c.Strategy), c.RepositoryUrl, c.RouteSite, c.RoutePath,
+		c.DatabaseKind, c.DatabaseVersion, c.DatabaseCapacity, c.DatabaseStorage, c.Status,
+		c.TestReportFramework, c.Description,
+		getIntOrNil(c.GitServerId), getStringOrNil(c.GitUrlPath), getIntOrNil(c.JenkinsSlaveId),
+		getIntOrNil(c.JobProvisioningId), c.DeploymentScript, getStatus(c.Strategy), c.VersioningType,
+		c.StartVersioningFrom, getIntOrNil(c.JiraServerId)).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
-
 	return &id, nil
 }
 

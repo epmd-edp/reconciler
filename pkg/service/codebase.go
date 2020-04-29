@@ -6,6 +6,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository/jenkins-slave"
+	jiraserver "github.com/epmd-edp/reconciler/v2/pkg/repository/jira-server"
 	jp "github.com/epmd-edp/reconciler/v2/pkg/repository/job-provisioning"
 	"github.com/pkg/errors"
 	"log"
@@ -83,45 +84,52 @@ func getBeIdOrCreate(txn *sql.Tx, be codebase.Codebase, schemaName string) (*int
 	return id, nil
 }
 
-func createBE(txn *sql.Tx, be codebase.Codebase, schemaName string) (*int, error) {
+func createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error) {
 	log.Println("Start insertion in the repository business entity...")
 
-	serverId, err := getGitServerId(txn, be.GitServer, schemaName)
+	serverId, err := getGitServerId(txn, c.GitServer, schemaName)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("cannot get git server: %v", be.GitServer))
+		return nil, errors.New(fmt.Sprintf("cannot get git server: %v", c.GitServer))
 	}
 	log.Printf("GitServer is fetched: %v", serverId)
 	if serverId == nil {
-		return nil, fmt.Errorf("git server has not been found for %v", be.GitServer)
+		return nil, fmt.Errorf("git server has not been found for %v", c.GitServer)
+	}
+	c.GitServerId = serverId
+
+	id, err := getJiraServerId(txn, c.JiraServer, schemaName)
+	if err != nil {
+		return nil, errors.Wrapf(err, "couldn't get Jira server id by % name", *c.JiraServer)
+	}
+	if id != nil {
+		c.JiraServerId = id
 	}
 
-	be.GitServerId = serverId
-
-	if be.JenkinsSlave != "" {
-		jsId, err := jenkins_slave.SelectJenkinsSlave(*txn, be.JenkinsSlave, schemaName)
+	if c.JenkinsSlave != "" {
+		jsId, err := jenkins_slave.SelectJenkinsSlave(*txn, c.JenkinsSlave, schemaName)
 		if err != nil || jsId == nil {
-			return nil, errors.New(fmt.Sprintf("couldn't get jenkins slave id: %v", be.JenkinsSlave))
+			return nil, errors.New(fmt.Sprintf("couldn't get jenkins slave id: %v", c.JenkinsSlave))
 		}
-		log.Printf("Jenkins Slave Id for %v codebase is %v", be.Name, *jsId)
+		log.Printf("Jenkins Slave Id for %v codebase is %v", c.Name, *jsId)
 
-		be.JenkinsSlaveId = jsId
+		c.JenkinsSlaveId = jsId
 	}
 
-	if be.JobProvisioning != "" {
-		jpId, err := jp.SelectJobProvision(*txn, be.JobProvisioning, schemaName)
+	if c.JobProvisioning != "" {
+		jpId, err := jp.SelectJobProvision(*txn, c.JobProvisioning, schemaName)
 		if err != nil || jpId == nil {
-			return nil, errors.New(fmt.Sprintf("couldn't get job provisioning id: %v", be.JobProvisioning))
+			return nil, errors.New(fmt.Sprintf("couldn't get job provisioning id: %v", c.JobProvisioning))
 		}
 
-		log.Printf("Job Probisioning Id for %v codebase is %v", be.Name, *jpId)
+		log.Printf("Job Probisioning Id for %v codebase is %v", c.Name, *jpId)
 
-		be.JobProvisioningId = jpId
+		c.JobProvisioningId = jpId
 	}
 
-	id, err := repository.CreateCodebase(*txn, be, schemaName)
+	id, err = repository.CreateCodebase(*txn, c, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during business entity creation: %v", err)
-		return nil, errors.New(fmt.Sprintf("cannot create business entity %v", be))
+		return nil, errors.New(fmt.Sprintf("cannot create business entity %v", c))
 	}
 	log.Printf("Id of the newly created business entity is %v", *id)
 	return id, nil
@@ -136,6 +144,19 @@ func getGitServerId(txn *sql.Tx, gitServerName string, schemaName string) (*int,
 	}
 
 	return serverId, nil
+}
+
+func getJiraServerId(txn *sql.Tx, name *string, schemaName string) (*int, error) {
+	if name == nil {
+		return nil, nil
+	}
+	log.Printf("Fetching JiraServer Id by %v name to set relation into codebase...", name)
+
+	id, err := jiraserver.SelectJiraServer(*txn, *name, schemaName)
+	if err != nil {
+		return nil, err
+	}
+	return id, nil
 }
 
 func (s BEService) Delete(name, schema string) error {
