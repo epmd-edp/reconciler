@@ -33,36 +33,38 @@ const (
 type CodebaseType string
 
 type Codebase struct {
-	Name                string
-	Tenant              string
-	Type                string
-	Language            string
-	Framework           *string
-	BuildTool           string
-	Strategy            string
-	RepositoryUrl       string
-	RouteSite           string
-	RoutePath           string
-	DatabaseKind        string
-	DatabaseVersion     string
-	DatabaseCapacity    string
-	DatabaseStorage     string
-	ActionLog           model.ActionLog
-	Description         string
-	TestReportFramework string
-	Status              string
-	GitServer           string
-	GitUrlPath          *string
-	GitServerId         *int
-	JenkinsSlave        string
-	JenkinsSlaveId      *int
-	JobProvisioning     string
-	JobProvisioningId   *int
-	DeploymentScript    string
-	VersioningType      string
-	StartVersioningFrom *string
-	JiraServer          *string
-	JiraServerId        *int
+	Name                 string
+	Tenant               string
+	Type                 string
+	Language             string
+	Framework            *string
+	BuildTool            string
+	Strategy             string
+	RepositoryUrl        string
+	RouteSite            string
+	RoutePath            string
+	DatabaseKind         string
+	DatabaseVersion      string
+	DatabaseCapacity     string
+	DatabaseStorage      string
+	ActionLog            model.ActionLog
+	Description          string
+	TestReportFramework  string
+	Status               string
+	GitServer            string
+	GitUrlPath           *string
+	GitServerId          *int
+	JenkinsSlave         string
+	JenkinsSlaveId       *int
+	JobProvisioning      string
+	JobProvisioningId    *int
+	DeploymentScript     string
+	VersioningType       string
+	StartVersioningFrom  *string
+	JiraServer           *string
+	JiraServerId         *int
+	CommitMessagePattern string
+	TicketNamePattern    string
 }
 
 var codebaseActionMessageMap = map[string]string{
@@ -90,21 +92,23 @@ func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase,
 	status := convertActionLog(k8sObject.Name, k8sObject.Status)
 
 	c := Codebase{
-		Tenant:              edpName,
-		Name:                k8sObject.Name,
-		Language:            s.Lang,
-		BuildTool:           s.BuildTool,
-		Strategy:            string(s.Strategy),
-		ActionLog:           *status,
-		Type:                s.Type,
-		Status:              k8sObject.Status.Value,
-		GitServer:           s.GitServer,
-		JenkinsSlave:        s.JenkinsSlave,
-		JobProvisioning:     s.JobProvisioning,
-		DeploymentScript:    s.DeploymentScript,
-		VersioningType:      string(s.Versioning.Type),
-		StartVersioningFrom: s.Versioning.StartFrom,
-		JiraServer:          s.JiraServer,
+		Tenant:               edpName,
+		Name:                 k8sObject.Name,
+		Language:             s.Lang,
+		BuildTool:            s.BuildTool,
+		Strategy:             string(s.Strategy),
+		ActionLog:            *status,
+		Type:                 s.Type,
+		Status:               k8sObject.Status.Value,
+		GitServer:            s.GitServer,
+		JenkinsSlave:         s.JenkinsSlave,
+		JobProvisioning:      s.JobProvisioning,
+		DeploymentScript:     s.DeploymentScript,
+		VersioningType:       string(s.Versioning.Type),
+		StartVersioningFrom:  s.Versioning.StartFrom,
+		JiraServer:           s.JiraServer,
+		CommitMessagePattern: s.CommitMessagePattern,
+		TicketNamePattern:    s.TicketNamePattern,
 	}
 
 	if s.Framework != nil {
