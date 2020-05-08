@@ -18,6 +18,7 @@ const (
 	UpdateCodebaseStatus = "update \"%v\".codebase set status = $1 where id = $2;"
 	SelectApplication    = "select id from \"%v\".codebase where name=$1 and type='application';"
 	DeleteCodebase       = "delete from \"%v\".codebase where name=$1;"
+	updateCodebase       = "update \"%v\".codebase set commit_message_pattern = $1, ticket_name_pattern = $2 where name = $3;"
 )
 
 const (
@@ -137,4 +138,15 @@ func Delete(txn sql.Tx, name, schema string) error {
 		return err
 	}
 	return nil
+}
+
+func Update(txn sql.Tx, c codebase.Codebase, schema string) error {
+	stmt, err := txn.Prepare(fmt.Sprintf(updateCodebase, schema))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(c.CommitMessagePattern, c.TicketNamePattern, c.Name)
+	return err
 }

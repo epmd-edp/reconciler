@@ -12,76 +12,73 @@ import (
 	"log"
 )
 
-type BEService struct {
+type CodebaseService struct {
 	DB *sql.DB
 }
 
-func (service BEService) PutBE(be codebase.Codebase) error {
-	log.Printf("Start creation of business entity %v...", be)
+func (s CodebaseService) PutCodebase(c codebase.Codebase) error {
+	log.Printf("Start creation of business entity %v...", c)
 	log.Println("Start transaction...")
-	txn, err := service.DB.Begin()
+	txn, err := s.DB.Begin()
 	if err != nil {
-		log.Printf("Error has occurred during opening transaction: %v", err)
-		return errors.New(fmt.Sprintf("cannot create business entity %v", be))
+		return errors.Wrapf(err, "an error has occurred during opening transaction: %v", c.Name)
 	}
 
-	schemaName := be.Tenant
-
-	id, err := getBeIdOrCreate(txn, be, schemaName)
+	id, err := putCodebase(txn, c, c.Tenant)
 	if err != nil {
-		log.Printf("Error has occurred during get BE id or create: %v", err)
 		_ = txn.Rollback()
-		return errors.New(fmt.Sprintf("cannot create business entity %v", be))
+		return errors.Wrapf(err, "an error has occurred during get Codebase id or create: %v", c.Name)
 	}
 	log.Printf("Id of BE to be updated: %v", *id)
 
 	log.Println("Start update status of codebase...")
-	codebaseActionId, err := repository.CreateActionLog(*txn, be.ActionLog, schemaName)
+	codebaseActionId, err := repository.CreateActionLog(*txn, c.ActionLog, c.Tenant)
 	if err != nil {
-		log.Printf("Error has occurred during status creation: %v", err)
 		_ = txn.Rollback()
-		return errors.New(fmt.Sprintf("cannot insert status %v", be))
+		return errors.Wrapf(err, "an error has occurred during status creation: %v", c.Name)
 	}
 	log.Println("ActionLog has been saved into the repository")
 
 	log.Println("Start update codebase_action status of codebase...")
-	err = repository.CreateCodebaseAction(*txn, *id, *codebaseActionId, schemaName)
-	if err != nil {
-		log.Printf("Error has occurred during codebase_action creation: %v", err)
+	if err := repository.CreateCodebaseAction(*txn, *id, *codebaseActionId, c.Tenant); err != nil {
 		_ = txn.Rollback()
-		return errors.New(fmt.Sprintf("cannot create codebase_action entity %v", be))
+		return errors.Wrapf(err, "an error has occurred during codebase_action creation: %v", c.Name)
 	}
 	log.Println("codebase_action has been updated")
 
-	err = repository.UpdateStatusByCodebaseId(*txn, *id, be.Status, be.Tenant)
-	if err != nil {
+	if err := repository.UpdateStatusByCodebaseId(*txn, *id, c.Status, c.Tenant); err != nil {
 		log.Printf("Error has occurred during the update of codebase: %v", err)
 		_ = txn.Rollback()
-		return errors.New(fmt.Sprintf("cannot create codebase with name %v", be.Name))
+		return errors.Wrapf(err, "an error has occurred during the update of codebase: %v", c.Name)
 	}
 
-	err = txn.Commit()
-	if err != nil {
-		log.Printf("An error has occurred while ending transaction: %s", err)
-		return err
+	if err := txn.Commit(); err != nil {
+		return errors.Wrapf(err, "An error has occurred while ending transaction: %v", c.Name)
 	}
-
-	log.Println("Business entity has been saved successfully")
-
+	log.Printf("Codebase %v has been saved successfully", c.Name)
 	return nil
 }
 
-func getBeIdOrCreate(txn *sql.Tx, be codebase.Codebase, schemaName string) (*int, error) {
-	log.Printf("Start retrieving BE by name, tenant and type: %v", be)
-	id, err := repository.GetCodebaseId(*txn, be.Name, schemaName)
+func putCodebase(txn *sql.Tx, c codebase.Codebase, schema string) (*int, error) {
+	log.Printf("Start retrieving Codebase by name, tenant and type: %v", c)
+	id, err := repository.GetCodebaseId(*txn, c.Name, schema)
 	if err != nil {
 		return nil, err
 	}
 	if id == nil {
-		log.Printf("Record for BE %v has not been found", be)
-		return createBE(txn, be, schemaName)
+		log.Printf("Record for Codebase %v has not been found", c)
+		return createBE(txn, c, schema)
 	}
-	return id, nil
+	return id, updateCodebase(txn, c, schema)
+}
+
+func updateCodebase(txn *sql.Tx, c codebase.Codebase, schema string) error {
+	log.Printf("start updating codebase %v", c.Name)
+	if err := repository.Update(*txn, c, schema); err != nil {
+		return errors.Wrapf(err, "couldn't update codebase %v", c.Name)
+	}
+	log.Printf("codebase %v has been updated", c.Name)
+	return nil
 }
 
 func createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error) {
@@ -159,7 +156,7 @@ func getJiraServerId(txn *sql.Tx, name *string, schemaName string) (*int, error)
 	return id, nil
 }
 
-func (s BEService) Delete(name, schema string) error {
+func (s CodebaseService) Delete(name, schema string) error {
 	log.Printf("start deleting %v codebase", name)
 	txn, err := s.DB.Begin()
 	if err != nil {

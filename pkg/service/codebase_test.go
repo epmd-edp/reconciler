@@ -11,7 +11,7 @@ import (
 )
 
 func TestBEService_CreateBE(t *testing.T) {
-	service := BEService{
+	service := CodebaseService{
 		DB: db.Instance,
 	}
 	k8sObject := edpv1alpha1.Codebase{
@@ -35,6 +35,6 @@ func TestBEService_CreateBE(t *testing.T) {
 	be.Type = "application"
 	fmt.Println(err)
 
-	err = service.PutBE(*be)
+	err = service.PutCodebase(*be)
 
 }

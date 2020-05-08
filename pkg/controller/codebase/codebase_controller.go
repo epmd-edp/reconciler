@@ -24,33 +24,21 @@ import (
 	edpv1alpha1Codebase "github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
 )
 
-var log = logf.Log.WithName("controller_codebase")
-
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
-
-// Add creates a new Codebase Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
 }
 
-// newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileCodebase{
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
-		beService: service.BEService{
+		service: service.CodebaseService{
 			DB: db.Instance,
 		},
 	}
 }
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
 	c, err := controller.New("codebase-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
@@ -77,7 +65,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		},
 	}
 
-	// Watch for changes to primary resource Codebase
 	err = c.Watch(&source.Kind{Type: &edpv1alpha1Codebase.Codebase{}}, &handler.EnqueueRequestForObject{}, pred)
 	if err != nil {
 		return err
@@ -86,22 +73,22 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileCodebase{}
+var (
+	_   reconcile.Reconciler = &ReconcileCodebase{}
+	log                      = logf.Log.WithName("controller_codebase")
+)
 
-const CodebaseReconcilerFinalizerName = "codebase.reconciler.finalizer.name"
+const codebaseReconcilerFinalizerName = "codebase.reconciler.finalizer.name"
 
-// ReconcileCodebase reconciles a Codebase object
 type ReconcileCodebase struct {
-	// This client, initialized using mgr.Client() above, is a split client
-	// that reads objects from the cache and writes to the apiserver
-	client    client.Client
-	scheme    *runtime.Scheme
-	beService service.BEService
+	client  client.Client
+	scheme  *runtime.Scheme
+	service service.CodebaseService
 }
 
 func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling Codebase")
+	rl := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	rl.Info("Reconciling Codebase")
 
 	i := &edpv1alpha1Codebase.Codebase{}
 	if err := r.client.Get(context.TODO(), request.NamespacedName, i); err != nil {
@@ -110,11 +97,11 @@ func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Resu
 		}
 		return reconcile.Result{}, err
 	}
-	reqLogger.Info("Codebase has been retrieved", "codebase", i)
+	rl.Info("Codebase has been retrieved", "codebase", i)
 
 	edpN, err := helper.GetEDPName(r.client, i.Namespace)
 	if err != nil {
-		reqLogger.Error(err, "cannot get edp name")
+		rl.Error(err, "cannot get edp name")
 		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 
@@ -125,35 +112,34 @@ func (r *ReconcileCodebase) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	c, err := codebase.Convert(*i, *edpN)
 	if err != nil {
-		reqLogger.Error(err, "cannot convert codebase to dto")
+		rl.Error(err, "cannot convert codebase to dto")
 		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 
-	err = r.beService.PutBE(*c)
-	if err != nil {
-		reqLogger.Error(err, "cannot put codebase branch")
+	if err = r.service.PutCodebase(*c); err != nil {
+		rl.Error(err, "cannot put codebase", "name", c.Name)
 		return reconcile.Result{RequeueAfter: 2 * time.Second}, nil
 	}
 
-	reqLogger.Info("Reconciling has been finished successfully")
+	rl.Info("Reconciling has been finished successfully")
 	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileCodebase) tryToDeleteCodebase(i *edpv1alpha1Codebase.Codebase, schema string) (*reconcile.Result, error) {
 	if i.GetDeletionTimestamp().IsZero() {
-		if !helper.ContainsString(i.ObjectMeta.Finalizers, CodebaseReconcilerFinalizerName) {
-			i.ObjectMeta.Finalizers = append(i.ObjectMeta.Finalizers, CodebaseReconcilerFinalizerName)
+		if !helper.ContainsString(i.ObjectMeta.Finalizers, codebaseReconcilerFinalizerName) {
+			i.ObjectMeta.Finalizers = append(i.ObjectMeta.Finalizers, codebaseReconcilerFinalizerName)
 			if err := r.client.Update(context.TODO(), i); err != nil {
 				return &reconcile.Result{}, err
 			}
 		}
 		return nil, nil
 	}
-	if err := r.beService.Delete(i.Name, schema); err != nil {
+	if err := r.service.Delete(i.Name, schema); err != nil {
 		return &reconcile.Result{}, err
 	}
 
-	i.ObjectMeta.Finalizers = helper.RemoveString(i.ObjectMeta.Finalizers, CodebaseReconcilerFinalizerName)
+	i.ObjectMeta.Finalizers = helper.RemoveString(i.ObjectMeta.Finalizers, codebaseReconcilerFinalizerName)
 	if err := r.client.Update(context.TODO(), i); err != nil {
 		return &reconcile.Result{}, err
 	}
