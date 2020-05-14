@@ -59,7 +59,8 @@ func CreateCodebase(txn sql.Tx, c codebase.Codebase, schemaName string) (*int, e
 		c.TestReportFramework, c.Description,
 		getIntOrNil(c.GitServerId), getStringOrNil(c.GitUrlPath), getIntOrNil(c.JenkinsSlaveId),
 		getIntOrNil(c.JobProvisioningId), c.DeploymentScript, getStatus(c.Strategy), c.VersioningType,
-		c.StartVersioningFrom, getIntOrNil(c.JiraServerId), c.CommitMessagePattern, c.TicketNamePattern).Scan(&id)
+		c.StartVersioningFrom, getIntOrNil(c.JiraServerId), getStringOrNil(c.CommitMessagePattern),
+		getStringOrNil(c.TicketNamePattern)).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
@@ -147,6 +148,6 @@ func Update(txn sql.Tx, c codebase.Codebase, schema string) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(c.CommitMessagePattern, c.TicketNamePattern, c.Name)
+	_, err = stmt.Exec(*c.CommitMessagePattern, *c.TicketNamePattern, c.Name)
 	return err
 }

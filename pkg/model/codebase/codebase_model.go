@@ -63,8 +63,8 @@ type Codebase struct {
 	StartVersioningFrom  *string
 	JiraServer           *string
 	JiraServerId         *int
-	CommitMessagePattern string
-	TicketNamePattern    string
+	CommitMessagePattern *string
+	TicketNamePattern    *string
 }
 
 var codebaseActionMessageMap = map[string]string{
