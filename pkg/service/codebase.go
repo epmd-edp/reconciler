@@ -3,13 +3,14 @@ package service
 import (
 	"database/sql"
 	"fmt"
+	"log"
+
 	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository/jenkins-slave"
 	jiraserver "github.com/epmd-edp/reconciler/v2/pkg/repository/jira-server"
 	jp "github.com/epmd-edp/reconciler/v2/pkg/repository/job-provisioning"
 	"github.com/pkg/errors"
-	"log"
 )
 
 type CodebaseService struct {
@@ -67,7 +68,7 @@ func putCodebase(txn *sql.Tx, c codebase.Codebase, schema string) (*int, error) 
 	}
 	if id == nil {
 		log.Printf("Record for Codebase %v has not been found", c)
-		return createBE(txn, c, schema)
+		return createBE(txn, c, schema, "ci")
 	}
 	return id, updateCodebase(txn, c, schema)
 }
@@ -113,7 +114,7 @@ func createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error)
 	}
 
 	if c.JobProvisioning != "" {
-		jpId, err := jp.SelectJobProvision(*txn, c.JobProvisioning, schemaName)
+		jpId, err := jp.SelectJobProvision(*txn, c.JobProvisioning, "ci", schemaName)
 		if err != nil || jpId == nil {
 			return nil, errors.New(fmt.Sprintf("couldn't get job provisioning id: %v", c.JobProvisioning))
 		}
