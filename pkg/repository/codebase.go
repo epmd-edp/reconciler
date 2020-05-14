@@ -148,6 +148,6 @@ func Update(txn sql.Tx, c codebase.Codebase, schema string) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(*c.CommitMessagePattern, *c.TicketNamePattern, c.Name)
+	_, err = stmt.Exec(getStringOrNil(c.CommitMessagePattern), getStringOrNil(c.TicketNamePattern), c.Name)
 	return err
 }
