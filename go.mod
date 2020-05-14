@@ -11,7 +11,7 @@ require (
 	github.com/epmd-edp/cd-pipeline-operator/v2 v2.2.0-50
 	github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200514095748-92497054f7da
 	github.com/epmd-edp/edp-component-operator v0.0.1-2
-	github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200416062406-16c330e09a19
+	github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200514153117-a6ba4d8ba60d
 	github.com/lib/pq v1.0.0
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openshift/client-go v3.9.0+incompatible

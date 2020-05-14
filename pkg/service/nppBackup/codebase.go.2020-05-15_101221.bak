@@ -68,7 +68,7 @@ func putCodebase(txn *sql.Tx, c codebase.Codebase, schema string) (*int, error) 
 	}
 	if id == nil {
 		log.Printf("Record for Codebase %v has not been found", c)
-		return createBE(txn, c, schema)
+		return createBE(txn, c, schema, "ci")
 	}
 	return id, updateCodebase(txn, c, schema)
 }
