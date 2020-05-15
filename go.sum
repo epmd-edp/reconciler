@@ -70,8 +70,8 @@ github.com/epmd-edp/jenkins-operator/v2 v2.1.0-47/go.mod h1:n5IZrwC++e8lEAxac12v
 github.com/epmd-edp/jenkins-operator/v2 v2.1.0-61/go.mod h1:n5IZrwC++e8lEAxac12vei/DJCSLGGV9Na/io9wmhWs=
 github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200416062406-16c330e09a19 h1:SQ3SNRr4pJTqWQ2CPwAtaxg3lyzcZj5mHla4Sv6n5B0=
 github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200416062406-16c330e09a19/go.mod h1:lhEvImddh3dQ60upbreE1/7GZUoe5pkFRQuxDs3vZFA=
-github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200514153117-a6ba4d8ba60d h1:t3jPBwCH7Xrp7rPtLVE8x+aG6IU1XjE0lw+mHEUE2K0=
-github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200514153117-a6ba4d8ba60d/go.mod h1:XjqQ2LkGCsKV2Gke+K+AevHIbIDZtJlCkv2pq7e6DQ8=
+github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200515110540-975ad84f6457 h1:mV9RD9qGnwPNHArKM9veN78MktjfAdJOE6NaDA36DWQ=
+github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200515110540-975ad84f6457/go.mod h1:XjqQ2LkGCsKV2Gke+K+AevHIbIDZtJlCkv2pq7e6DQ8=
 github.com/epmd-edp/keycloak-operator v1.0.18-alpha-39/go.mod h1:n78SGdVQhCkr29STKtz2qKDnYBiWk4TUoGATKF6nOH8=
 github.com/epmd-edp/keycloak-operator v1.0.31-alpha-56/go.mod h1:uXEmg98UyXkMVe9deHTkz0wF7fb47geazmAoiQAb/Zw=
 github.com/evanphx/json-patch v4.0.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=

@@ -112,12 +112,12 @@ func (r *ReconcileJobProvision) Reconcile(request reconcile.Request) (reconcile.
 		return reconcile.Result{}, err
 	}
 
-	jp := instance.Status.CiJobProvisions
+	jp := instance.Status.JobProvisions
 	edpN, err := helper.GetEDPName(r.client, instance.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	err = r.JobProvisionService.PutJobProvisions(jp, *edpN, "ci")
+	err = r.JobProvisionService.PutJobProvisions(jp, *edpN)
 	if err != nil {
 		return reconcile.Result{RequeueAfter: time.Second * 120},
 			errWrap.Wrapf(err, "an error has occurred while adding {%v} job provisions into DB", jp)
