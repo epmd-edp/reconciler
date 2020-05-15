@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69771d4b_1dfdded9",
+        "filename": "pkg/controller/job-provisioning/job_provisioning_controller.go",
+        "patchSetId": 7
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2020-05-15T07:39:05Z",
+      "side": 1,
+      "message": "move it to the constants",
+      "revId": "f2cbfb17f047974fe5300789e0d8f77febb005c2",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "575de6ae_1c336fdb",
+        "filename": "pkg/repository/job-provisioning/job_provisioning.go",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2020-05-15T07:39:05Z",
+      "side": 1,
+      "message": "please, use this declaration method(name,scope,tenant string)",
+      "revId": "f2cbfb17f047974fe5300789e0d8f77febb005c2",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "03acf27b_a5f9b7ee",
+        "filename": "pkg/repository/job-provisioning/job_provisioning.go",
+        "patchSetId": 7
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2020-05-15T07:39:05Z",
+      "side": 1,
+      "message": "the same",
+      "revId": "f2cbfb17f047974fe5300789e0d8f77febb005c2",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b1fd40d_c96a7f71",
+        "filename": "pkg/service/codebase.go",
+        "patchSetId": 7
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2020-05-15T07:39:05Z",
+      "side": 1,
+      "message": "consts",
+      "revId": "f2cbfb17f047974fe5300789e0d8f77febb005c2",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": true
+    }
+  ]
+}
