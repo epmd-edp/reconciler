@@ -2,11 +2,12 @@ package stage
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	sm "github.com/epmd-edp/reconciler/v2/pkg/model/stage"
-	"testing"
-	"time"
 )
 
 func TestInsertStage(t *testing.T) {
@@ -27,7 +28,8 @@ func TestInsertStage(t *testing.T) {
 			Username:        "",
 			UpdatedAt:       time.Now(),
 		},
-		Status: "active",
+		Status:          "active",
+		JobProvisioning: "default",
 	}
 
 	id, err := CreateStage(*txn, s, 1)

@@ -3,14 +3,15 @@ package stage
 import (
 	"database/sql"
 	"fmt"
+	"log"
+
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
-	"log"
 )
 
 const (
 	InsertStage = "insert into \"%v\".cd_stage(name, cd_pipeline_id, description, trigger_type," +
-		" \"order\", status, codebase_branch_id) VALUES ($1, $2, $3, $4, $5, $6, $7) returning id;"
+		" \"order\", status, codebase_branch_id, job_provisioning_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) returning id;"
 	SelectStageId = "select st.id as st_id from \"%v\".cd_stage st " +
 		"left join \"%v\".cd_pipeline pl on st.cd_pipeline_id = pl.id " +
 		"where (st.name = $1 and pl.name = $2);"
@@ -62,7 +63,7 @@ func CreateStage(txn sql.Tx, stage stage.Stage, cdPipelineId int) (id *int, err 
 
 	err = stmt.QueryRow(stage.Name, cdPipelineId, stage.Description,
 		stage.TriggerType, stage.Order, stage.Status,
-		getLibraryBranchIdOrNil(stage.Source)).Scan(&id)
+		getLibraryBranchIdOrNil(stage.Source), stage.JobProvisioning).Scan(&id)
 	if err != nil {
 		return nil, err
 	}

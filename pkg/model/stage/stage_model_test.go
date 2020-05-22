@@ -18,12 +18,13 @@ package stage
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	edpv1alpha1 "github.com/epmd-edp/cd-pipeline-operator/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
-	"time"
 )
 
 const (
@@ -39,6 +40,7 @@ const (
 	detailedMessage = "fake-detailed-message"
 	result          = "success"
 	event           = "created"
+	jobProvisioning = "fake-job-provisioning"
 )
 
 func TestConvertMethodToCDStage(t *testing.T) {
@@ -65,6 +67,7 @@ func TestConvertMethodToCDStage(t *testing.T) {
 					StepName:        jenkinsStepName,
 				},
 			},
+			JobProvisioning: jobProvisioning,
 		},
 		Status: edpv1alpha1.StageStatus{
 			Username:        username,
