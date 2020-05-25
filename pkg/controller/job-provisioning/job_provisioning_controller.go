@@ -2,14 +2,15 @@ package job_provisioning
 
 import (
 	"context"
+	"reflect"
+	"sort"
+	"time"
+
 	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	jp "github.com/epmd-edp/reconciler/v2/pkg/service/job-provisioning"
-	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sort"
-	"time"
 
 	jenkinsV2Api "github.com/epmd-edp/jenkins-operator/v2/pkg/apis/v2/v1alpha1"
 	errWrap "github.com/pkg/errors"

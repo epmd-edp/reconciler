@@ -6,10 +6,10 @@ replace git.apache.org/thrift.git => github.com/apache/thrift v0.12.0
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
-	github.com/epmd-edp/cd-pipeline-operator/v2 v2.2.0-50
-	github.com/epmd-edp/codebase-operator/v2 v2.2.0-78
+	github.com/epmd-edp/cd-pipeline-operator/v2 v2.2.1-57.0.20200602074800-2a4f99f9e45e
+	github.com/epmd-edp/codebase-operator/v2 v2.2.0-83
 	github.com/epmd-edp/edp-component-operator v0.0.1-2
-	github.com/epmd-edp/jenkins-operator/v2 v2.2.0-81
+	github.com/epmd-edp/jenkins-operator/v2 v2.2.1-131.0.20200601151312-c803c0229edf
 	github.com/lib/pq v1.0.0
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openshift/client-go v3.9.0+incompatible

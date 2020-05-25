@@ -2,6 +2,7 @@ package job_provisioning
 
 import (
 	"database/sql"
+
 	jenkinsV2Api "github.com/epmd-edp/jenkins-operator/v2/pkg/apis/v2/v1alpha1"
 	jp "github.com/epmd-edp/reconciler/v2/pkg/repository/job-provisioning"
 	"github.com/pkg/errors"
@@ -23,7 +24,7 @@ func (s JobProvisionService) PutJobProvisions(provisions []jenkinsV2Api.JobProvi
 	}
 
 	for _, p := range provisions {
-		id, err := jp.SelectJobProvision(*txn, p.Name, schemaName)
+		id, err := jp.SelectJobProvision(*txn, p.Name, p.Scope, schemaName)
 		if err != nil {
 			_ = txn.Rollback()
 			return errors.Wrapf(err, "an error has occurred while selecting job provision %v", p.Name)
@@ -34,7 +35,7 @@ func (s JobProvisionService) PutJobProvisions(provisions []jenkinsV2Api.JobProvi
 			continue
 		}
 
-		err = jp.CreateJobProvision(*txn, p.Name, schemaName)
+		err = jp.CreateJobProvision(*txn, p.Name, p.Scope, schemaName)
 		if err != nil {
 			_ = txn.Rollback()
 			return errors.Wrapf(err, "an error has occurred while creating job provision %v", p.Name)

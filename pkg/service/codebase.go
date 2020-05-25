@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository/jenkins-slave"
 	jp "github.com/epmd-edp/reconciler/v2/pkg/repository/job-provisioning"
-	"log"
 )
 
 type BEService struct {
@@ -112,7 +113,7 @@ func createBE(txn sql.Tx, be codebase.Codebase, schemaName string) (*int, error)
 	}
 
 	if be.JobProvisioning != "" {
-		jpId, err := jp.SelectJobProvision(txn, be.JobProvisioning, schemaName)
+		jpId, err := jp.SelectJobProvision(txn, be.JobProvisioning, "ci", schemaName)
 		if err != nil || jpId == nil {
 			return nil, errors.New(fmt.Sprintf("couldn't get job provisioning id: %v", be.JobProvisioning))
 		}
