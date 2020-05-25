@@ -7,6 +7,7 @@ import (
 
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/stage"
+	jp "github.com/epmd-edp/reconciler/v2/pkg/repository/job-provisioning"
 )
 
 const (
@@ -52,6 +53,7 @@ const (
 		"left join \"%[1]v\".cd_stage cs on scds.cd_stage_id = cs.id " +
 		"left join \"%[1]v\".cd_pipeline cp on cs.cd_pipeline_id = cp.id " +
 		"where cp.name = $1 );"
+	scope = "cd"
 )
 
 func CreateStage(txn sql.Tx, stage stage.Stage, cdPipelineId int) (id *int, err error) {
@@ -60,10 +62,15 @@ func CreateStage(txn sql.Tx, stage stage.Stage, cdPipelineId int) (id *int, err 
 		return nil, err
 	}
 	defer stmt.Close()
+	var jpID *int
+	jpID, err = jp.SelectJobProvision(txn, stage.JobProvisioning, scope, stage.Tenant)
+	if err != nil {
+		return nil, err
+	}
 
 	err = stmt.QueryRow(stage.Name, cdPipelineId, stage.Description,
 		stage.TriggerType, stage.Order, stage.Status,
-		getLibraryBranchIdOrNil(stage.Source), stage.JobProvisioning).Scan(&id)
+		getLibraryBranchIdOrNil(stage.Source), *jpID).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
