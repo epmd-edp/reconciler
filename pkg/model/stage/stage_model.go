@@ -18,25 +18,27 @@ package stage
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/epmd-edp/cd-pipeline-operator/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 type Stage struct {
-	Id             int
-	Name           string
-	Tenant         string
-	Namespace      string
-	CdPipelineName string
-	Description    string
-	TriggerType    string
-	Order          int
-	ActionLog      model.ActionLog
-	Status         string
-	QualityGates   []QualityGate
-	Source         Source
+	Id              int
+	Name            string
+	Tenant          string
+	Namespace       string
+	CdPipelineName  string
+	Description     string
+	TriggerType     string
+	Order           int
+	ActionLog       model.ActionLog
+	Status          string
+	QualityGates    []QualityGate
+	Source          Source
+	JobProvisioning string
 }
 
 type Source struct {
@@ -45,9 +47,10 @@ type Source struct {
 }
 
 type Library struct {
-	Id     *int
-	Name   string
-	Branch string
+	Id       *int
+	Name     string
+	Branch   string
+	BranchId *int
 }
 
 type QualityGate struct {
@@ -92,6 +95,7 @@ func ConvertToStage(k8sObject v1alpha1.Stage, edpName string) (*Stage, error) {
 				Branch: spec.Source.Library.Branch,
 			},
 		},
+		JobProvisioning: spec.JobProvisioning,
 	}
 	return &stage, nil
 }

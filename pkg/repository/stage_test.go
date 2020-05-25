@@ -2,10 +2,12 @@ package repository
 
 import (
 	"fmt"
-	"github.com/epmd-edp/reconciler/v2/pkg/db"
-	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"testing"
 	"time"
+
+	"github.com/epmd-edp/reconciler/v2/pkg/db"
+	"github.com/epmd-edp/reconciler/v2/pkg/model"
+	sm "github.com/epmd-edp/reconciler/v2/pkg/model/stage"
 )
 
 func rTestInsertStage(t *testing.T) {
@@ -29,7 +31,8 @@ func rTestInsertStage(t *testing.T) {
 			Username:        "",
 			UpdatedAt:       time.Now().Unix(),
 		},
-		Status: "active",
+		Status:          "active",
+		JobProvisioning: "default",
 	}
 
 	id, err := CreateStage(*txn, "tarianyk-test", stage, 1)
