@@ -33,11 +33,10 @@ In order to install the EDP Reconciler, follow the steps below:
         - <chart_version>                               # Helm chart version;
         - global.edpName                                # a namespace or a project name (in case of OpenShift);
         - global.platform                               # a platform type that can be "kubernetes" or "openshift";
+        - global.database.host                     # database host;
+        - global.database.name                     # database name;
+        - global.database.port                     # database port;
         - name                                          # component name;
-        - database.required                             # database deployment request can be "true" or "false";
-        - database.host                                 # database host;
-        - database.name                                 # database name;
-        - database.port                                 # database port;
         - image.name                                    # EDP reconciler Docker image name. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler);
         - image.version                                 # EDP reconciler Docker image tag. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler/tags);
     ```

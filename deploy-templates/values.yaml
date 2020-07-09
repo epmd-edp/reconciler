@@ -1,12 +1,12 @@
 global:
   edpName: ""
   platform: "openshift"
+  database:
+    host: edp-install-wizard-db
+    name: edp-install-wizard-db
+    port: 5432
+
 name: reconciler
-database:
-  required: false
-  host: edp-install-wizard-db
-  name: edp-install-wizard-db
-  port: 5432
 image:
   name: reconciler
   version: v2.4.0
