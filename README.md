@@ -19,30 +19,35 @@ In order to install the EDP Reconciler, follow the steps below:
 2. Choose available Helm chart version:
      ```bash
      helm search repo epamedp/reconciler
+     ```
+   Example response:   
+     ```bash
      NAME                    CHART VERSION   APP VERSION     DESCRIPTION
      epamedp/reconciler      v2.4.0                          Helm chart for Golang application/service deplo...
      ```
 
     _**NOTE:** It is highly recommended to use the latest released version._
 3. Deploy operator:
-Parameters:
-    - <chart_version>                               # a version of Helm chart;
-    - global.edpName                                # a namespace or a project name (in case of OpenShift);
-    - global.platform                               # a platform type that can be "kubernetes" or "openshift";
-    - name                                          # component name;
-    - database.required                             # database deployment request can be "true" or "false";
-    - database.host                                 # database host;
-    - database.name                                 # database name;
-    - database.port                                 # database port;
-    - image.name                                    # EDP image in [Dockerhub](https://hub.docker.com/u/epamedp);
-    - image.version                                 # EDP tag. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler/tags);
+    Full available chart parameters list:
+    ```
+        - <chart_version>                               # Helm chart version;
+        - global.edpName                                # a namespace or a project name (in case of OpenShift);
+        - global.platform                               # a platform type that can be "kubernetes" or "openshift";
+        - name                                          # component name;
+        - database.required                             # database deployment request can be "true" or "false";
+        - database.host                                 # database host;
+        - database.name                                 # database name;
+        - database.port                                 # database port;
+        - image.name                                    # EDP reconciler Docker image name. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler);
+        - image.version                                 # EDP reconciler Docker image tag. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler/tags);
+    ```
+    
+    Inspect the sample of launching a Helm chart for Reconciler installation:
+    ```bash
+    helm install reconciler epamedp/reconciler --namespace <edp_cicd_project> --version <chart_version> --set name=reconciler --set global.edpName=<edp_cicd_project> --set global.platform=<platform_type> --set image.name=epamedp/reconciler --set image.version=<operator_version> 
+    ```
 
-Inspect the sample of launching a Helm chart for Reconciler installation:
-```bash
-helm install reconciler epamedp/reconciler --namespace <edp_cicd_project> --version <chart_version> --set name=reconciler --set global.edpName=<edp_cicd_project> --set global.platform=<platform_type> --set image.name=epamedp/reconciler --set image.version=<operator_version> 
-```
-
-4.  Check the <edp_cicd_project> namespace that should be in a pending state of creating a secret by indicating the following message: "Error: secrets "db-admin-console" not found". Such notification is a normal flow and it will be fixed during the EDP installation.
+4. Check the <edp_cicd_project> namespace that should be in a pending state of creating a secret by indicating the following message: "Error: secrets "db-admin-console" not found". Such notification is a normal flow and it will be fixed during the EDP installation.
 
 ### Local Development
 In order to develop the operator, first set up a local environment. For details, please refer to the [Local Development](documentation/local-development.md) page.
