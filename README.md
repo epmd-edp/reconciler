@@ -1,16 +1,21 @@
-# EDP Reconciler
+# Reconciler Operator
+
+Get acquainted with the Reconciler Operator and the installation process as well as the local development.
 
 ## Overview
 
-Reconciler is an EDP operator that is responsible for a work with the EDP tenant database.
+Reconciler Operator is an EDP operator that is responsible for saving state of CR's in EDP database. 
+Operator installation can be applied on two container orchestration platforms: OpenShift and Kubernetes.
+                                                                                                     
+_**NOTE:** Operator is platform-independent, that is why there is a unified instruction for deploying._
 
-### Prerequisites
+## Prerequisites
 * Linux machine or Windows Subsystem for Linux instance with [Helm 3](https://helm.sh/docs/intro/install/) installed;
 * Cluster admin access to the cluster;
 * EDP project/namespace is deployed by following one of the instructions: [edp-install-openshift](https://github.com/epmd-edp/edp-install/blob/release-2.4/documentation/openshift_install_edp.md#edp-project) or [edp-install-kubernetes](https://github.com/epmd-edp/edp-install/blob/release-2.4/documentation/kubernetes_install_edp.md#edp-namespace).
 
-### Installation
-In order to install the EDP Reconciler, follow the steps below:
+## Installation
+In order to install the EDP Reconciler Operator, follow the steps below:
 
 1. To add the Helm EPAMEDP Charts for local client, run "helm repo add":
      ```bash
@@ -27,26 +32,27 @@ In order to install the EDP Reconciler, follow the steps below:
      ```
 
     _**NOTE:** It is highly recommended to use the latest released version._
+    
 3. Deploy operator:
+
     Full available chart parameters list:
     ```
         - <chart_version>                               # Helm chart version;
         - global.edpName                                # a namespace or a project name (in case of OpenShift);
         - global.platform                               # a platform type that can be "kubernetes" or "openshift";
-        - global.database.host                     # database host;
-        - global.database.name                     # database name;
-        - global.database.port                     # database port;
+        - global.database.host                          # database host;
+        - global.database.name                          # database name;
+        - global.database.port                          # database port;
         - name                                          # component name;
         - image.name                                    # EDP reconciler Docker image name. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler);
         - image.version                                 # EDP reconciler Docker image tag. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler/tags);
     ```
     
-    Inspect the sample of launching a Helm chart for Reconciler installation:
+4. Install operator in the <edp_cicd_project> namespace with the helm command; find below the installation command example:
     ```bash
-    helm install reconciler epamedp/reconciler --namespace <edp_cicd_project> --version <chart_version> --set name=reconciler --set global.edpName=<edp_cicd_project> --set global.platform=<platform_type> --set image.name=epamedp/reconciler --set image.version=<operator_version> 
+    helm install reconciler epamedp/reconciler --namespace <edp_cicd_project> --version <chart_version> --set name=reconciler --set global.edpName=<edp_cicd_project> --set global.platform=<platform_type> --set global.database.name=<db-name> --set global.database.host=<db-name>.<namespace_name> --set global.database.port=<port> 
     ```
+5. Check the <edp_cicd_project> namespace that should contain operator deployment with your operator in a running status
 
-4. Check the <edp_cicd_project> namespace that should be in a pending state of creating a secret by indicating the following message: "Error: secrets "db-admin-console" not found". Such notification is a normal flow and it will be fixed during the EDP installation.
-
-### Local Development
+## Local Development
 In order to develop the operator, first set up a local environment. For details, please refer to the [Local Development](documentation/local-development.md) page.
