@@ -1,8 +1,10 @@
-# EDP Reconciler
+# Reconciler operator
 
 ## Overview
 
-Reconciler is an EDP operator that is responsible for a work with the EDP tenant database.
+Reconciler operator is an EDP operator that is responsible for saving state of CR's in EDP database. Operator installation can be applied on two container orchestration platforms: Openshift and Kubernetes.
+                                                                                                     
+_**NOTE:** Operator is platform-independent, that is why there is an unified instruction for deploying._
 
 ### Prerequisites
 * Linux machine or Windows Subsystem for Linux instance with [Helm 3](https://helm.sh/docs/intro/install/) installed;
@@ -27,7 +29,9 @@ In order to install the EDP Reconciler, follow the steps below:
      ```
 
     _**NOTE:** It is highly recommended to use the latest released version._
+    
 3. Deploy operator:
+
     Full available chart parameters list:
     ```
         - <chart_version>                               # Helm chart version;
@@ -41,12 +45,11 @@ In order to install the EDP Reconciler, follow the steps below:
         - image.version                                 # EDP reconciler Docker image tag. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler/tags);
     ```
     
-    Inspect the sample of launching a Helm chart for Reconciler installation:
-    ```bash
-    helm install reconciler epamedp/reconciler --namespace <edp_cicd_project> --version <chart_version> --set name=reconciler --set global.edpName=<edp_cicd_project> --set global.platform=<platform_type> --set image.name=epamedp/reconciler --set image.version=<operator_version> 
-    ```
-
-4. Check the <edp_cicd_project> namespace that should be in a pending state of creating a secret by indicating the following message: "Error: secrets "db-admin-console" not found". Such notification is a normal flow and it will be fixed during the EDP installation.
+Install operator in the <edp_cicd_project> namespace with helm command. Bellow is the installation command example:
+```bash
+helm install reconciler epamedp/reconciler --namespace <edp_cicd_project> --version <chart_version> --set name=reconciler --set global.edpName=<edp_cicd_project> --set global.platform=<platform_type> --set image.name=epamedp/reconciler --set image.version=<operator_version> 
+```
+* Check the <edp_cicd_project> namespace that should contain operator deployment with your operator in a running status
 
 ### Local Development
 In order to develop the operator, first set up a local environment. For details, please refer to the [Local Development](documentation/local-development.md) page.
