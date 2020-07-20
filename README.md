@@ -44,8 +44,8 @@ In order to install the EDP Reconciler Operator, follow the steps below:
         - global.database.name                          # database name;
         - global.database.port                          # database port;
         - name                                          # component name;
-        - image.name                                    # EDP reconciler Docker image name. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler);
-        - image.version                                 # EDP reconciler Docker image tag. The released image can be found on [Dockerhub](https://hub.docker.com/repository/docker/epamedp/reconciler/tags);
+        - image.name                                    # EDP reconciler Docker image name. The released image can be found on [Dockerhub](https://hub.docker.com/r/epamedp/reconciler);
+        - image.version                                 # EDP reconciler Docker image tag. The released image can be found on [Dockerhub](https://hub.docker.com/r/epamedp/reconciler/tags);
     ```
     
 4. Install operator in the <edp_cicd_project> namespace with the helm command; find below the installation command example:
