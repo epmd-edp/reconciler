@@ -78,6 +78,7 @@ var codebaseActionMessageMap = map[string]string{
 	"put_jenkins_folder":             "Put JenkinsFolder CR for %v codebase",
 	"clean_data":                     "Clean temporary data for %v codebase",
 	"import_project":                 "Start importing project %v",
+	"put_version_file":               "Put VERSION file for Go %v app",
 }
 
 func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase, error) {
