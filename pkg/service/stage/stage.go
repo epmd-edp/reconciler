@@ -123,7 +123,7 @@ func createSingleOutputStreamAndLink(tx *sql.Tx, stageId int, stage stage.Stage,
 		err = setOriginalInputImageStream(tx, stage, dto.CodebaseName, *outputId)
 	}
 	if err != nil {
-		return errors.Wrapf(err, "cannot link codebase docker stream", "id", dto.CodebaseDockerStreamId)
+		return errors.Wrapf(err, "cannot link codebase docker stream %v", dto.CodebaseDockerStreamId)
 	}
 	return nil
 }
@@ -193,7 +193,7 @@ func setOriginalInputImageStream(tx *sql.Tx, stage stage.Stage, codebaseName str
 func getOriginalInputImageStream(tx *sql.Tx, cdPipelineName, codebaseName, schemaName string) (*int, error) {
 	originalInputStream, err := repository.GetSourceInputStream(*tx, cdPipelineName, codebaseName, schemaName)
 	if err != nil {
-		return nil, errors.Wrapf(err, "couldn't fetch Original Input Stream for pipeline", "pipe", cdPipelineName, "codebase", codebaseName)
+		return nil, errors.Wrapf(err, "couldn't fetch Original Input Stream for pipeline %v", "pipe")
 	}
 	return originalInputStream, nil
 }
@@ -230,7 +230,7 @@ func getInputDockerStreamsForArbitraryStage(tx *sql.Tx, id int, stage stage.Stag
 	log.V(2).Info("start reading input docker streams for the arbitrary stage with id: %v", id)
 	streams, err := repository.GetDockerStreamsByPipelineNameAndStageOrder(*tx, stage.Tenant, stage.CdPipelineName, stage.Order-1)
 	if err != nil {
-		return nil, errors.Wrapf(err, "an error has been occurred during the read docker streams",
+		return nil, errors.Wrapf(err, "an error has been occurred during the read docker streams %v",
 			"pipeline name", stage.CdPipelineName, "stage order", stage.Order-1)
 	}
 	log.V(2).Info("streams have been successfully retrieved", "streams", streams)
@@ -241,7 +241,7 @@ func getInputDockerStreamsForFirstStage(tx *sql.Tx, id int, stage stage.Stage) (
 	log.V(2).Info("start reading input docker streams for the first stage", "stage id", id)
 	streams, err := repository.GetDockerStreamsByPipelineName(*tx, stage.Tenant, stage.CdPipelineName)
 	if err != nil {
-		return nil, errors.Wrapf(err, "an error has been occurred during the read docker streams",
+		return nil, errors.Wrapf(err, "an error has been occurred during the read docker streams %v",
 			"pipeline name", stage.CdPipelineName)
 	}
 	log.V(2).Info("streams have been successfully retrieved", "streams", streams)
@@ -318,7 +318,7 @@ func createStage(tx *sql.Tx, edpRestClient *rest.RESTClient, stage stage.Stage) 
 	}
 
 	if err = createCodebaseDockerStreams(tx, *id, stage, pipelineCR.Spec.ApplicationsToPromote); err != nil {
-		return nil, errors.Wrapf(err, "couldn't create docker stream for stage %v in CD Pipeline", stage.Name, stage.CdPipelineName)
+		return nil, errors.Wrapf(err, "couldn't create docker stream for stage %v in CD Pipeline", stage.Name)
 	}
 
 	if err = insertQualityGateRow(tx, *id, stage.QualityGates, stage.Tenant); err != nil {
@@ -403,7 +403,7 @@ func (s StageService) DeleteCDStage(pipeName, stageName, schema string) error {
 	id, err := sr.SelectCodebaseDockerStreamId(*txn, pipeName, stageName, schema)
 	if err != nil {
 		_ = txn.Rollback()
-		return errors.Wrapf(err, "couldn't get codebase docker stream id by cd stage %v for cd pipeline", stageName, pipeName)
+		return errors.Wrapf(err, "couldn't get codebase docker stream id by cd stage %v for cd pipeline", stageName)
 	}
 
 	if id == nil {
@@ -419,7 +419,7 @@ func (s StageService) DeleteCDStage(pipeName, stageName, schema string) error {
 
 	if err := sr.DeleteCDStage(*txn, pipeName, stageName, schema); err != nil {
 		_ = txn.Rollback()
-		return errors.Wrapf(err, "couldn't delete cd stage %v for cd pipeline", stageName, pipeName)
+		return errors.Wrapf(err, "couldn't delete cd stage %v for cd pipeline", stageName)
 	}
 
 	if err := txn.Commit(); err != nil {
