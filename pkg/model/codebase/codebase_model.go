@@ -65,6 +65,7 @@ type Codebase struct {
 	JiraServerId         *int
 	CommitMessagePattern *string
 	TicketNamePattern    *string
+	CiTool               string
 }
 
 var codebaseActionMessageMap = map[string]string{
@@ -110,6 +111,7 @@ func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase,
 		JiraServer:           s.JiraServer,
 		CommitMessagePattern: s.CommitMessagePattern,
 		TicketNamePattern:    s.TicketNamePattern,
+		CiTool:               s.CiTool,
 	}
 
 	if s.Framework != nil {
