@@ -129,8 +129,7 @@ func (s CdPipelineService) getCDPipelineOrCreate(txn *sql.Tx, cdPipeline cdpipel
 
 func updateApplicationsToPromote(tx *sql.Tx, cdPipelineId int, applicationsToPromote []string, schemaName string) error {
 	if err := repository.RemoveApplicationsToPromote(*tx, cdPipelineId, schemaName); err != nil {
-		return errors.Wrapf(err, "an error has occurred while removing Application To Promote records for Stage",
-			"pipe id", cdPipelineId)
+		return errors.Wrapf(err, "an error has occurred while removing Application To Promote records for Stage %v", cdPipelineId)
 	}
 	if err := createApplicationToPromoteRow(tx, cdPipelineId, applicationsToPromote, schemaName); err != nil {
 		return fmt.Errorf("an error has occurred while creating Application To Promote record for %v Stage: %v", cdPipelineId, err)
