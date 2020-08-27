@@ -6,9 +6,10 @@ import (
 )
 
 type EDPComponent struct {
-	Type string
-	Url  string
-	Icon string
+	Type    string
+	Url     string
+	Icon    string
+	Visible bool
 }
 
 func ConvertToEDPComponent(k8sObj edpComponentV1Api.EDPComponent) (*EDPComponent, error) {
@@ -18,8 +19,9 @@ func ConvertToEDPComponent(k8sObj edpComponentV1Api.EDPComponent) (*EDPComponent
 	s := k8sObj.Spec
 
 	return &EDPComponent{
-		Type: s.Type,
-		Url:  s.Url,
-		Icon: s.Icon,
+		Type:    s.Type,
+		Url:     s.Url,
+		Icon:    s.Icon,
+		Visible: s.Visible,
 	}, nil
 }

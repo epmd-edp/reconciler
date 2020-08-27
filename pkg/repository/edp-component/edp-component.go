@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	InsertEDPComponentSql = "insert into \"%v\".edp_component(type, url, icon) values ($1, $2, $3);"
+	InsertEDPComponentSql = "insert into \"%v\".edp_component(type, url, icon, visible) values ($1, $2, $3, $4);"
 	SelectEDPComponentSql = "select id from \"%v\".edp_component where type = $1;"
 )
 
@@ -18,7 +18,7 @@ func CreateEDPComponent(txn sql.Tx, component model.EDPComponent, tenant string)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(component.Type, component.Url, component.Icon)
+	_, err = stmt.Exec(component.Type, component.Url, component.Icon, component.Visible)
 
 	return err
 }

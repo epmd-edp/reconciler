@@ -10,7 +10,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/epmd-edp/cd-pipeline-operator/v2 v2.3.0-58.0.20200522123451-d0fa24eeeb1f
 	github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200825100527-b8b553645568
-	github.com/epmd-edp/edp-component-operator v0.0.1-2
+	github.com/epmd-edp/edp-component-operator v0.1.1-0.20200827122548-e87429a916e0
 	github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200525102742-f56cd8641faa
 	github.com/lib/pq v1.0.0
 	github.com/openshift/api v3.9.0+incompatible
