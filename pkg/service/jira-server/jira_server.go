@@ -26,12 +26,12 @@ func (s JiraServerService) PutJiraServer(jira jiramodel.JiraServer) error {
 	id, err := jiraserver.SelectJiraServer(*txn, jira.Name, jira.Tenant)
 	if err != nil {
 		_ = txn.Rollback()
-		return errors.Wrapf(err, "an error has occurred while fetching Jira Server", jira.Name)
+		return errors.Wrapf(err, "an error has occurred while fetching Jira Server %v", jira.Name)
 	}
 
 	if err := tryToPutJiraServer(txn, id, jira); err != nil {
 		_ = txn.Rollback()
-		return errors.Wrapf(err, "an error has occurred while put Jira Server", jira.Name)
+		return errors.Wrapf(err, "an error has occurred while put Jira Server %v", jira.Name)
 	}
 
 	if err := txn.Commit(); err != nil {

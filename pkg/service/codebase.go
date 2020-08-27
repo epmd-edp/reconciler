@@ -97,7 +97,7 @@ func createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error)
 
 	id, err := getJiraServerId(txn, c.JiraServer, schemaName)
 	if err != nil {
-		return nil, errors.Wrapf(err, "couldn't get Jira server id by % name", *c.JiraServer)
+		return nil, errors.Wrapf(err, "couldn't get Jira server id by %v name", *c.JiraServer)
 	}
 	if id != nil {
 		c.JiraServerId = id

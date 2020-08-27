@@ -28,8 +28,8 @@ func (s CodebaseBranchService) PutCodebaseBranch(codebaseBranch codebasebranch.C
 	id, err := getCodebaseBranchIdOrCreate(txn, codebaseBranch, schemaName)
 	if err != nil {
 		_ = txn.Rollback()
-		return errors.Wrapf(err, "an error has occurred while getting Codebase Branch id or create",
-			"branch", codebaseBranch.Name)
+		return errors.Wrapf(err, "an error has occurred while getting Codebase Branch id or create %v",
+			"branch %v")
 	}
 
 	if err := updateCodebaseBranch(txn, codebaseBranch, *id, schemaName); err != nil {
@@ -42,7 +42,7 @@ func (s CodebaseBranchService) PutCodebaseBranch(codebaseBranch codebasebranch.C
 	actionLogId, err := repository.CreateActionLog(*txn, codebaseBranch.ActionLog, schemaName)
 	if err != nil {
 		_ = txn.Rollback()
-		return errors.Wrapf(err, "an error has occurred during status creation", "name", codebaseBranch.Name)
+		return errors.Wrapf(err, "an error has occurred during status creation %v", "name %v")
 	}
 	log.V(2).Info("ActionLog has been saved into the repository")
 
@@ -50,7 +50,7 @@ func (s CodebaseBranchService) PutCodebaseBranch(codebaseBranch codebasebranch.C
 	cbId, err := repository.GetCodebaseId(*txn, codebaseBranch.AppName, schemaName)
 	if err != nil {
 		_ = txn.Rollback()
-		return errors.Wrapf(err, "an error has occurred during retrieving codebase id", "id", cbId)
+		return errors.Wrapf(err, "an error has occurred during retrieving codebase id %v", "id %v")
 	}
 
 	if err := repository.CreateCodebaseAction(*txn, *cbId, *actionLogId, schemaName); err != nil {
