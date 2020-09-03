@@ -103,8 +103,8 @@ func createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error)
 		c.JiraServerId = id
 	}
 
-	if c.JenkinsSlave != "" {
-		jsId, err := jenkins_slave.SelectJenkinsSlave(*txn, c.JenkinsSlave, schemaName)
+	if c.JenkinsSlave != nil && *c.JenkinsSlave != "" {
+		jsId, err := jenkins_slave.SelectJenkinsSlave(*txn, *c.JenkinsSlave, schemaName)
 		if err != nil || jsId == nil {
 			return nil, errors.New(fmt.Sprintf("couldn't get jenkins slave id: %v", c.JenkinsSlave))
 		}
@@ -113,8 +113,8 @@ func createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error)
 		c.JenkinsSlaveId = jsId
 	}
 
-	if c.JobProvisioning != "" {
-		jpId, err := jp.SelectJobProvision(*txn, c.JobProvisioning, "ci", schemaName)
+	if c.JobProvisioning != nil && *c.JobProvisioning != "" {
+		jpId, err := jp.SelectJobProvision(*txn, *c.JobProvisioning, "ci", schemaName)
 		if err != nil || jpId == nil {
 			return nil, errors.New(fmt.Sprintf("couldn't get job provisioning id: %v", c.JobProvisioning))
 		}

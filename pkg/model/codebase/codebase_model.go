@@ -54,9 +54,9 @@ type Codebase struct {
 	GitServer            string
 	GitUrlPath           *string
 	GitServerId          *int
-	JenkinsSlave         string
+	JenkinsSlave         *string
 	JenkinsSlaveId       *int
-	JobProvisioning      string
+	JobProvisioning      *string
 	JobProvisioningId    *int
 	DeploymentScript     string
 	VersioningType       string
