@@ -40,6 +40,7 @@ var codebaseBranchActionMessageMap = map[string]string{
 	"jenkins_configuration":               "CI Jenkins pipelines for codebase branch %v provisioning for codebase %v",
 	"codebase_branch_registration":        "Branch %v for codebase %v registration",
 	"accept_codebase_branch_registration": "Accept branch %v for codebase %v registration",
+	"put_branch_for_gitlab_ci_codebase":   "Create %v branch for %v codebase in Git ",
 }
 
 func ConvertToCodebaseBranch(k8sObject edpv1alpha1Codebase.CodebaseBranch, edpName string) (*CodebaseBranch, error) {
