@@ -69,6 +69,10 @@ github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200825100527-b8b553645568
 github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200825100527-b8b553645568/go.mod h1:qLuEkWCxTzh0QfkzzkNJoW+3tmuN0EV4zVa1OF5kXAA=
 github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200903073301-2eefd21202bb h1:rwyPc6Lr+T3ExzR104OvqZFojUCmA0vdwjnA7rI1B7E=
 github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200903073301-2eefd21202bb/go.mod h1:j9vAMW2uSm9iKs7YshmM5Rz4m6jDvIEzS83EQ9sDHpI=
+github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929142216-8fc0e28d42c2 h1:gIC7orZvVBgWlYaquXH73pYYeLJPEppAJbz8BocvMtc=
+github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929142216-8fc0e28d42c2/go.mod h1:j9vAMW2uSm9iKs7YshmM5Rz4m6jDvIEzS83EQ9sDHpI=
+github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929150804-7c30e8accbaa h1:aAcoaivZngf+TlEV7VIIcSUAwigwNtPzv6DP9v50MKo=
+github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929150804-7c30e8accbaa/go.mod h1:j9vAMW2uSm9iKs7YshmM5Rz4m6jDvIEzS83EQ9sDHpI=
 github.com/epmd-edp/edp-component-operator v0.0.0-20191029131047-d87b7a6d3bb0/go.mod h1:k4OqvjIznqyXgdpp1iuuSdSk4BdjiJ3j3eesPIIqO+s=
 github.com/epmd-edp/edp-component-operator v0.0.1-2 h1:ov7fyEQJtQ8ZqeJ0UdV7P76a6s5SAuUNezRaToMYx7Q=
 github.com/epmd-edp/edp-component-operator v0.0.1-2/go.mod h1:k4OqvjIznqyXgdpp1iuuSdSk4BdjiJ3j3eesPIIqO+s=

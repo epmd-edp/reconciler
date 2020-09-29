@@ -9,8 +9,8 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
 	sr "github.com/epmd-edp/reconciler/v2/pkg/repository/stage"
-	"github.com/epmd-edp/reconciler/v2/pkg/service"
-	service_stage "github.com/epmd-edp/reconciler/v2/pkg/service/stage"
+	stageService "github.com/epmd-edp/reconciler/v2/pkg/service/stage"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/thirdpartyservice"
 	"github.com/pkg/errors"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sort"
@@ -19,8 +19,9 @@ import (
 var log = logf.Log.WithName("cd_pipeline_service")
 
 type CdPipelineService struct {
-	DB        *sql.DB
-	ClientSet platform.ClientSet
+	DB                *sql.DB
+	ClientSet         platform.ClientSet
+	ThirdPartyService thirdpartyservice.ThirdPartyService
 }
 
 func (s CdPipelineService) PutCDPipeline(cdPipeline cdpipeline.CDPipeline) error {
@@ -108,7 +109,7 @@ func (s CdPipelineService) getCDPipelineOrCreate(txn *sql.Tx, cdPipeline cdpipel
 
 	if cdPipeline.ThirdPartyServices != nil && len(cdPipeline.ThirdPartyServices) != 0 {
 		log.V(2).Info("try to create records in ThirdPartyServices", "values", cdPipeline.ThirdPartyServices)
-		servicesId, err := service.GetServicesId(txn, cdPipeline.ThirdPartyServices, schemaName)
+		servicesId, err := s.ThirdPartyService.GetServicesId(txn, cdPipeline.ThirdPartyServices, schemaName)
 		if err != nil {
 			_ = txn.Rollback()
 			return nil, errors.Wrap(err, "an error has occurred while getting services id:")
@@ -159,12 +160,12 @@ func (s CdPipelineService) updateStageCodebaseDockerStreamRelations(txn *sql.Tx,
 		stages[i].Tenant = schemaName
 		stages[i].CdPipelineName = pipelineName
 
-		pipelineCR, err := service_stage.GetCDPipelineCR(s.ClientSet.EDPRestClient, stages[i].CdPipelineName, stages[i].Namespace)
+		pipelineCR, err := stageService.GetCDPipelineCR(s.ClientSet.EDPRestClient, stages[i].CdPipelineName, stages[i].Namespace)
 		if err != nil {
 			return err
 		}
 
-		if err := service_stage.UpdateSingleStageCodebaseDockerStreamRelations(txn, stages[i].Id, stages[i], pipelineCR.Spec.ApplicationsToPromote); err != nil {
+		if err := stageService.UpdateSingleStageCodebaseDockerStreamRelations(txn, stages[i].Id, stages[i], pipelineCR.Spec.ApplicationsToPromote); err != nil {
 			return err
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/model/cdpipeline"
 	"github.com/epmd-edp/reconciler/v2/pkg/platform"
 	"github.com/epmd-edp/reconciler/v2/pkg/service/cd-pipeline"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/thirdpartyservice"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -47,6 +48,9 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	cdpService := cd_pipeline.CdPipelineService{
 		DB:        db.Instance,
 		ClientSet: *clientSet,
+		ThirdPartyService: thirdpartyservice.ThirdPartyService{
+			DB: db.Instance,
+		},
 	}
 	return &ReconcileCDPipeline{client: mgr.GetClient(), scheme: mgr.GetScheme(), cdpService: cdpService}
 }
