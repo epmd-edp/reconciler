@@ -47,6 +47,7 @@ rules:
       - jiraservers
       - jiraservers/finalizers
       - jiraservers/status
+      - services
     verbs:
       - '*'
   {{ end }}
