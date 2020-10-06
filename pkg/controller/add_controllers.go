@@ -14,6 +14,7 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/controller/thirdpartyservice"
 )
 
+//qwe
 func init() {
 	AddToManagerFuncs = append(AddToManagerFuncs, cdpipeline.Add, codebase.Add, codebasebranch.Add,
 		edpComponent.Add, git_server.Add, jj.Add, jenkinsSlave.Add, jiraServer.Add, jp.Add, stage.Add, thirdpartyservice.Add)
