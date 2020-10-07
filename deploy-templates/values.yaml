@@ -1,5 +1,5 @@
 global:
-  edpName: ""
+  edpName: "edp"
   platform: "openshift"
   database:
     host: edp-install-wizard-db
@@ -9,4 +9,4 @@ global:
 name: reconciler
 image:
   name: reconciler
-  version: v2.4.0
+  version: v2.5.0
