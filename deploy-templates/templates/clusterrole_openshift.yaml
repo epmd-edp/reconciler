@@ -48,6 +48,9 @@ rules:
       - jiraservers/finalizers
       - jiraservers/status
       - services
+      - perfservers
+      - perfservers/finalizers
+      - perfservers/status
     verbs:
       - '*'
   {{ end }}

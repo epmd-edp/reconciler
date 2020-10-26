@@ -56,6 +56,8 @@ github.com/elazarl/goproxy v0.0.0-20190711103511-473e67f1d7d2/go.mod h1:/Zj4wYkg
 github.com/elazarl/goproxy/ext v0.0.0-20190711103511-473e67f1d7d2/go.mod h1:gNh8nYJoAm43RfaxurUnxr+N1PwuFV3ZMl/efxlIlY8=
 github.com/emicklei/go-restful v2.9.6+incompatible h1:tfrHha8zJ01ywiOEC1miGY8st1/igzWB8OmvPgoYX7w=
 github.com/emicklei/go-restful v2.9.6+incompatible/go.mod h1:otzb+WCGbkyDHkqmQmT5YD2WR4BBwUdeQoFo8l/7tVs=
+github.com/emicklei/go-restful v2.14.2+incompatible h1:uyx8VgUCryEkh7qbr8rEtrA0rGDEJ73F5lOJdB5m3V8=
+github.com/emicklei/go-restful v2.14.2+incompatible/go.mod h1:otzb+WCGbkyDHkqmQmT5YD2WR4BBwUdeQoFo8l/7tVs=
 github.com/emirpasic/gods v1.9.0/go.mod h1:YfzfFFoVP/catgzJb4IKIqXjX78Ha8FMSDh3ymbK86o=
 github.com/epmd-edp/cd-pipeline-operator/v2 v2.2.0-50 h1:2a+EYbwYjhwJa0MAd4lsq1/LmTAqPp8/G9yAeheYPuQ=
 github.com/epmd-edp/cd-pipeline-operator/v2 v2.2.0-50/go.mod h1:ygALtMzvxjLfbXLfGqZ+eGjsARgBdyf6IvoTl5NF5Kk=
@@ -73,6 +75,8 @@ github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929142216-8fc0e28d42c2
 github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929142216-8fc0e28d42c2/go.mod h1:j9vAMW2uSm9iKs7YshmM5Rz4m6jDvIEzS83EQ9sDHpI=
 github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929150804-7c30e8accbaa h1:aAcoaivZngf+TlEV7VIIcSUAwigwNtPzv6DP9v50MKo=
 github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929150804-7c30e8accbaa/go.mod h1:j9vAMW2uSm9iKs7YshmM5Rz4m6jDvIEzS83EQ9sDHpI=
+github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20201019102140-348726fc81a6 h1:/Jl3hAO909C6IoxbQiFxclLi/a/kkz4VJGzwAQsynA0=
+github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20201019102140-348726fc81a6/go.mod h1:j9vAMW2uSm9iKs7YshmM5Rz4m6jDvIEzS83EQ9sDHpI=
 github.com/epmd-edp/edp-component-operator v0.0.0-20191029131047-d87b7a6d3bb0/go.mod h1:k4OqvjIznqyXgdpp1iuuSdSk4BdjiJ3j3eesPIIqO+s=
 github.com/epmd-edp/edp-component-operator v0.0.1-2 h1:ov7fyEQJtQ8ZqeJ0UdV7P76a6s5SAuUNezRaToMYx7Q=
 github.com/epmd-edp/edp-component-operator v0.0.1-2/go.mod h1:k4OqvjIznqyXgdpp1iuuSdSk4BdjiJ3j3eesPIIqO+s=
@@ -91,6 +95,9 @@ github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200525102742-f56cd8641faa
 github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200525102742-f56cd8641faa/go.mod h1:XjqQ2LkGCsKV2Gke+K+AevHIbIDZtJlCkv2pq7e6DQ8=
 github.com/epmd-edp/keycloak-operator v1.0.18-alpha-39/go.mod h1:n78SGdVQhCkr29STKtz2qKDnYBiWk4TUoGATKF6nOH8=
 github.com/epmd-edp/keycloak-operator v1.0.31-alpha-56/go.mod h1:uXEmg98UyXkMVe9deHTkz0wF7fb47geazmAoiQAb/Zw=
+github.com/epmd-edp/perf-operator v0.0.0-20201023121247-c9cd8c631d15 h1:8rVjmZReleG++1SEjdJ5v4iF8flW7zXW3wPS9eRUzgA=
+github.com/epmd-edp/perf-operator v0.0.0-20201023121247-c9cd8c631d15/go.mod h1:5RL67lU1jwKT6T7FzFf5h0Yro9A9lIq5yjBNLzCMpoM=
+github.com/epmd-edp/perf-operator/v2 v2.0.0-20201023133758-5acd75342126/go.mod h1:zuNHrwxjQuArfvA5KLEMyFheyKR57P5i3ujB5GedvM4=
 github.com/evanphx/json-patch v4.0.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch v4.5.0+incompatible h1:ouOWdg56aJriqS0huScTkVXPC5IcNrDCXZ6OoTAWu7M=
 github.com/evanphx/json-patch v4.5.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
