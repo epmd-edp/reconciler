@@ -6,7 +6,7 @@ _**NOTE:** Installation of operators is platform-independent, that is why there 
 
 ### Prerequisites
 1. Linux machine or Windows Subsystem for Linux instance with [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed with an authorized access to the cluster;
-2. Admin space is deployed by following one of the instructions: [edp-install-openshift](https://github.com/epmd-edp/edp-install/blob/master/documentation/openshift_install.md#admin-space) or [edp-install-kubernetes](https://github.com/epmd-edp/edp-install/blob/master/documentation/kubernetes_install.md#admin-space).
+2. Admin space is deployed by following one of the instructions: [EDP Installation on OpenShift](https://github.com/epmd-edp/edp-install/blob/master/documentation/openshift_install_edp.md#edp-installation-on-openshift) or [EDP Installation on Kubernetes](https://github.com/epmd-edp/edp-install/blob/master/documentation/kubernetes_install_edp.md#edp-installation-on-kubernetes).
 
 ### Installation
 * Go to the [releases](https://github.com/epmd-edp/reconciler/releases) page of this repository, choose a version, download an archive and unzip it;
