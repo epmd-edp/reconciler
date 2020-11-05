@@ -227,7 +227,7 @@ func deleteCodebasePerfDataSourceRecord(txn *sql.Tx, perf *v1alpha1.Perf, name, 
 		return errors.Wrapf(err, "couldn't get %v codebase id", name)
 	}
 	if id == nil {
-		return fmt.Errorf("couldn't find codebse by %v name", name)
+		return nil
 	}
 
 	if err := codebaseperfdatasourceRepo.DeleteCodebasePerfDataSourceRecord(*txn, *id, schema); err != nil {
