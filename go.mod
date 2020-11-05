@@ -9,11 +9,11 @@ replace github.com/openshift/api => github.com/openshift/api v0.0.0-201808011710
 require (
 	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/epmd-edp/cd-pipeline-operator/v2 v2.3.0-58.0.20200522123451-d0fa24eeeb1f
-	github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20201019102140-348726fc81a6
+	github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20201105094243-20c7bf537f42
 	github.com/epmd-edp/edp-component-operator v0.1.1-0.20200827122548-e87429a916e0
 	github.com/epmd-edp/jenkins-operator/v2 v2.3.0-130.0.20200525102742-f56cd8641faa
 	github.com/epmd-edp/perf-operator v0.0.0-20201023121247-c9cd8c631d15
-	github.com/epmd-edp/perf-operator/v2 v2.0.0-20201023133758-5acd75342126
+	github.com/epmd-edp/perf-operator/v2 v2.0.0-20201102140540-c5092c5a11af
 	github.com/lib/pq v1.0.0
 	github.com/openshift/api v3.9.0+incompatible
 	github.com/openshift/client-go v3.9.0+incompatible

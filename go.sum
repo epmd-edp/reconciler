@@ -77,6 +77,8 @@ github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929150804-7c30e8accbaa
 github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20200929150804-7c30e8accbaa/go.mod h1:j9vAMW2uSm9iKs7YshmM5Rz4m6jDvIEzS83EQ9sDHpI=
 github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20201019102140-348726fc81a6 h1:/Jl3hAO909C6IoxbQiFxclLi/a/kkz4VJGzwAQsynA0=
 github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20201019102140-348726fc81a6/go.mod h1:j9vAMW2uSm9iKs7YshmM5Rz4m6jDvIEzS83EQ9sDHpI=
+github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20201105094243-20c7bf537f42 h1:9Xg6CRkMuZIbTag+zf+LYWURMvFO2Z5u2iy1Zf8saLM=
+github.com/epmd-edp/codebase-operator/v2 v2.3.0-95.0.20201105094243-20c7bf537f42/go.mod h1:rDXVz1yVp31XRlHNTEIa/bLqAd5Y2H1LaagU6dH0vXg=
 github.com/epmd-edp/edp-component-operator v0.0.0-20191029131047-d87b7a6d3bb0/go.mod h1:k4OqvjIznqyXgdpp1iuuSdSk4BdjiJ3j3eesPIIqO+s=
 github.com/epmd-edp/edp-component-operator v0.0.1-2 h1:ov7fyEQJtQ8ZqeJ0UdV7P76a6s5SAuUNezRaToMYx7Q=
 github.com/epmd-edp/edp-component-operator v0.0.1-2/go.mod h1:k4OqvjIznqyXgdpp1iuuSdSk4BdjiJ3j3eesPIIqO+s=
@@ -98,6 +100,7 @@ github.com/epmd-edp/keycloak-operator v1.0.31-alpha-56/go.mod h1:uXEmg98UyXkMVe9
 github.com/epmd-edp/perf-operator v0.0.0-20201023121247-c9cd8c631d15 h1:8rVjmZReleG++1SEjdJ5v4iF8flW7zXW3wPS9eRUzgA=
 github.com/epmd-edp/perf-operator v0.0.0-20201023121247-c9cd8c631d15/go.mod h1:5RL67lU1jwKT6T7FzFf5h0Yro9A9lIq5yjBNLzCMpoM=
 github.com/epmd-edp/perf-operator/v2 v2.0.0-20201023133758-5acd75342126/go.mod h1:zuNHrwxjQuArfvA5KLEMyFheyKR57P5i3ujB5GedvM4=
+github.com/epmd-edp/perf-operator/v2 v2.0.0-20201102140540-c5092c5a11af/go.mod h1:4xAIU35PlzybP24XW9AK2z1Ym66ZITg2P5nc6SYdtVI=
 github.com/evanphx/json-patch v4.0.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch v4.5.0+incompatible h1:ouOWdg56aJriqS0huScTkVXPC5IcNrDCXZ6OoTAWu7M=
 github.com/evanphx/json-patch v4.5.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
