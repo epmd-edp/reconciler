@@ -8,6 +8,7 @@ import (
 const (
 	insertPerfDataSource         = "insert into \"%v\".codebase_perf_data_sources(codebase_id, data_source_id) values ($1, $2);"
 	codebasePerfDataSourceExists = "select exists(select 1 from \"%v\".codebase_perf_data_sources where codebase_id=$1 and data_source_id=$2);"
+	deleteCodebasePerfDataSource = "delete from \"%v\".codebase_perf_data_sources where codebase_id=$1;"
 )
 
 func InsertCodebasePerfDataSource(txn sql.Tx, codebaseId, dsId int, tenant string) error {
@@ -36,4 +37,11 @@ func CodebasePerfDataSourceExists(txn sql.Tx, codebaseId, dsId int, tenant strin
 		return false, err
 	}
 	return exists, err
+}
+
+func DeleteCodebasePerfDataSourceRecord(txn sql.Tx, codebaseId int, schema string) error {
+	if _, err := txn.Exec(fmt.Sprintf(deleteCodebasePerfDataSource, schema), codebaseId); err != nil {
+		return err
+	}
+	return nil
 }

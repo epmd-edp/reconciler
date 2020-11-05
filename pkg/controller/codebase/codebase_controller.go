@@ -147,7 +147,7 @@ func (r *ReconcileCodebase) tryToDeleteCodebase(i *edpv1alpha1Codebase.Codebase,
 		}
 		return nil, nil
 	}
-	if err := r.service.Delete(i.Name, schema); err != nil {
+	if err := r.service.Delete(i.Spec.Perf, i.Name, schema); err != nil {
 		return &reconcile.Result{}, err
 	}
 

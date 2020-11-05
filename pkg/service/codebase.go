@@ -3,6 +3,8 @@ package service
 import (
 	"database/sql"
 	"fmt"
+	"github.com/epmd-edp/codebase-operator/v2/pkg/apis/edp/v1alpha1"
+	codebaseperfdatasourceRepo "github.com/epmd-edp/reconciler/v2/pkg/repository/codebaseperfdatasource"
 	"github.com/epmd-edp/reconciler/v2/pkg/service/codebaseperfdatasource"
 	"github.com/epmd-edp/reconciler/v2/pkg/service/perfdatasource"
 	"github.com/epmd-edp/reconciler/v2/pkg/service/perfserver"
@@ -192,14 +194,19 @@ func getJiraServerId(txn *sql.Tx, name *string, schemaName string) (*int, error)
 	return id, nil
 }
 
-func (s CodebaseService) Delete(name, schema string) error {
+func (s CodebaseService) Delete(perf *v1alpha1.Perf, name, schema string) error {
 	log.Printf("start deleting %v codebase", name)
 	txn, err := s.DB.Begin()
 	if err != nil {
 		return errors.Wrapf(err, "couldn't open transaction while deleting codebase %v", name)
 	}
 
+	if err := deleteCodebasePerfDataSourceRecord(txn, perf, name, schema); err != nil {
+		return err
+	}
+
 	if err := repository.Delete(*txn, name, schema); err != nil {
+		_ = txn.Rollback()
 		return errors.Wrapf(err, "couldn't delete codebase %v", name)
 	}
 
@@ -207,5 +214,25 @@ func (s CodebaseService) Delete(name, schema string) error {
 		return errors.Wrapf(err, "couldn't close transaction while deleting codebase %v", name)
 	}
 	log.Printf("end deleting %v codebase", name)
+	return nil
+}
+
+func deleteCodebasePerfDataSourceRecord(txn *sql.Tx, perf *v1alpha1.Perf, name, schema string) error {
+	if perf == nil {
+		return nil
+	}
+
+	id, err := repository.GetApplicationId(*txn, name, schema)
+	if err != nil {
+		return errors.Wrapf(err, "couldn't get %v codebase id", name)
+	}
+	if id == nil {
+		return fmt.Errorf("couldn't find codebse by %v name", name)
+	}
+
+	if err := codebaseperfdatasourceRepo.DeleteCodebasePerfDataSourceRecord(*txn, *id, schema); err != nil {
+		_ = txn.Rollback()
+		return errors.Wrapf(err, "couldn't delete codebase perf data source record for codebase %v", name)
+	}
 	return nil
 }
