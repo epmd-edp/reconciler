@@ -66,6 +66,13 @@ type Codebase struct {
 	CommitMessagePattern *string
 	TicketNamePattern    *string
 	CiTool               string
+	Perf                 *Perf
+}
+
+type Perf struct {
+	Id          *int
+	Name        string   `json:"name"`
+	DataSources []string `json:"dataSources"`
 }
 
 var codebaseActionMessageMap = map[string]string{
@@ -158,6 +165,12 @@ func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase,
 		c.GitUrlPath = s.GitUrlPath
 	}
 
+	if s.Perf != nil {
+		c.Perf = &Perf{
+			Name:        s.Perf.Name,
+			DataSources: s.Perf.DataSources,
+		}
+	}
 	return &c, nil
 }
 

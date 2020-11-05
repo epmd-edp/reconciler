@@ -6,6 +6,9 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
 	"github.com/epmd-edp/reconciler/v2/pkg/service"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/codebaseperfdatasource"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/perfdatasource"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/perfserver"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -34,6 +37,15 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		scheme: mgr.GetScheme(),
 		service: service.CodebaseService{
 			DB: db.Instance,
+			DataSourceService: perfdatasource.PerfDataSourceService{
+				DB: db.Instance,
+			},
+			PerfService: perfserver.PerfServerService{
+				DB: db.Instance,
+			},
+			CodebaseDsService: codebaseperfdatasource.CodebasePerfDataSourceService{
+				DB: db.Instance,
+			},
 		},
 	}
 }

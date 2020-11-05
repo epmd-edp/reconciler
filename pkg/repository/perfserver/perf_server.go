@@ -6,13 +6,13 @@ import (
 )
 
 const (
-	selectJiraServer = "select id from \"%v\".perf_server where name = $1;"
-	updateGitServer  = "update \"%v\".perf_server set available = $1 where id = $2;"
-	insertGitServer  = "insert into \"%v\".perf_server(name, available) values ($1, $2) returning id;"
+	selectPerfServer = "select id from \"%v\".perf_server where name = $1;"
+	updatePerfServer = "update \"%v\".perf_server set available = $1 where id = $2;"
+	insertPerfServer = "insert into \"%v\".perf_server(name, available) values ($1, $2) returning id;"
 )
 
 func SelectPerfServer(txn sql.Tx, name, tenant string) (*int, error) {
-	stmt, err := txn.Prepare(fmt.Sprintf(selectJiraServer, tenant))
+	stmt, err := txn.Prepare(fmt.Sprintf(selectPerfServer, tenant))
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func SelectPerfServer(txn sql.Tx, name, tenant string) (*int, error) {
 }
 
 func UpdatePerfServer(txn sql.Tx, id *int, available bool, tenant string) error {
-	stmt, err := txn.Prepare(fmt.Sprintf(updateGitServer, tenant))
+	stmt, err := txn.Prepare(fmt.Sprintf(updatePerfServer, tenant))
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func UpdatePerfServer(txn sql.Tx, id *int, available bool, tenant string) error 
 }
 
 func CreatePerfServer(txn sql.Tx, name string, available bool, tenant string) error {
-	stmt, err := txn.Prepare(fmt.Sprintf(insertGitServer, tenant))
+	stmt, err := txn.Prepare(fmt.Sprintf(insertPerfServer, tenant))
 	if err != nil {
 		return err
 	}

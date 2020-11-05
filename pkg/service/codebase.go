@@ -3,6 +3,9 @@ package service
 import (
 	"database/sql"
 	"fmt"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/codebaseperfdatasource"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/perfdatasource"
+	"github.com/epmd-edp/reconciler/v2/pkg/service/perfserver"
 	"log"
 
 	"github.com/epmd-edp/reconciler/v2/pkg/model/codebase"
@@ -14,7 +17,10 @@ import (
 )
 
 type CodebaseService struct {
-	DB *sql.DB
+	DB                *sql.DB
+	DataSourceService perfdatasource.PerfDataSourceService
+	PerfService       perfserver.PerfServerService
+	CodebaseDsService codebaseperfdatasource.CodebasePerfDataSourceService
 }
 
 func (s CodebaseService) PutCodebase(c codebase.Codebase) error {
@@ -25,7 +31,7 @@ func (s CodebaseService) PutCodebase(c codebase.Codebase) error {
 		return errors.Wrapf(err, "an error has occurred during opening transaction: %v", c.Name)
 	}
 
-	id, err := putCodebase(txn, c, c.Tenant)
+	id, err := s.putCodebase(txn, c, c.Tenant)
 	if err != nil {
 		_ = txn.Rollback()
 		return errors.Wrapf(err, "an error has occurred during get Codebase id or create: %v", c.Name)
@@ -57,10 +63,18 @@ func (s CodebaseService) PutCodebase(c codebase.Codebase) error {
 		return errors.Wrapf(err, "An error has occurred while ending transaction: %v", c.Name)
 	}
 	log.Printf("Codebase %v has been saved successfully", c.Name)
+
+	if err := s.DataSourceService.InsertPerfDataSources(c.Perf, c.Tenant); err != nil {
+		return errors.Wrap(err, "an error has occurred during filling perf data source table")
+	}
+
+	if err := s.CodebaseDsService.InsertCodebasePerfDataSources(*id, c.Perf, c.Tenant); err != nil {
+		return errors.Wrapf(err, "couldn't create CodebasePerfDataSource record. codebase id %v", id)
+	}
 	return nil
 }
 
-func putCodebase(txn *sql.Tx, c codebase.Codebase, schema string) (*int, error) {
+func (s CodebaseService) putCodebase(txn *sql.Tx, c codebase.Codebase, schema string) (*int, error) {
 	log.Printf("Start retrieving Codebase by name, tenant and type: %v", c)
 	id, err := repository.GetCodebaseId(*txn, c.Name, schema)
 	if err != nil {
@@ -68,7 +82,7 @@ func putCodebase(txn *sql.Tx, c codebase.Codebase, schema string) (*int, error) 
 	}
 	if id == nil {
 		log.Printf("Record for Codebase %v has not been found", c)
-		return createBE(txn, c, schema)
+		return s.createBE(txn, c, schema)
 	}
 	return id, updateCodebase(txn, c, schema)
 }
@@ -82,7 +96,7 @@ func updateCodebase(txn *sql.Tx, c codebase.Codebase, schema string) error {
 	return nil
 }
 
-func createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error) {
+func (s CodebaseService) createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error) {
 	log.Println("Start insertion in the repository business entity...")
 
 	serverId, err := getGitServerId(txn, c.GitServer, schemaName)
@@ -124,6 +138,10 @@ func createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error)
 		c.JobProvisioningId = jpId
 	}
 
+	if err := s.setPerfServerIdToCodebaseDto(c.Perf, schemaName); err != nil {
+		return nil, errors.Wrapf(err, "couldn't set %v perf server id", c.Perf.Name)
+	}
+
 	id, err = repository.CreateCodebase(*txn, c, schemaName)
 	if err != nil {
 		log.Printf("Error has occurred during business entity creation: %v", err)
@@ -131,6 +149,23 @@ func createBE(txn *sql.Tx, c codebase.Codebase, schemaName string) (*int, error)
 	}
 	log.Printf("Id of the newly created business entity is %v", *id)
 	return id, nil
+}
+
+func (s CodebaseService) setPerfServerIdToCodebaseDto(perf *codebase.Perf, tenant string) error {
+	if perf == nil {
+		return nil
+	}
+
+	id, err := s.PerfService.GetPerfServerId(perf.Name, tenant)
+	if err != nil {
+		return err
+	}
+
+	if id == nil {
+		return fmt.Errorf("%v perf server record doesn't exist", perf.Name)
+	}
+	perf.Id = id
+	return nil
 }
 
 func getGitServerId(txn *sql.Tx, gitServerName string, schemaName string) (*int, error) {
