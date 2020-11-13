@@ -104,6 +104,8 @@ github.com/epmd-edp/perf-operator/v2 v2.0.0-20201102140540-c5092c5a11af/go.mod h
 github.com/epmd-edp/perf-operator/v2 v2.0.0-20201112151110-c4c066b47861 h1:MletQnk0cOFEXq2E0cAneQximGcYF7yAOgAmlMXDt9w=
 github.com/epmd-edp/perf-operator/v2 v2.0.0-20201112151110-c4c066b47861/go.mod h1:mJ7sbct65ikCLYyuRs1k+p6+F9Sm/eYAAccICSg9A/g=
 github.com/epmd-edp/perf-operator/v2 v2.0.0-20201112151951-3ceb768790eb/go.mod h1:mJ7sbct65ikCLYyuRs1k+p6+F9Sm/eYAAccICSg9A/g=
+github.com/epmd-edp/perf-operator/v2 v2.0.0-20201113144934-312366acb776 h1:/GA1TiKeaJ2q44P0RqHc0QXWAqZLsUAGsSVWpWVIJSc=
+github.com/epmd-edp/perf-operator/v2 v2.0.0-20201113144934-312366acb776/go.mod h1:mJ7sbct65ikCLYyuRs1k+p6+F9Sm/eYAAccICSg9A/g=
 github.com/evanphx/json-patch v4.0.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch v4.5.0+incompatible h1:ouOWdg56aJriqS0huScTkVXPC5IcNrDCXZ6OoTAWu7M=
 github.com/evanphx/json-patch v4.5.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
