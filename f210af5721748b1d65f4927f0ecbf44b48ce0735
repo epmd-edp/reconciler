@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2abb2885_5d17c465",
+        "filename": "pkg/repository/codebase.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000005
+      },
+      "writtenOn": "2020-11-13T13:18:00Z",
+      "side": 1,
+      "message": "why did you decided to set defaultBranch at this place ?\npay attention to query that is used for creating codebase\n\nplease, check changes before MR",
+      "revId": "f210af5721748b1d65f4927f0ecbf44b48ce0735",
+      "serverId": "0350cb7f-c1b1-4710-a647-f6632dbafb3c",
+      "unresolved": true
+    }
+  ]
+}
