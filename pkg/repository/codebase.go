@@ -55,7 +55,7 @@ func CreateCodebase(txn sql.Tx, c codebase.Codebase, schemaName string) (*int, e
 
 	var id int
 	err = stmt.QueryRow(c.Name, c.Type, strings.ToLower(c.Language), c.Framework,
-		strings.ToLower(c.BuildTool), strings.ToLower(c.Strategy), c.RepositoryUrl, c.RouteSite, c.RoutePath,
+		strings.ToLower(c.BuildTool), strings.ToLower(c.Strategy), c.DefaultBranch, c.RepositoryUrl, c.RouteSite, c.RoutePath,
 		c.DatabaseKind, c.DatabaseVersion, c.DatabaseCapacity, c.DatabaseStorage, c.Status,
 		c.TestReportFramework, c.Description,
 		getIntOrNil(c.GitServerId), getStringOrNil(c.GitUrlPath), getIntOrNil(c.JenkinsSlaveId),
