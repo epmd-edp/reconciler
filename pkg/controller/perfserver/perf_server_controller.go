@@ -2,7 +2,7 @@ package perfserver
 
 import (
 	"context"
-	"github.com/epmd-edp/perf-operator/pkg/apis/edp/v1alpha1"
+	"github.com/epmd-edp/perf-operator/v2/pkg/apis/edp/v1alpha1"
 	"github.com/epmd-edp/reconciler/v2/pkg/controller/helper"
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	perfServerModel "github.com/epmd-edp/reconciler/v2/pkg/model/perfserver"

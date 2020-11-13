@@ -10,6 +10,8 @@ import (
 	jj "github.com/epmd-edp/reconciler/v2/pkg/controller/jenkins_job"
 	jiraServer "github.com/epmd-edp/reconciler/v2/pkg/controller/jira-server"
 	jp "github.com/epmd-edp/reconciler/v2/pkg/controller/job-provisioning"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/perfdatasourcejenkins"
+	"github.com/epmd-edp/reconciler/v2/pkg/controller/perfdatasourcesonar"
 	"github.com/epmd-edp/reconciler/v2/pkg/controller/perfserver"
 	"github.com/epmd-edp/reconciler/v2/pkg/controller/stage"
 	"github.com/epmd-edp/reconciler/v2/pkg/controller/thirdpartyservice"
@@ -18,5 +20,5 @@ import (
 func init() {
 	AddToManagerFuncs = append(AddToManagerFuncs, cdpipeline.Add, codebase.Add, codebasebranch.Add,
 		edpComponent.Add, git_server.Add, jj.Add, jenkinsSlave.Add, jiraServer.Add, jp.Add, stage.Add,
-		thirdpartyservice.Add, perfserver.Add)
+		thirdpartyservice.Add, perfserver.Add, perfdatasourcejenkins.Add, perfdatasourcesonar.Add)
 }

@@ -68,3 +68,23 @@ func (s PerfDataSourceService) InsertPerfDataSources(perf *codebase.Perf, tenant
 
 	return nil
 }
+
+func (s PerfDataSourceService) RemoveCodebaseDataSource(codebase, dataSource, tenant string) error {
+	rLog := log.WithValues("codebase", codebase, "data source", dataSource)
+	rLog.Info("removing codebase_perf_data_source record")
+	txn, err := s.DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	if err := perfdatasource.RemoveCodebaseDataSource(*txn, codebase, dataSource, tenant); err != nil {
+		_ = txn.Rollback()
+		return err
+	}
+
+	if err := txn.Commit(); err != nil {
+		return err
+	}
+	rLog.Info("codebase_perf_data_source record has been removed")
+	return nil
+}

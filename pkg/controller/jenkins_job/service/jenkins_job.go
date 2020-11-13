@@ -11,8 +11,8 @@ import (
 	"github.com/epmd-edp/reconciler/v2/pkg/db"
 	"github.com/epmd-edp/reconciler/v2/pkg/model"
 	"github.com/epmd-edp/reconciler/v2/pkg/repository"
+	"github.com/epmd-edp/reconciler/v2/pkg/util/cluster"
 	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -109,7 +109,7 @@ func (s JenkinsJobService) createActionLogModel(jj jenv1alpha1.JenkinsJob) (*mod
 
 func (s JenkinsJobService) getStageInstanceOwner(jj jenv1alpha1.JenkinsJob) (*v1alpha1.Stage, error) {
 	log.V(2).Info("start getting stage owner cr", "stage", jj.Name)
-	if ow := GetOwnerReference(consts.StageKind, jj.GetOwnerReferences()); ow != nil {
+	if ow := cluster.GetOwnerReference(consts.StageKind, jj.GetOwnerReferences()); ow != nil {
 		log.V(2).Info("trying to fetch stage owner from reference", "stage", ow.Name)
 		return s.getStageInstance(ow.Name, jj.Namespace)
 	}
@@ -118,19 +118,6 @@ func (s JenkinsJobService) getStageInstanceOwner(jj jenv1alpha1.JenkinsJob) (*v1
 		return s.getStageInstance(*jj.Spec.StageName, jj.Namespace)
 	}
 	return nil, fmt.Errorf("couldn't find stage owner for jenkins job %v", jj.Name)
-}
-
-func GetOwnerReference(ownerKind string, ors []metav1.OwnerReference) *metav1.OwnerReference {
-	log.V(2).Info("finding owner", "kind", ownerKind)
-	if len(ors) == 0 {
-		return nil
-	}
-	for _, o := range ors {
-		if o.Kind == ownerKind {
-			return &o
-		}
-	}
-	return nil
 }
 
 func (s JenkinsJobService) getStageInstance(name, namespace string) (*v1alpha1.Stage, error) {
