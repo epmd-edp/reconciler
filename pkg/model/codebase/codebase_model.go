@@ -67,6 +67,7 @@ type Codebase struct {
 	TicketNamePattern    *string
 	CiTool               string
 	Perf                 *Perf
+	DefaultBranch        string
 }
 
 type Perf struct {
@@ -120,6 +121,7 @@ func Convert(k8sObject edpv1alpha1Codebase.Codebase, edpName string) (*Codebase,
 		CommitMessagePattern: s.CommitMessagePattern,
 		TicketNamePattern:    s.TicketNamePattern,
 		CiTool:               s.CiTool,
+		DefaultBranch:        s.DefaultBranch,
 	}
 
 	if s.Framework != nil {
