@@ -61,7 +61,7 @@ func CreateCodebase(txn sql.Tx, c codebase.Codebase, schemaName string) (*int, e
 		getIntOrNil(c.GitServerId), getStringOrNil(c.GitUrlPath), getIntOrNil(c.JenkinsSlaveId),
 		getIntOrNil(c.JobProvisioningId), c.DeploymentScript, getStatus(c.Strategy), c.VersioningType,
 		c.StartVersioningFrom, getIntOrNil(c.JiraServerId), getStringOrNil(c.CommitMessagePattern),
-		getStringOrNil(c.TicketNamePattern), c.CiTool, getPerfIdOrNil(c.Perf)).Scan(&id)
+		getStringOrNil(c.TicketNamePattern), c.CiTool, getPerfIdOrNil(c.Perf), c.DefaultBranch).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
