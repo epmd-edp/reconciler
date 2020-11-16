@@ -51,6 +51,12 @@ rules:
       - perfservers
       - perfservers/finalizers
       - perfservers/status
+      - perfdatasourcejenkinses
+      - perfdatasourcejenkinses/finalizers
+      - perfdatasourcejenkinses/status
+      - perfdatasourcesonars
+      - perfdatasourcesonars/finalizers
+      - perfdatasourcesonars/status
     verbs:
       - '*'
   {{ end }}
