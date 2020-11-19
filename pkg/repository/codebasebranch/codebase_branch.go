@@ -12,10 +12,8 @@ const (
 		" values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id;"
 	UpdateCodebaseBranchStatus = "update \"%v\".codebase_branch set status = $1 where id = $2;"
 	UpdateCodebaseBranchValues = "update \"%v\".codebase_branch set version = $1, build_number = $2, last_success_build = $3 where id = $4;"
-	deleteCodebaseBranch       = "delete from \"%[1]v\".codebase_branch cb " +
-		"	using \"%[1]v\".codebase as c " +
-		"where c.name = $1 " +
-		"  and cb.name = $2 ;"
+	deleteCodebaseBranch       = "delete from \"%[1]v\".codebase_branch where \"%[1]v\".codebase_branch.id=(select cb.id from" +
+		" \"%[1]v\".codebase_branch cb left join \"%[1]v\".codebase c on cb.codebase_id = c.id where c.name = $1 and cb.name = $2);"
 )
 
 func GetCodebaseBranchId(txn sql.Tx, codebaseName string, codebaseBranchName string, schemaName string) (*int, error) {
